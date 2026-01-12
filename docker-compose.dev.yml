@@ -1,0 +1,68 @@
+# Arc Zero Development Environment
+# This Docker Compose file sets up PostgreSQL, Neo4j, and Redis for local development
+#
+# Usage:
+#   docker-compose -f docker-compose.dev.yml up -d
+#   docker-compose -f docker-compose.dev.yml down
+
+version: '3.8'
+
+services:
+  # PostgreSQL 16 - Main relational database
+  postgres:
+    image: postgres:16
+    container_name: archzero-postgres-dev
+    environment:
+      POSTGRES_DB: archzero_dev
+      POSTGRES_USER: archzero
+      POSTGRES_PASSWORD: devpassword
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_dev:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U archzero"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Neo4j 5.15 - Graph database for topology and relationships
+  neo4j:
+    image: neo4j:5.15-community
+    container_name: archzero-neo4j-dev
+    environment:
+      NEO4J_AUTH: neo4j/devpassword
+      NEO4J_dbms_memory_heap_max__size: 512m
+      NEO4J_dbms_memory_pagecache_size: 512m
+    ports:
+      - "7474:7474"  # HTTP
+      - "7687:7687"  # Bolt
+    volumes:
+      - neo4j_dev:/data
+    healthcheck:
+      test: ["CMD", "cypher-shell", "-u", "neo4j", "-p", "devpassword", "RETURN 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Redis 7 - Caching layer
+  redis:
+    image: redis:7-alpine
+    container_name: archzero-redis-dev
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_dev:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  postgres_dev:
+    driver: local
+  neo4j_dev:
+    driver: local
+  redis_dev:
+    driver: local
