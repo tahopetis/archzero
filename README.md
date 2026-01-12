@@ -3,6 +3,7 @@
 **Modern Enterprise Architecture Platform**
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+[![Version](https://img.shields.io/badge/version-2.0.0-brightgreen.svg)](https://github.com/tahopetis/archzero)
 [![Rust Version](https://img.shields.io/badge/rust-1.75+-orange.svg)](https://www.rust-lang.org/)
 [![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16+-blue.svg)](https://www.postgresql.org/)
 [![Neo4j](https://img.shields.io/badge/Neo4j-5+-green.svg)](https://neo4j.com/)
@@ -10,6 +11,21 @@
 > **The structure you need for reporting, with the flexibility you need for reality.**
 
 Arc Zero bridges the gap between rigid legacy EA tools and flexible custom solutions. Built on an "Opinionated Core, Flexible Periphery" philosophy, it enforces industry-standard metamodels while allowing infinite schema-less customization.
+
+---
+
+## 🆕 What's New in v2.0
+
+**Governance & Compliance features have arrived!**
+
+- **7 New Card Types**: Architecture Principles, Technology Standards, Architecture Policies, Exceptions, Initiatives, Risks, and Compliance Requirements
+- **Technology Radar**: Interactive visualization for tracking technology lifecycle
+- **ARB Workflows**: Structured Architecture Review Board process for technology decisions
+- **Compliance Dashboard**: Framework-centric compliance tracking (GDPR, SOX, HIPAA, ISO 27001)
+- **Risk Register**: Comprehensive risk management with heat map visualization
+- **Initiatives Portfolio**: Strategic transformation program management with Kanban board
+- **35+ New API Endpoints**: Full CRUD for all governance entities
+- **14 New Relationship Types**: Governance layer ontology for principles, standards, policies, risks, and compliance
 
 ---
 
@@ -25,6 +41,10 @@ Arc Zero is an Enterprise Architecture platform designed for:
 - 🔄 **Hybrid Data Model**: Strict SQL columns for speed + JSONB for flexibility
 - 📊 **Graph-Powered**: Deep impact analysis and dependency tracking via Neo4j
 - 🤖 **Intelligent Engines**: Business Impact Analysis (BIA), 6R Migration Advisor, TCO Calculator
+- 🛡️ **Governance Framework**: Architecture principles, technology standards, policies, exceptions, and compliance tracking
+- 🎯 **Strategic Planning**: Initiative portfolio, transformation roadmaps, and gap analysis
+- ⚠️ **Risk Management**: Risk register, heat maps, and mitigation tracking
+- ✅ **ARB Workflows**: Architecture Review Board for technology decisions
 - 🔌 **Integration-Ready**: Excel import, REST API, Pustaka ITAM connector
 
 ---
@@ -77,17 +97,17 @@ npm run dev
 | Document | Description |
 |----------|-------------|
 | [Product Requirements](docs/00-prd.md) | Product vision, architecture, and roadmap |
-| [Metamodel Specification](docs/01-metamodel-spec.md) | Card types, attributes, and validation rules |
-| [Relationship Specification](docs/02-relationship-spec.md) | Graph ontology and connection rules |
+| [Metamodel Specification](docs/01-metamodel-spec.md) | Card types (Layers A-D), attributes, and validation rules |
+| [Relationship Specification](docs/02-relationship-spec.md) | Graph ontology and connection rules (including governance layer) |
 | [Logic & Scoring](docs/03-logic-scoring-profile.md) | BIA, 6R, and TCO calculation engines |
-| [Database Schema](docs/04-sql-ddl.md) | PostgreSQL + Neo4j DDL scripts |
-| [API Reference](docs/05-api-spec.md) | REST API endpoints and payloads |
-| [UI/UX Sitemap](docs/06-uiux-sitemap.md) | Screen flows and component specs |
+| [Database Schema](docs/04-sql-ddl.md) | PostgreSQL + Neo4j DDL scripts (with governance tables) |
+| [API Reference](docs/05-api-spec.md) | REST API endpoints and payloads (35+ governance endpoints) |
+| [UI/UX Sitemap](docs/06-uiux-sitemap.md) | Screen flows and component specs (with governance screens) |
+| [Architecture Decision Records](docs/07-architecture-decision-records.md) | Key architectural decisions and trade-offs |
+| [Deployment Guide](docs/08-deployment.md) | Production deployment, scaling, and monitoring |
 
 **Additional Guides:**
-- [Deployment Guide](docs/DEPLOYMENT.md) *(Coming Soon)*
 - [Contributing Guide](CONTRIBUTING.md) *(Coming Soon)*
-- [Architecture Decisions](docs/ARCHITECTURE.md) *(Coming Soon)*
 
 ---
 
@@ -122,6 +142,12 @@ graph TB
 
 Everything in Arc Zero is a **Card** - the atomic unit of enterprise architecture.
 
+**Card Types (4 Layers):**
+- **Layer A (Strategic):** Objective, Organization, Project (Initiative)
+- **Layer B (Application):** Application, Interface
+- **Layer C (Technology):** IT Component, Platform, Provider, Data Object, Tech Category
+- **Layer D (Governance):** Architecture Principle, Technology Standard, Architecture Policy, Exception, Risk, Compliance Requirement
+
 **Hybrid Data Structure:**
 - **Tier 1 (SQL Columns)**: Indexed fields for fast queries (Name, Type, Lifecycle, Quality Score)
 - **Tier 2 (JSONB)**: Flexible schema-less attributes (Cost Center, Hosting Type, Custom Fields)
@@ -133,14 +159,37 @@ Everything in Arc Zero is a **Card** - the atomic unit of enterprise architectur
   "type": "Application",
   "lifecycle_active": "2020-03-15",
   "quality_score": 85,
-  
+
   "attributes": {
     "hosting_type": "SaaS",
+    "pace_layer": "System of Differentiation",
+    "rationalization_action": "Invest",
+    "cloud_readiness_score": 92,
     "cost_center": "CC-SALES-01",
     "financials": {
       "estimated_annual_cost": 120000,
       "currency": "USD"
     }
+  }
+}
+```
+
+**Example Governance Card (Architecture Principle):**
+```json
+{
+  "id": "princ-001",
+  "name": "Cloud-First Strategy",
+  "type": "ArchitecturePrinciple",
+  "attributes": {
+    "statement": "Prefer cloud-native SaaS solutions over on-premise deployments",
+    "category": "Strategic",
+    "rationale": "Reduces maintenance overhead and improves scalability",
+    "implications": [
+      "All new apps must be cloud-native",
+      "Exceptions require ARB approval"
+    ],
+    "owner": "Chief Technology Officer",
+    "adherence_rate": 78
   }
 }
 ```
@@ -194,6 +243,77 @@ Recursive cost roll-up from infrastructure → applications → business capabil
 
 ---
 
+## 🛡️ Governance & Strategy Features
+
+### 6. Architecture Principles Management
+Define and track architecture principles (e.g., "Cloud-First", "API-First Design") with adherence monitoring.
+
+**Features:**
+- Create and manage principles by category (Strategic, Business, Technical, Data)
+- Track adherence rates across applications and capabilities
+- View violations and exemptions
+- Automated compliance reporting
+
+### 7. Technology Standards (Technology Radar)
+Manage technology lifecycle with interactive radar visualization.
+
+**Features:**
+- Track technology status: Adopt, Trial, Assess, Hold, Sunset, Banned
+- Technology debt report with EOL monitoring
+- Replacement tracking for sunset technologies
+- Quadrant-based visualization (Languages, Frameworks, Databases, Infrastructure)
+
+### 8. Architecture Policies & Exceptions
+Enforceable rules with automated violation detection and exception management.
+
+**Features:**
+- JSON-based policy rules with blocking/warning enforcement
+- Automated compliance checking against all cards
+- Exception request workflow with approval/rejection
+- Expiring exceptions tracking with notifications
+
+### 9. Initiatives Portfolio
+Strategic transformation program management with impact tracking.
+
+**Features:**
+- Kanban board by status (Planning, In Progress, On Hold, Completed)
+- Budget tracking with spend visualization
+- Impact map showing affected cards
+- Initiative dependency management
+- Health indicators (On Track, At Risk, Behind Schedule)
+
+### 10. Risk Register
+Comprehensive risk management with heat map visualization.
+
+**Features:**
+- Risk scoring matrix (Likelihood × Impact = Risk Score)
+- Risk type categorization (Security, Compliance, Operational, Financial, Strategic)
+- Top 10 risks view
+- Risk-to-initiative linkage for mitigation tracking
+- 5×5 heat map visualization
+
+### 11. Compliance Dashboard
+Framework-centric compliance tracking for GDPR, SOX, HIPAA, PCI-DSS, ISO 27001.
+
+**Features:**
+- Per-framework compliance rate monitoring
+- Required controls checklist
+- Non-compliant card identification
+- Audit timeline with countdown
+- Control-by-control assessment
+
+### 12. ARB (Architecture Review Board)
+Structured workflow for technology decision governance.
+
+**Features:**
+- Review queue with prioritization
+- Technology selection requests
+- Exception request reviews
+- Decision tracking (Approve/Reject with conditions)
+- Meeting management and decision history
+
+---
+
 ## 🔧 Technology Stack
 
 | Layer | Technology | Rationale |
@@ -220,7 +340,13 @@ Arc Zero ships with sample data demonstrating a fictional enterprise:
 - 50 Applications (Mix of SaaS, On-Premise, Legacy)
 - 20 Business Capabilities (Sales, HR, Finance, Operations)
 - 100+ IT Components (Databases, Servers, Services)
-- 200+ Relationships (Dependencies, Hosting, Support)
+- 15 Architecture Principles (Cloud-First, API-First, etc.)
+- 25 Technology Standards (PostgreSQL, React, Oracle, etc.)
+- 10 Architecture Policies with 20+ policy violations
+- 5 Initiatives (Cloud Migration 2027, ERP Consolidation, etc.)
+- 30 Risks (Operational, Security, Compliance)
+- 3 Compliance Frameworks (GDPR, SOX, HIPAA)
+- 200+ Relationships (Dependencies, Hosting, Support, Governance)
 
 **Load Sample Data:**
 ```bash
@@ -231,6 +357,12 @@ cargo run --bin seed --sample enterprise-demo
 1. Navigate to `Reports > Landscape Heatmap`
 2. Select "Color By: Technical Fit"
 3. Drill down into "Sales Capability"
+
+**View Governance Features:**
+1. Navigate to `Governance > Architecture Principles` to see principle adherence
+2. Navigate to `Governance > Technology Standards` to view the Technology Radar
+3. Navigate to `Risk > Risk Register` to see the Top 10 risks
+4. Navigate to `ARB > Pending Reviews` to see exception requests
 
 ---
 
@@ -273,6 +405,26 @@ curl -X POST http://localhost:8080/api/v1/graph/traverse \
 ```
 
 **Full API Documentation:** [docs/05-api-spec.md](docs/05-api-spec.md)
+
+---
+
+## ⌨️ Keyboard Shortcuts
+
+Arc Zero includes powerful keyboard navigation for power users:
+
+| Shortcut | Action |
+|----------|--------|
+| `Cmd+K` / `Ctrl+K` | Open global search |
+| `G` then `D` | Go to Dashboard |
+| `G` then `I` | Go to Inventory |
+| `G` then `R` | Go to Reports |
+| `G` then `G` | Go to Governance |
+| `G` then `S` | Go to Strategic Planning |
+| `G` then `K` | Go to Risk |
+| `G` then `A` | Go to ARB (Architect/Admin only) |
+| `N` | New Card (opens modal) |
+| `?` | Show keyboard shortcuts help |
+| `Esc` | Close modal/drawer |
 
 ---
 
@@ -337,10 +489,13 @@ PUSTAKA_API_KEY=your-api-key
 # Features
 ENABLE_EXCEL_IMPORT=true
 ENABLE_6R_ENGINE=true
+ENABLE_GOVERNANCE=true
+ENABLE_ARB_WORKFLOW=true
+ENABLE_COMPLIANCE_TRACKING=true
 DEFAULT_CURRENCY=USD
 ```
 
-**Production Deployment Guide:** See [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md) *(Coming Soon)*
+**Production Deployment Guide:** See [docs/08-deployment.md](docs/08-deployment.md)
 
 ---
 
@@ -368,30 +523,48 @@ We welcome contributions! Here's how to get started:
 
 ## 📝 Roadmap
 
-### ✅ Phase 1: Foundation (Current - v1.0)
+### ✅ Phase 1: Foundation (Completed - v1.0)
 - [x] Core database (PostgreSQL + Neo4j)
 - [x] Card CRUD operations
 - [x] Metamodel validation
 - [x] List view with filtering
-- [x] Basic authentication
+- [x] Basic authentication (JWT)
 
-### 🚧 Phase 2: Relationships (Q1 2026 - v1.1)
-- [ ] Graph visualization
-- [ ] Matrix report
-- [ ] BIA Engine (Basic)
-- [ ] Relationship validation
+### ✅ Phase 2: Relationships (Completed - v1.1)
+- [x] Graph visualization (Force-directed)
+- [x] Matrix report
+- [x] BIA Engine (Basic)
+- [x] Relationship validation
 
-### 📋 Phase 3: Visualizations (Q2 2026 - v1.2)
-- [ ] Landscape Heatmap
-- [ ] Time Machine Roadmap
-- [ ] TCO Engine
-- [ ] Export to PDF/PowerPoint
+### ✅ Phase 3: Visualizations (Completed - v1.2)
+- [x] Landscape Heatmap
+- [x] Time Machine Roadmap
+- [x] TCO Engine
+- [x] Export to PDF/PowerPoint
 
-### 🔮 Phase 4: Intelligence (Q3 2026 - v1.3)
-- [ ] 6R Decision Engine
-- [ ] Advanced Excel Import
-- [ ] Pustaka Integration
-- [ ] AI-powered recommendations
+### ✅ Phase 4: Intelligence (Completed - v1.3)
+- [x] 6R Decision Engine
+- [x] Advanced Excel Import
+- [x] Pustaka Integration
+- [x] AI-powered recommendations
+
+### 🎉 Phase 5: Governance & Compliance (Completed - v2.0)
+- [x] Layer D: Governance metamodel (7 new card types)
+- [x] Architecture Principles management
+- [x] Technology Standards (Technology Radar)
+- [x] Architecture Policies & Exceptions
+- [x] Initiatives Portfolio & Transformation Roadmap
+- [x] Risk Register & Heat Map
+- [x] Compliance Dashboard (GDPR, SOX, HIPAA)
+- [x] ARB (Architecture Review Board) workflows
+- [x] 35+ new API endpoints for governance
+- [x] 14 new governance relationship types
+
+### 🔮 Phase 6: Advanced Features (Planning - v2.1)
+- [ ] Advanced analytics and dashboards
+- [ ] Custom report builder
+- [ ] Webhook notifications
+- [ ] Mobile app (React Native)
 
 **Full Roadmap:** See [docs/00-prd.md#7-roadmap--phases](docs/00-prd.md)
 
