@@ -1,0 +1,41 @@
+# Binaries
+bdui-linux-x64
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+
+# Build outputs
+/target/
+/dist/
+/build/
+*.o
+*.a
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# Temporary files
+*.tmp
+*.temp
+docs/review.md
