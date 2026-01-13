@@ -26,13 +26,13 @@ describe('BulkActionsToolbar', () => {
   it('should render toolbar when items are selected', () => {
     render(<BulkActionsToolbar {...mockHandlers} selectedCount={3} />);
 
-    expect(screen.getByText('3 items selected')).toBeInTheDocument();
+    expect(screen.getByText('3 items selected')).toBeDefined();
   });
 
   it('should show singular form when 1 item is selected', () => {
     render(<BulkActionsToolbar {...mockHandlers} selectedCount={1} />);
 
-    expect(screen.getByText('1 item selected')).toBeInTheDocument();
+    expect(screen.getByText('1 item selected')).toBeDefined();
   });
 
   it('should call onBulkEdit when Edit button is clicked', () => {
@@ -75,6 +75,6 @@ describe('BulkActionsToolbar', () => {
     render(<BulkActionsToolbar {...mockHandlers} selectedCount={2} />);
 
     const deleteButton = screen.getByText('Delete').closest('button');
-    expect(deleteButton).toHaveClass('bg-rose-600');
+    expect(deleteButton?.className).toContain('bg-rose-600');
   });
 });

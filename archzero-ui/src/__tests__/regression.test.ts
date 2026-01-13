@@ -38,7 +38,7 @@ describe('Regression Tests - Phase 0-3 Functionality', () => {
 
   describe('Phase 0: Basic Architecture', () => {
     it('should render Layout component without errors', () => {
-      renderWithProviders(<Layout>Test Content</Layout>);
+      renderWithProviders(<Layout><span>Test Content</span></Layout>);
 
       expect(screen.getByText('Test Content')).toBeInTheDocument();
     });

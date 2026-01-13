@@ -2,9 +2,8 @@
  * Test Setup File
  */
 
-import { expect, afterEach, vi } from 'vitest';
+import { afterEach, vi } from 'vitest';
 import { cleanup } from '@testing-library/react';
-import '@testing-library/jest-dom';
 
 // Cleanup after each test
 afterEach(() => {
@@ -45,5 +44,6 @@ global.ResizeObserver = class ResizeObserver {
   unobserve() {}
 } as any;
 
-// Extend Vitest's expect with jest-dom matchers
-import '@testing-library/jest-dom/vitest';
+// Mock URL.createObjectURL and revokeObjectURL
+global.URL.createObjectURL = vi.fn(() => 'blob:mock-url');
+global.URL.revokeObjectURL = vi.fn();
