@@ -68,10 +68,11 @@ export function BulkEditDialog({
 
         <form onSubmit={handleSubmit} className="p-6 space-y-4">
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1">
+            <label htmlFor="type" className="block text-sm font-medium text-slate-700 mb-1">
               Type
             </label>
             <select
+              id="type"
               value={updates.type_}
               onChange={(e) => setUpdates({ ...updates, type_: e.target.value })}
               className={cn(
@@ -89,10 +90,11 @@ export function BulkEditDialog({
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1">
+            <label htmlFor="lifecycle-phase" className="block text-sm font-medium text-slate-700 mb-1">
               Lifecycle Phase
             </label>
             <select
+              id="lifecycle-phase"
               value={updates.lifecycle_phase}
               onChange={(e) => setUpdates({ ...updates, lifecycle_phase: e.target.value })}
               className={cn(
