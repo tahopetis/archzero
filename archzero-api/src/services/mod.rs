@@ -1,7 +1,21 @@
 pub mod auth_service;
+pub mod bia_service;
 pub mod card_service;
 pub mod db_service;
+pub mod migration_service;
+pub mod relationship_service;
+pub mod neo4j_service;
+pub mod saga_service;
+pub mod topology_service;
+pub mod tco_service;
 
 pub use auth_service::AuthService;
+pub use bia_service::BIAService;
 pub use card_service::CardService;
 pub use db_service::{DatabaseService, PgPool};
+pub use migration_service::MigrationService;
+pub use relationship_service::RelationshipService;
+pub use neo4j_service::Neo4jService;
+pub use saga_service::SagaOrchestrator;
+pub use topology_service::TopologyService;
+pub use tco_service::TCOService;

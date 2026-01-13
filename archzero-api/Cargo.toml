@@ -43,3 +43,6 @@ chrono = { version = "0.4", features = ["serde"] }
 
 # Async utilities
 async-trait = "0.1"
+
+# API Documentation
+utoipa = { version = "4.0", features = ["axum_extras", "chrono", "uuid"] }
