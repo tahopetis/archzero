@@ -139,7 +139,11 @@ impl Neo4jService {
         let graph = self.graph.write().await;
 
         // Use the relationship type as the edge label (must be alphanumeric)
+        // Validate to prevent Neo4j injection - only allow alphanumeric and underscore
         let edge_type = relationship_type_str.replace(" ", "");
+        if !edge_type.chars().all(|c| c.is_alphanumeric() || c == '_') {
+            return Err(AppError::Internal(anyhow::anyhow!("Invalid relationship type: {}", edge_type)));
+        }
 
         let query = format!(
             r#"

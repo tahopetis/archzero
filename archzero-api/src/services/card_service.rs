@@ -77,55 +77,111 @@ impl CardService {
         let page_size = params.page_size.unwrap_or(20).min(100);
         let offset = (page - 1) * page_size;
 
-        // Build query with filters
-        let mut query_parts = vec!["SELECT id, name, type, lifecycle_phase, quality_score, description, owner_id, created_at, updated_at, attributes, tags, status FROM cards WHERE status = 'active'".to_string()];
-        let mut count_parts = vec!["SELECT COUNT(*) FROM cards WHERE status = 'active'".to_string()];
+        // Build parameterized query to prevent SQL injection
+        let mut base_query = "SELECT id, name, type, lifecycle_phase, quality_score, description, owner_id, created_at, updated_at, attributes, tags, status FROM cards WHERE status = 'active'".to_string();
+        let mut base_count = "SELECT COUNT(*) FROM cards WHERE status = 'active'".to_string();
+        let mut conditions = Vec::new();
+        let mut param_idx = 1;
 
-        // Use ILIKE for basic full-text search (pg_trgm indexes will speed this up)
-        if let Some(q) = &params.q {
-            let escaped_q = q.replace('\'', "''");
-            // ILIKE with wildcards for flexible matching (uses pg_trgm indexes)
-            query_parts.push(format!("(name ILIKE '%{}%' OR description ILIKE '%{}%')",
-                escaped_q, escaped_q));
-            count_parts.push(format!("(name ILIKE '%{}%' OR description ILIKE '%{}%')",
-                escaped_q, escaped_q));
-        }
+        // Search query parameter
+        let search_pattern = if let Some(q) = &params.q {
+            param_idx += 1;
+            conditions.push(format!("(name ILIKE ${} OR description ILIKE ${})", param_idx - 1, param_idx));
+            param_idx += 1;
+            Some(format!("%{}%", q))
+        } else {
+            None
+        };
 
-        if let Some(card_type) = &params.card_type {
-            let type_str = serde_json::to_string(card_type).unwrap_or_default();
-            query_parts.push(format!("type = '{}'", type_str.trim_matches('"')));
-            count_parts.push(format!("type = '{}'", type_str.trim_matches('"')));
-        }
+        // Card type parameter
+        let card_type_str = if let Some(card_type) = &params.card_type {
+            param_idx += 1;
+            let type_str = serde_json::to_string(card_type)
+                .map_err(|e| AppError::Internal(anyhow::anyhow!("Failed to serialize card type: {}", e)))?
+                .trim_matches('"')
+                .to_string();
+            conditions.push(format!("type = ${}", param_idx));
+            Some(type_str)
+        } else {
+            None
+        };
 
-        if let Some(lifecycle_phase) = &params.lifecycle_phase {
-            let phase_str = serde_json::to_string(lifecycle_phase).unwrap_or_default();
-            query_parts.push(format!("lifecycle_phase = '{}'", phase_str.trim_matches('"')));
-            count_parts.push(format!("lifecycle_phase = '{}'", phase_str.trim_matches('"')));
-        }
+        // Lifecycle phase parameter
+        let lifecycle_phase_str = if let Some(lifecycle_phase) = &params.lifecycle_phase {
+            param_idx += 1;
+            let phase_str = serde_json::to_string(lifecycle_phase)
+                .map_err(|e| AppError::Internal(anyhow::anyhow!("Failed to serialize lifecycle phase: {}", e)))?
+                .trim_matches('"')
+                .to_string();
+            conditions.push(format!("lifecycle_phase = ${}", param_idx));
+            Some(phase_str)
+        } else {
+            None
+        };
 
-        if let Some(tags) = &params.tags {
+        // Tags parameter - use ANY for secure parameterization
+        let tags_array = if let Some(tags) = &params.tags {
             if !tags.is_empty() {
-                let tag_array = tags.iter()
-                    .map(|t| format!("'{}'", t.replace('\'', "''")))
-                    .collect::<Vec<_>>()
-                    .join(",");
-                query_parts.push(format!("tags && ARRAY[{}]", tag_array));
-                count_parts.push(format!("tags && ARRAY[{}]", tag_array));
+                param_idx += 1;
+                conditions.push(format!("tags && ${}", param_idx));
+                Some(tags.clone())
+            } else {
+                None
             }
+        } else {
+            None
+        };
+
+        // Build final queries with conditions
+        if !conditions.is_empty() {
+            base_query = format!("{} {}", base_query, "AND ".to_string() + &conditions.join(" AND "));
+            base_count = format!("{} {}", base_count, "AND ".to_string() + &conditions.join(" AND "));
         }
 
-        // Get total count
-        let count_query = count_parts.join(" AND ");
-        let count_row: (i64,) = sqlx::query_as(&count_query)
+        // Build count query with parameters
+        let mut count_query = sqlx::query_as::<_, (i64,)>(&base_count);
+
+        // Bind parameters in correct order
+        if let Some(ref pattern) = search_pattern {
+            count_query = count_query.bind(pattern).bind(pattern);
+        }
+        if let Some(ref type_str) = card_type_str {
+            count_query = count_query.bind(type_str);
+        }
+        if let Some(ref phase_str) = lifecycle_phase_str {
+            count_query = count_query.bind(phase_str);
+        }
+        if let Some(ref tags) = tags_array {
+            count_query = count_query.bind(tags);
+        }
+
+        let count_row = count_query
             .fetch_one(&self.pool)
             .await
             .map_err(|e| AppError::Internal(anyhow::anyhow!("Failed to count cards: {}", e)))?;
 
-        // Get paginated results - order by creation date for now
-        let data_query = format!("{} ORDER BY created_at DESC LIMIT {} OFFSET {}",
-            query_parts.join(" AND "), page_size, offset);
+        // Build data query with parameters
+        let data_query = format!("{} ORDER BY created_at DESC LIMIT ${} OFFSET ${}",
+            base_query, param_idx + 1, param_idx + 2);
 
-        let rows = sqlx::query(&data_query)
+        let mut data_query_builder = sqlx::query(&data_query);
+
+        // Bind parameters in correct order
+        if let Some(ref pattern) = search_pattern {
+            data_query_builder = data_query_builder.bind(pattern).bind(pattern);
+        }
+        if let Some(ref type_str) = card_type_str {
+            data_query_builder = data_query_builder.bind(type_str);
+        }
+        if let Some(ref phase_str) = lifecycle_phase_str {
+            data_query_builder = data_query_builder.bind(phase_str);
+        }
+        if let Some(ref tags) = tags_array {
+            data_query_builder = data_query_builder.bind(tags);
+        }
+        data_query_builder = data_query_builder.bind(page_size as i64).bind(offset as i64);
+
+        let rows = data_query_builder
             .fetch_all(&self.pool)
             .await
             .map_err(|e| AppError::Internal(anyhow::anyhow!("Failed to list cards: {}", e)))?;

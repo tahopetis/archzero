@@ -11,10 +11,19 @@ use utoipa::OpenApi;
 
 use archzero_api::{
     config::Settings,
-    handlers::{auth, cards, health, relationships, bia, migration, tco},
+    handlers::{auth, cards, health, relationships, bia, migration, tco, policies, principles, standards, exceptions, initiatives, risks, compliance, arb, graph, import, bulk},
     services::{CardService, AuthService, RelationshipService, Neo4jService, SagaOrchestrator, BIAService, TopologyService, MigrationService, TCOService},
+    middleware::{security_headers, security_logging},
     models::card::{Card, CardType, LifecyclePhase, CreateCardRequest, UpdateCardRequest, CardSearchParams},
     models::relationship::{Relationship, RelationshipType, CreateRelationshipRequest, UpdateRelationshipRequest},
+    models::principles::*,
+    models::standards::*,
+    models::policies::*,
+    models::exceptions::*,
+    models::initiatives::*,
+    models::risks::*,
+    models::compliance::*,
+    models::arb::*,
 };
 
 /// Arc Zero API Documentation
@@ -49,6 +58,76 @@ use archzero_api::{
         tco::get_tco_breakdown,
         tco::get_tco_comparison,
         tco::get_cost_trend,
+        // Phase 3: Governance & Compliance
+        principles::list_principles,
+        principles::get_principle,
+        principles::create_principle,
+        principles::update_principle,
+        principles::delete_principle,
+        principles::get_principle_compliance,
+        standards::list_standards,
+        standards::get_standard,
+        standards::create_standard,
+        standards::update_standard,
+        standards::delete_standard,
+        standards::get_radar,
+        standards::get_debt_report,
+        policies::list_policies,
+        policies::get_policy,
+        policies::create_policy,
+        policies::update_policy,
+        policies::delete_policy,
+        policies::check_policy_compliance,
+        policies::validate_policy,
+        policies::list_violations,
+        exceptions::list_exceptions,
+        exceptions::get_exception,
+        exceptions::create_exception_request,
+        exceptions::approve_exception,
+        exceptions::reject_exception,
+        exceptions::list_expiring_exceptions,
+        exceptions::delete_exception,
+        initiatives::list_initiatives,
+        initiatives::get_initiative,
+        initiatives::create_initiative,
+        initiatives::update_initiative,
+        initiatives::delete_initiative,
+        initiatives::get_initiative_impact_map,
+        initiatives::link_cards_to_initiative,
+        risks::list_risks,
+        risks::get_risk,
+        risks::create_risk,
+        risks::update_risk,
+        risks::delete_risk,
+        risks::get_risk_heat_map,
+        risks::get_top_risks,
+        compliance::list_compliance_requirements,
+        compliance::get_compliance_requirement,
+        compliance::create_compliance_requirement,
+        compliance::update_compliance_requirement,
+        compliance::delete_compliance_requirement,
+        compliance::assess_card_compliance,
+        compliance::get_compliance_dashboard,
+        // Phase 3: ARB Workflow
+        arb::list_meetings,
+        arb::get_meeting,
+        arb::create_meeting,
+        arb::update_meeting,
+        arb::delete_meeting,
+        arb::get_meeting_agenda,
+        arb::add_submission_to_agenda,
+        arb::list_submissions,
+        arb::get_submission,
+        arb::create_submission,
+        arb::update_submission,
+        arb::delete_submission,
+        arb::record_decision,
+        arb::get_dashboard,
+        arb::get_statistics,
+        // Phase 4: Graph Visualization
+        graph::get_graph,
+        graph::get_graph_stats,
+        graph::get_node_count,
     ),
     components(
         schemas(
@@ -65,6 +144,132 @@ use archzero_api::{
             cards::CardListResponse,
             relationships::CardRelationshipParams,
             health::HealthResponse,
+            // Phase 3: Governance & Compliance schemas
+            // Principles
+            ArchitecturePrinciple,
+            PrincipleCategory,
+            CreatePrincipleRequest,
+            UpdatePrincipleRequest,
+            PrincipleSearchParams,
+            PrincipleComplianceReport,
+            ComplianceViolation,
+            PrinciplesListResponse,
+            // Standards
+            TechnologyStandard,
+            TechnologyStatus,
+            RadarQuadrant,
+            RadarRing,
+            TechnologyRadar,
+            CreateStandardRequest,
+            UpdateStandardRequest,
+            StandardSearchParams,
+            StandardsListResponse,
+            TechnologyDebtReport,
+            DebtItem,
+            // Policies
+            ArchitecturePolicy,
+            CreatePolicyRequest,
+            UpdatePolicyRequest,
+            PolicySearchParams,
+            PolicySeverity,
+            PolicyEnforcement,
+            PolicyComplianceCheckRequest,
+            PolicyComplianceCheckResponse,
+            policies::CardComplianceResult,
+            policies::ComplianceStatus,
+            PolicyViolation,
+            PolicyViolationListResponse,
+            ViolationPagination,
+            ValidatePolicyRequest,
+            ValidatePolicyResponse,
+            PolicyListResponse,
+            PolicyPagination,
+            ViolationSearchParams,
+            // Exceptions
+            Exception,
+            ExceptionStatus,
+            ExceptionDuration,
+            CreateExceptionRequest,
+            ExceptionListParams,
+            ExceptionListResponse,
+            ExceptionPagination,
+            ApproveExceptionRequest,
+            RejectExceptionRequest,
+            // Initiatives
+            Initiative,
+            InitiativeStatus,
+            InitiativeHealth,
+            InitiativeType,
+            CreateInitiativeRequest,
+            UpdateInitiativeRequest,
+            InitiativeSearchParams,
+            InitiativeListResponse,
+            InitiativeImpactMap,
+            ImpactedCard,
+            CardLinkRequest,
+            CardLinkResponse,
+            // Risks
+            Risk,
+            RiskType,
+            RiskStatus,
+            CreateRiskRequest,
+            UpdateRiskRequest,
+            RiskSearchParams,
+            RiskListResponse,
+            RiskHeatMapData,
+            HeatMapCell,
+            TopRisksResponse,
+            TopRiskItem,
+            // Compliance
+            ComplianceRequirement,
+            ComplianceFramework,
+            CreateComplianceRequirementRequest,
+            UpdateComplianceRequirementRequest,
+            ComplianceRequirementSearchParams,
+            ComplianceRequirementsListResponse,
+            CardComplianceAssessmentResult,
+            RequirementComplianceStatus,
+            AssessComplianceRequest,
+            ComplianceAssessment,
+            ComplianceSummary,
+            CardTypeBreakdown,
+            ComplianceDashboard,
+            CompliancePagination,
+            // Phase 3: ARB Workflow schemas
+            ARBMeeting,
+            ARBMeetingStatus,
+            CreateARBMeetingRequest,
+            UpdateARBMeetingRequest,
+            ARBMeetingSearchParams,
+            ARBMeetingListResponse,
+            ARBSubmission,
+            ARBSubmissionType,
+            ARBSubmissionStatus,
+            ARBPriority,
+            CreateARBSubmissionRequest,
+            UpdateARBSubmissionRequest,
+            ARBSubmissionSearchParams,
+            ARBSubmissionListResponse,
+            ARBDecision,
+            ARBDecisionType,
+            CreateARBDecisionRequest,
+            UpdateARBDecisionRequest,
+            ARBAgendaItem,
+            AddSubmissionToMeetingRequest,
+            ARBDashboard,
+            ARBStatistics,
+            ARBPagination,
+            SubmissionTypeCount,
+            DecisionTypeCount,
+            // Phase 4: Graph Visualization
+            graph::GraphData,
+            graph::GraphNode,
+            graph::NodePosition,
+            graph::GraphNodeData,
+            graph::GraphEdge,
+            graph::GraphEdgeData,
+            graph::GraphStats,
+            graph::GraphSearchParams,
         )
     ),
     tags(
@@ -75,6 +280,15 @@ use archzero_api::{
         (name = "Topology", description = "Topology analysis endpoints"),
         (name = "Migration", description = "6R Migration decision endpoints"),
         (name = "TCO", description = "Total Cost of Ownership endpoints"),
+        (name = "Principles", description = "Architecture Principles management endpoints"),
+        (name = "Standards", description = "Technology Standards management endpoints"),
+        (name = "Policies", description = "Architecture Policy management endpoints"),
+        (name = "Exceptions", description = "Exception management endpoints"),
+        (name = "Initiatives", description = "Initiative portfolio management endpoints"),
+        (name = "Risks", description = "Risk register endpoints"),
+        (name = "Compliance", description = "Compliance requirements tracking endpoints"),
+        (name = "ARB", description = "Architecture Review Board workflow endpoints"),
+        (name = "Graph", description = "Graph visualization endpoints"),
     ),
     info(
         title = "Arc Zero API",
@@ -144,6 +358,8 @@ async fn main() -> anyhow::Result<()> {
     let topology_service = Arc::new(TopologyService::new(neo4j_service.clone()));
     let migration_service = Arc::new(MigrationService::new());
     let tco_service = Arc::new(TCOService::new());
+    let import_jobs: Arc<std::sync::Mutex<std::collections::HashMap<Uuid, import::ImportJob>>> =
+        Arc::new(std::sync::Mutex::new(std::collections::HashMap::new()));
 
     // Build our application with routes
     let app = Router::new()
@@ -209,8 +425,137 @@ async fn main() -> anyhow::Result<()> {
                 .route("/cards/:card_id/comparison", get(tco::get_tco_comparison))
                 .route("/cards/:card_id/trend", get(tco::get_cost_trend)),
         )
+        // Phase 3: Architecture Policy endpoints
+        .nest(
+            "/api/v1/policies",
+            Router::new()
+                .route("/", get(policies::list_policies).post(policies::create_policy))
+                .route("/:id", get(policies::get_policy).put(policies::update_policy).delete(policies::delete_policy))
+                .route("/check", post(policies::check_policy_compliance))
+                .route("/:id/validate", post(policies::validate_policy))
+                .route("/violations", get(policies::list_violations))
+                .layer(axum::Extension(saga_orchestrator.clone())),
+        )
+        // Phase 3: Architecture Principles endpoints
+        .nest(
+            "/api/v1/principles",
+            Router::new()
+                .route("/", get(principles::list_principles).post(principles::create_principle))
+                .route("/:id", get(principles::get_principle).put(principles::update_principle).delete(principles::delete_principle))
+                .route("/:id/compliance", get(principles::get_principle_compliance))
+                .layer(axum::Extension(saga_orchestrator.clone())),
+        )
+        // Phase 3: Technology Standards endpoints
+        .nest(
+            "/api/v1/tech-standards",
+            Router::new()
+                .route("/", get(standards::list_standards).post(standards::create_standard))
+                .route("/:id", get(standards::get_standard).put(standards::update_standard).delete(standards::delete_standard))
+                .route("/radar", get(standards::get_radar))
+                .route("/debt-report", get(standards::get_debt_report))
+                .layer(axum::Extension(saga_orchestrator.clone())),
+        )
+        // Phase 3: Exceptions endpoints
+        .nest(
+            "/api/v1/exceptions",
+            Router::new()
+                .route("/", get(exceptions::list_exceptions).post(exceptions::create_exception_request))
+                .route("/:id", get(exceptions::get_exception).delete(exceptions::delete_exception))
+                .route("/:id/approve", post(exceptions::approve_exception))
+                .route("/:id/reject", post(exceptions::reject_exception))
+                .route("/expiring", get(exceptions::list_expiring_exceptions))
+                .layer(axum::Extension(saga_orchestrator.clone())),
+        )
+        // Phase 3: Initiatives endpoints
+        .nest(
+            "/api/v1/initiatives",
+            Router::new()
+                .route("/", get(initiatives::list_initiatives).post(initiatives::create_initiative))
+                .route("/:id", get(initiatives::get_initiative).put(initiatives::update_initiative).delete(initiatives::delete_initiative))
+                .route("/:id/impact-map", get(initiatives::get_initiative_impact_map))
+                .route("/:id/link-cards", post(initiatives::link_cards_to_initiative))
+                .layer(axum::Extension(saga_orchestrator.clone())),
+        )
+        // Phase 3: Risks endpoints
+        .nest(
+            "/api/v1/risks",
+            Router::new()
+                .route("/", get(risks::list_risks).post(risks::create_risk))
+                .route("/:id", get(risks::get_risk).put(risks::update_risk).delete(risks::delete_risk))
+                .route("/heat-map", get(risks::get_risk_heat_map))
+                .route("/top-10", get(risks::get_top_risks))
+                .layer(axum::Extension(saga_orchestrator.clone())),
+        )
+        // Phase 3: Compliance Requirements endpoints
+        .nest(
+            "/api/v1/compliance-requirements",
+            Router::new()
+                .route("/", get(compliance::list_compliance_requirements).post(compliance::create_compliance_requirement))
+                .route("/:id", get(compliance::get_compliance_requirement).put(compliance::update_compliance_requirement).delete(compliance::delete_compliance_requirement))
+                .route("/:id/assess", post(compliance::assess_card_compliance))
+                .route("/:id/dashboard", get(compliance::get_compliance_dashboard))
+                .layer(axum::Extension(saga_orchestrator.clone())),
+        )
+        // Phase 3: ARB Workflow endpoints
+        .nest(
+            "/api/v1/arb/meetings",
+            Router::new()
+                .route("/", get(arb::list_meetings).post(arb::create_meeting))
+                .route("/:id", get(arb::get_meeting).put(arb::update_meeting).delete(arb::delete_meeting))
+                .route("/:id/agenda", get(arb::get_meeting_agenda).post(arb::add_submission_to_agenda))
+                .layer(axum::Extension(saga_orchestrator.clone())),
+        )
+        .nest(
+            "/api/v1/arb/submissions",
+            Router::new()
+                .route("/", get(arb::list_submissions).post(arb::create_submission))
+                .route("/:id", get(arb::get_submission).put(arb::update_submission).delete(arb::delete_submission))
+                .route("/:id/decision", post(arb::record_decision))
+                .layer(axum::Extension(saga_orchestrator.clone())),
+        )
+        .nest(
+            "/api/v1/arb",
+            Router::new()
+                .route("/dashboard", get(arb::get_dashboard))
+                .route("/statistics", get(arb::get_statistics))
+                .layer(axum::Extension(saga_orchestrator.clone())),
+        )
+        // Phase 4: Graph Visualization endpoints
+        .nest(
+            "/api/v1/graph",
+            Router::new()
+                .route("/", get(graph::get_graph))
+                .route("/stats", get(graph::get_graph_stats))
+                .route("/count", get(graph::get_node_count)),
+        )
+        // Phase 4: Bulk Import endpoints
+        .nest(
+            "/api/v1/import",
+            Router::new()
+                .route("/cards", post(import::bulk_import_cards))
+                .route("/status/:job_id", get(import::get_import_status))
+                .layer(axum::Extension(import_jobs.clone())),
+        )
+        // Phase 4: Bulk Operations endpoints
+        .nest(
+            "/api/v1/cards",
+            Router::new()
+                .route("/bulk", axum::routing::delete(bulk::bulk_delete_cards))
+                .route("/bulk/update", axum::routing::put(bulk::bulk_update_cards))
+                .layer(axum::Extension(card_service.clone())),
+        )
+        .nest(
+            "/api/v1/export",
+            Router::new()
+                .route("/bulk", post(bulk::bulk_export_cards))
+                .layer(axum::Extension(card_service.clone())),
+        )
         // API Documentation routes
         .route("/api-docs/openapi.json", get(openapi_json))
+        // Security middleware (applied to all routes)
+        .layer(axum::middleware::from_fn(security_headers))
+        .layer(axum::middleware::from_fn(security_logging))
+        // CORS (should be after security headers)
         .layer(CorsLayer::permissive())
         // Layer with shared state
         .layer(axum::Extension(card_service.clone()))
