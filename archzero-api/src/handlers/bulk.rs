@@ -1,15 +1,11 @@
-use axum::{
-    extract::{Extension, Path},
-    Json,
-};
+use axum::extract::{Json, State};
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
-use std::sync::Arc;
 
 use crate::{
     error::AppError,
-    services::CardService,
-    models::card::{Card, UpdateCardRequest},
+    state::AppState,
+    models::card::UpdateCardRequest,
 };
 
 /// Bulk delete cards request
@@ -81,7 +77,7 @@ pub enum ExportFormat {
     tag = "Cards"
 )]
 pub async fn bulk_delete_cards(
-    Extension(card_service): Extension<Arc<CardService>>,
+    State(state): State<AppState>,
     Json(req): Json<BulkDeleteRequest>,
 ) -> Result<Json<BulkDeleteResponse>, AppError> {
     let mut deleted_count = 0;
@@ -89,7 +85,7 @@ pub async fn bulk_delete_cards(
     let mut errors = Vec::new();
 
     for id in &req.ids {
-        match card_service.delete(*id).await {
+        match state.card_service.delete(*id).await {
             Ok(_) => deleted_count += 1,
             Err(e) => {
                 failed_ids.push(*id);
@@ -121,7 +117,7 @@ pub async fn bulk_delete_cards(
     tag = "Cards"
 )]
 pub async fn bulk_update_cards(
-    Extension(card_service): Extension<Arc<CardService>>,
+    State(state): State<AppState>,
     Json(req): Json<BulkUpdateRequest>,
 ) -> Result<Json<BulkUpdateResponse>, AppError> {
     let mut processed_count = 0;
@@ -129,7 +125,7 @@ pub async fn bulk_update_cards(
     let mut errors = Vec::new();
 
     for id in &req.ids {
-        match card_service.update(*id, req.updates.clone()).await {
+        match state.card_service.update(*id, req.updates.clone()).await {
             Ok(_) => processed_count += 1,
             Err(e) => {
                 failed_ids.push(*id);
@@ -161,7 +157,7 @@ pub async fn bulk_update_cards(
     tag = "Cards"
 )]
 pub async fn bulk_export_cards(
-    Extension(card_service): Extension<Arc<CardService>>,
+    State(state): State<AppState>,
     Json(req): Json<BulkExportRequest>,
 ) -> Result<Json<serde_json::Value>, AppError> {
     // For now, return JSON format
@@ -170,7 +166,7 @@ pub async fn bulk_export_cards(
         // Export specific cards
         let mut exported_cards = Vec::new();
         for id in ids {
-            match card_service.get(id).await {
+            match state.card_service.get(id).await {
                 Ok(card) => exported_cards.push(card),
                 Err(_) => continue,
             }
@@ -178,7 +174,7 @@ pub async fn bulk_export_cards(
         exported_cards
     } else {
         // Export all cards (with optional filters)
-        let (cards, _) = card_service
+        let (cards, _) = state.card_service
             .list(crate::models::card::CardSearchParams {
                 q: None,
                 card_type: None,

@@ -39,3 +39,17 @@ yarn-error.log*
 *.tmp
 *.temp
 docs/review.md
+
+# Playwright (E2E Testing)
+node_modules/
+/test-results/
+/playwright-report/
+/playwright/.cache/
+/playwright/.auth/
+/playwright-*
+/e2e/test-results/
+/e2e/playwright-report/
+/e2e/blob-report/
+package-lock.json
+yarn.lock
+pnpm-lock.yaml

@@ -1,5 +1,4 @@
 use anyhow::Result;
-use std::collections::HashMap;
 use uuid::Uuid;
 
 use crate::models::tco::*;
@@ -113,7 +112,7 @@ impl TCOService {
                 let amount_per_consumer = total_cost / consumers.len() as f64;
                 let percentage = (100.0 / consumers.len() as f64).min(100.0);
 
-                Ok(consumers.iter().map(|consumer| {
+                Ok(consumers.iter().map(|_consumer| {
                     AllocatedCost {
                         id: Uuid::new_v4(),
                         source_card_id: card_id,
@@ -188,7 +187,7 @@ impl TCOService {
         card_name: &str,
         total_cost: f64,
         consumers: &[ConsumerInfo],
-        metrics: &UsageMetrics,
+        _metrics: &UsageMetrics,
     ) -> Result<Vec<AllocatedCost>> {
         // Calculate total usage across all consumers
         let total_usage: f64 = consumers.iter()
@@ -268,7 +267,7 @@ impl TCOService {
         card_name: &str,
         total_cost: f64,
         consumers: &[ConsumerInfo],
-        metrics: &UsageMetrics,
+        _metrics: &UsageMetrics,
     ) -> Result<Vec<AllocatedCost>> {
         // Use transaction count if available, otherwise user count
         let total_transactions: f64 = consumers.iter()
@@ -317,9 +316,9 @@ impl TCOService {
     /// Allocate costs from dependencies to this card
     fn allocate_from_dependencies(
         &self,
-        card_id: Uuid,
+        _card_id: Uuid,
         dependencies: &[DependencyInfo],
-        strategy: &AllocationStrategy,
+        _strategy: &AllocationStrategy,
     ) -> Result<Vec<DependencyCost>> {
         if dependencies.is_empty() {
             return Ok(Vec::new());

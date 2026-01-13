@@ -1,10 +1,10 @@
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 use chrono::{DateTime, Utc};
-use validator::Validate;
+use utoipa::ToSchema;
 
-#[derive(Debug, Serialize, Deserialize, Clone, PartialEq)]
-#[serde(rename_all = "PascalCase")]
+#[derive(Debug, Serialize, Deserialize, Clone, PartialEq, ToSchema)]
+#[serde(rename_all = "camelCase")]
 pub enum RelationshipType {
     // Core dependencies
     ReliesOn,
@@ -22,7 +22,8 @@ pub enum RelationshipType {
     ExemptsFrom,
 }
 
-#[derive(Debug, Serialize, Deserialize, Clone)]
+#[derive(Debug, Serialize, Deserialize, Clone, ToSchema)]
+#[serde(rename_all = "camelCase")]
 pub struct Relationship {
     pub id: Uuid,
     pub from_card_id: Uuid,
@@ -35,13 +36,23 @@ pub struct Relationship {
     pub created_at: DateTime<Utc>,
 }
 
-#[derive(Debug, Deserialize, Validate)]
+#[derive(Debug, Deserialize, Clone, ToSchema)]
+#[serde(rename_all = "camelCase")]
 pub struct CreateRelationshipRequest {
     pub from_card_id: Uuid,
     pub to_card_id: Uuid,
     pub relationship_type: RelationshipType,
     pub valid_from: Option<String>,  // ISO date string
     pub valid_to: Option<String>,  // ISO date string
+    pub attributes: Option<serde_json::Value>,
+    pub confidence: Option<f64>,
+}
+
+#[derive(Debug, Deserialize, ToSchema)]
+#[serde(rename_all = "camelCase")]
+pub struct UpdateRelationshipRequest {
+    pub valid_from: Option<String>,
+    pub valid_to: Option<String>,
     pub attributes: Option<serde_json::Value>,
     pub confidence: Option<f64>,
 }

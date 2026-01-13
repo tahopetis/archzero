@@ -15,7 +15,7 @@ use uuid::Uuid;
 use crate::{
     services::CardService,
     error::AppError,
-    models::card::{CreateCardRequest, CardType, LifecyclePhase},
+    state::AppState,
 };
 
 // Import job status tracking
@@ -100,8 +100,7 @@ pub struct ImportResult {
 ///
 /// Processes CSV/Excel file and imports cards
 pub async fn bulk_import_cards(
-    State(card_service): State<Arc<CardService>>,
-    State(import_jobs): State<Arc<Mutex<std::collections::HashMap<Uuid, ImportJob>>>>,
+    State(state): State<AppState>,
     mut multipart: Multipart,
 ) -> Result<Json<ImportResult>, AppError> {
     // Parse multipart form data
@@ -163,11 +162,11 @@ pub async fn bulk_import_cards(
     };
 
     // Store job
-    import_jobs.lock().await.insert(job_id, job.clone());
+    state.import_jobs.lock().await.insert(job_id, job.clone());
 
     // Process import in background
-    let card_service_clone = card_service.clone();
-    let import_jobs_clone = import_jobs.clone();
+    let card_service_clone = state.card_service.clone();
+    let import_jobs_clone = state.import_jobs.clone();
     tokio::spawn(async move {
         process_import(card_service_clone, import_jobs_clone, job_id, file_data, column_mapping).await;
     });
@@ -184,10 +183,10 @@ pub async fn bulk_import_cards(
 
 /// Get import job status
 pub async fn get_import_status(
-    State(import_jobs): State<Arc<Mutex<std::collections::HashMap<Uuid, ImportJob>>>>,
+    State(state): State<AppState>,
     axum::extract::Path(job_id): axum::extract::Path<Uuid>,
 ) -> Result<Json<ImportJob>, AppError> {
-    let jobs = import_jobs.lock().await;
+    let jobs = state.import_jobs.lock().await;
 
     match jobs.get(&job_id) {
         Some(job) => Ok(Json(job.clone())),
@@ -196,11 +195,11 @@ pub async fn get_import_status(
 }
 
 async fn process_import(
-    card_service: Arc<CardService>,
+    _card_service: Arc<CardService>,
     import_jobs: Arc<Mutex<std::collections::HashMap<Uuid, ImportJob>>>,
     job_id: Uuid,
-    file_data: Vec<u8>,
-    column_mapping: ColumnMapping,
+    _file_data: Vec<u8>,
+    _column_mapping: ColumnMapping,
 ) {
     // This is a simplified implementation
     // In production, you would:

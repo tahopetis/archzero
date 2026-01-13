@@ -1,14 +1,13 @@
 use axum::{
-    extract::{Path, Query, Extension},
+    extract::{Path, Query, State},
     response::Json,
 };
 use uuid::Uuid;
-use std::sync::Arc;
 use serde::Deserialize;
 
 use crate::models::tco::*;
-use crate::services::{TCOService, CardService, TopologyService};
 use crate::error::AppError;
+use crate::state::AppState;
 
 /// Query parameters for TCO calculation
 #[derive(Debug, Deserialize)]
@@ -35,18 +34,16 @@ pub struct TCOCalculationParams {
     tag = "TCO"
 )]
 pub async fn calculate_tco(
-    Extension(tco_service): Extension<Arc<TCOService>>,
-    Extension(card_service): Extension<Arc<CardService>>,
-    Extension(topology_service): Extension<Arc<TopologyService>>,
+    State(state): State<AppState>,
     Query(params): Query<TCOCalculationParams>,
     Json(req): Json<TCOCalculationRequest>,
 ) -> Result<Json<TCOCalculation>, AppError> {
     // Get the card
-    let card = card_service.get(req.card_id).await?;
+    let card = state.card_service.get(req.card_id).await?;
 
     // Get dependencies if requested
     let dependencies = if params.include_dependencies.unwrap_or(false) {
-        let deps = topology_service.get_dependencies(req.card_id).await
+        let deps = state.topology_service.get_dependencies(req.card_id).await
             .map_err(|e| AppError::Internal(anyhow::anyhow!("Failed to get dependencies: {}", e)))?;
 
         // Convert to DependencyInfo
@@ -65,7 +62,7 @@ pub async fn calculate_tco(
     };
 
     // Get consumers
-    let consumers = topology_service.get_dependents(req.card_id).await
+    let consumers = state.topology_service.get_dependents(req.card_id).await
         .map_err(|e| AppError::Internal(anyhow::anyhow!("Failed to get consumers: {}", e)))?;
 
     // Convert to ConsumerInfo
@@ -78,7 +75,7 @@ pub async fn calculate_tco(
         }
     }).collect();
 
-    let calculation = tco_service.calculate_tco(
+    let calculation = state.tco_service.calculate_tco(
         req.card_id,
         card.name.clone(),
         req,
@@ -100,11 +97,11 @@ pub async fn calculate_tco(
     tag = "TCO"
 )]
 pub async fn get_portfolio_tco(
-    Extension(tco_service): Extension<Arc<TCOService>>,
+    State(state): State<AppState>,
 ) -> Result<Json<TCOPortfolio>, AppError> {
     // For now, return an empty portfolio
     // In production, this would aggregate all TCO calculations
-    let portfolio = tco_service.calculate_portfolio_tco(vec![])
+    let portfolio = state.tco_service.calculate_portfolio_tco(vec![])
         .map_err(|e| AppError::Internal(anyhow::anyhow!("Failed to calculate portfolio: {}", e)))?;
 
     Ok(Json(portfolio))
@@ -170,8 +167,8 @@ pub async fn get_tco_comparison(
     tag = "TCO"
 )]
 pub async fn get_cost_trend(
-    Path(card_id): Path<Uuid>,
-    Query(params): Query<std::collections::HashMap<String, String>>,
+    Path(_card_id): Path<Uuid>,
+    Query(_params): Query<std::collections::HashMap<String, String>>,
 ) -> Result<Json<Vec<CostTrendDataPoint>>, AppError> {
     // For now, return empty trend
     // In production, this would query historical TCO data

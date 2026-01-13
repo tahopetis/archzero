@@ -1,9 +1,9 @@
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 use chrono::{DateTime, Utc};
-use validator::Validate;
+use utoipa::{ToSchema, IntoParams};
 
-#[derive(Debug, Serialize, Deserialize, Clone, PartialEq)]
+#[derive(Debug, Serialize, Deserialize, Clone, PartialEq, ToSchema)]
 #[serde(rename_all = "PascalCase")]
 pub enum CardType {
     // Layer A: Strategic
@@ -23,9 +23,12 @@ pub enum CardType {
     Initiative,
     Risk,
     ComplianceRequirement,
+    // Layer E: ARB (Architecture Review Board)
+    ARBMeeting,
+    ARBSubmission,
 }
 
-#[derive(Debug, Serialize, Deserialize, Clone, PartialEq)]
+#[derive(Debug, Serialize, Deserialize, Clone, PartialEq, ToSchema)]
 #[serde(rename_all = "PascalCase")]
 pub enum LifecyclePhase {
     Discovery,
@@ -38,7 +41,8 @@ pub enum LifecyclePhase {
     Retired,
 }
 
-#[derive(Debug, Serialize, Deserialize, Clone)]
+#[derive(Debug, Serialize, Deserialize, Clone, ToSchema)]
+#[serde(rename_all = "camelCase")]
 pub struct Card {
     pub id: Uuid,
     pub name: String,
@@ -55,9 +59,9 @@ pub struct Card {
     pub status: String,
 }
 
-#[derive(Debug, Deserialize, Validate)]
+#[derive(Debug, Deserialize, Clone, ToSchema)]
+#[serde(rename_all = "camelCase")]
 pub struct CreateCardRequest {
-    #[validate(length(min = 1))]
     pub name: String,
     #[serde(rename = "type")]
     pub card_type: CardType,
@@ -69,7 +73,8 @@ pub struct CreateCardRequest {
     pub tags: Option<Vec<String>>,
 }
 
-#[derive(Debug, Deserialize, Validate)]
+#[derive(Debug, Deserialize, Clone, ToSchema)]
+#[serde(rename_all = "camelCase")]
 pub struct UpdateCardRequest {
     pub name: Option<String>,
     pub lifecycle_phase: Option<LifecyclePhase>,
@@ -79,7 +84,8 @@ pub struct UpdateCardRequest {
     pub tags: Option<Vec<String>>,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, Clone, ToSchema, IntoParams)]
+#[serde(rename_all = "camelCase")]
 pub struct CardSearchParams {
     pub q: Option<String>,
     #[serde(rename = "type")]

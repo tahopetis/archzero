@@ -4,7 +4,6 @@ use axum::{
     middleware::Next,
     response::Response,
 };
-use crate::models::user::{Claims, UserRole};
 use crate::services::AuthService;
 
 pub async fn auth_middleware(

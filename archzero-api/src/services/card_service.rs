@@ -1,7 +1,7 @@
 use anyhow::Result;
 use sqlx::{PgPool, Row};
 use uuid::Uuid;
-use chrono::{Utc, DateTime};
+use chrono::Utc;
 
 use crate::models::card::{Card, CreateCardRequest, UpdateCardRequest, CardSearchParams};
 use crate::error::AppError;

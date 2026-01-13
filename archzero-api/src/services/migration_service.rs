@@ -96,7 +96,7 @@ impl MigrationService {
         &self,
         rule: &MigrationRule,
         factors: &MigrationFactors,
-        target_env: &TargetEnvironment,
+        _target_env: &TargetEnvironment,
     ) -> bool {
         // Parse and evaluate condition (simplified logic)
         // In production, this would use a proper rules engine or JSONLogic
@@ -224,7 +224,7 @@ impl MigrationService {
     }
 
     /// Generate alternative migration options
-    fn generate_alternatives(&self, primary: &RecommendationType, factors: &MigrationFactors) -> Vec<RecommendationType> {
+    fn generate_alternatives(&self, primary: &RecommendationType, _factors: &MigrationFactors) -> Vec<RecommendationType> {
         match primary {
             RecommendationType::Rehost => vec![RecommendationType::Refactor, RecommendationType::Retain],
             RecommendationType::Refactor => vec![RecommendationType::Rehost, RecommendationType::Revise],

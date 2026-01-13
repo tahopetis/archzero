@@ -7,6 +7,10 @@
 
 | ID | Time | T | Title | Read |
 |----|------|---|-------|------|
+| #1334 | 4:02 PM | 🔄 | Relationship Validation Simplified | ~185 |
+| #1325 | 4:01 PM | 🔵 | Relationship Model Structure Reviewed | ~262 |
+| #1301 | 3:54 PM | 🔄 | Card Serialization Changed to camelCase | ~238 |
+| #1296 | 3:52 PM | 🔵 | Card Model Structure Reviewed | ~325 |
 | #1176 | 3:19 PM | 🔄 | Relationship Model DateTime Type Fixed | ~29 |
 | #1174 | " | 🔄 | Relationship Date Fields Changed to String | ~176 |
 | #1172 | 3:18 PM | 🔴 | Card Model NaiveDate Import Removed | ~48 |
@@ -17,4 +21,25 @@
 | #1134 | " | 🟣 | User Authentication Data Models Defined | ~333 |
 | #1133 | " | 🟣 | Card Data Models Implemented | ~357 |
 | #1131 | 3:11 PM | 🟣 | Models Module Structure Created | ~197 |
+
+### Jan 13, 2026
+
+| ID | Time | T | Title | Read |
+|----|------|---|-------|------|
+| #1447 | 2:04 AM | 🟣 | OpenAPI Query Parameters Support | ~208 |
+| #1446 | " | 🟣 | OpenAPI IntoParams Support Added | ~157 |
+| #1437 | 2:02 AM | 🔄 | Relationship Model OpenAPI Support Added | ~231 |
+| #1436 | " | 🟣 | OpenAPI Schema Support Added to Relationships | ~214 |
+| #1435 | 2:01 AM | 🟣 | OpenAPI Schema Derivation Added to Models | ~205 |
+| #1434 | " | 🟣 | RelationshipType OpenAPI Schema Added | ~187 |
+| #1433 | " | 🟣 | OpenAPI Schema Support Added | ~186 |
+| #1432 | " | 🟣 | OpenAPI ToSchema Derivations Added | ~258 |
+| #1431 | " | 🔴 | OpenAPI Schema Support Added | ~216 |
+| #1430 | " | 🟣 | OpenAPI Schema Derivation Added | ~187 |
+| #1429 | 2:00 AM | 🟣 | OpenAPI Schema Support Added | ~183 |
+| #1428 | " | 🟣 | OpenAPI Schema Support Added | ~156 |
+| #1411 | 1:55 AM | 🔄 | Card Model Validator Import Removed | ~219 |
+| #1410 | " | 🔄 | CreateCardRequest Validation Removed | ~216 |
+| #1397 | 1:52 AM | 🔄 | UpdateCardRequest Clone Derivation Added | ~199 |
+| #1396 | " | 🔄 | CreateCardRequest Clone Trait Added | ~172 |
 </claude-mem-context>

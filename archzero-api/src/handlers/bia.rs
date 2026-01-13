@@ -1,13 +1,12 @@
 use axum::{
-    extract::{Path, Extension},
+    extract::{Path, State},
     response::Json,
 };
 use uuid::Uuid;
-use std::sync::Arc;
 
 use crate::models::bia::*;
-use crate::services::{BIAService, TopologyService, CardService};
 use crate::error::AppError;
+use crate::state::AppState;
 
 /// List all available BIA profiles
 #[utoipa::path(
@@ -20,9 +19,9 @@ use crate::error::AppError;
     tag = "BIA"
 )]
 pub async fn list_profiles(
-    Extension(bia_service): Extension<Arc<BIAService>>,
+    State(state): State<AppState>,
 ) -> Result<Json<Vec<String>>, AppError> {
-    let profiles = bia_service.list_profiles();
+    let profiles = state.bia_service.list_profiles();
     Ok(Json(profiles))
 }
 
@@ -41,10 +40,10 @@ pub async fn list_profiles(
     tag = "BIA"
 )]
 pub async fn get_profile(
-    Extension(bia_service): Extension<Arc<BIAService>>,
+    State(state): State<AppState>,
     Path(name): Path<String>,
 ) -> Result<Json<BIAProfile>, AppError> {
-    let profile = bia_service.get_profile(&name)
+    let profile = state.bia_service.get_profile(&name)
         .ok_or_else(|| AppError::NotFound(format!("BIA profile '{}' not found", name)))?;
 
     Ok(Json(profile.clone()))
@@ -64,13 +63,13 @@ pub async fn get_profile(
     tag = "BIA"
 )]
 pub async fn create_assessment(
-    Extension(bia_service): Extension<Arc<BIAService>>,
+    State(state): State<AppState>,
     Json(req): Json<CreateAssessmentRequest>,
 ) -> Result<Json<BIAAssessment>, AppError> {
     // For now, use a fixed user ID (should come from JWT in production)
     let assessed_by = Uuid::new_v4(); // TODO: Get from authentication context
 
-    let assessment = bia_service.calculate_assessment(
+    let assessment = state.bia_service.calculate_assessment(
         req.card_id,
         &req.profile_name,
         req.responses,
@@ -117,16 +116,14 @@ pub async fn get_assessment(
     tag = "Topology"
 )]
 pub async fn get_enhanced_criticality(
-    Extension(bia_service): Extension<Arc<BIAService>>,
-    Extension(topology_service): Extension<Arc<TopologyService>>,
-    Extension(card_service): Extension<Arc<CardService>>,
+    State(state): State<AppState>,
     Path(card_id): Path<Uuid>,
 ) -> Result<Json<EnhancedCriticality>, AppError> {
     // Get the card to check if it exists
-    let card = card_service.get(card_id).await?;
+    let _card = state.card_service.get(card_id).await?;
 
     // Calculate topology metrics
-    let topology_metrics = topology_service.calculate_topology_metrics(card_id).await
+    let topology_metrics = state.topology_service.calculate_topology_metrics(card_id).await
         .map_err(|e| AppError::Internal(anyhow::anyhow!("Failed to calculate topology: {}", e)))?;
 
     // For now, use a default BIA score of 0.5 (Medium)
@@ -135,7 +132,7 @@ pub async fn get_enhanced_criticality(
     let bia_level = CriticalityLevel::from_score(bia_score);
 
     // Calculate enhanced criticality
-    let enhanced = topology_service.calculate_enhanced_criticality(
+    let enhanced = state.topology_service.calculate_enhanced_criticality(
         bia_score,
         bia_level,
         topology_metrics,
@@ -158,10 +155,10 @@ pub async fn get_enhanced_criticality(
     tag = "Topology"
 )]
 pub async fn get_topology_metrics(
-    Extension(topology_service): Extension<Arc<TopologyService>>,
+    State(state): State<AppState>,
     Path(card_id): Path<Uuid>,
 ) -> Result<Json<TopologyMetrics>, AppError> {
-    let metrics = topology_service.calculate_topology_metrics(card_id).await
+    let metrics = state.topology_service.calculate_topology_metrics(card_id).await
         .map_err(|e| AppError::Internal(anyhow::anyhow!("Failed to calculate topology: {}", e)))?;
 
     Ok(Json(metrics))
@@ -181,9 +178,9 @@ pub async fn get_topology_metrics(
     tag = "Topology"
 )]
 pub async fn get_critical_paths(
-    Extension(topology_service): Extension<Arc<TopologyService>>,
+    State(state): State<AppState>,
 ) -> Result<Json<Vec<(Uuid, u32)>>, AppError> {
-    let paths = topology_service.find_critical_paths(10).await
+    let paths = state.topology_service.find_critical_paths(10).await
         .map_err(|e| AppError::Internal(anyhow::anyhow!("Failed to find critical paths: {}", e)))?;
 
     Ok(Json(paths))
@@ -203,10 +200,10 @@ pub async fn get_critical_paths(
     tag = "Topology"
 )]
 pub async fn get_dependents(
-    Extension(topology_service): Extension<Arc<TopologyService>>,
+    State(state): State<AppState>,
     Path(card_id): Path<Uuid>,
 ) -> Result<Json<Vec<Uuid>>, AppError> {
-    let dependents = topology_service.get_dependents(card_id).await
+    let dependents = state.topology_service.get_dependents(card_id).await
         .map_err(|e| AppError::Internal(anyhow::anyhow!("Failed to get dependents: {}", e)))?;
 
     Ok(Json(dependents))
@@ -226,10 +223,10 @@ pub async fn get_dependents(
     tag = "Topology"
 )]
 pub async fn get_dependencies(
-    Extension(topology_service): Extension<Arc<TopologyService>>,
+    State(state): State<AppState>,
     Path(card_id): Path<Uuid>,
 ) -> Result<Json<Vec<Uuid>>, AppError> {
-    let dependencies = topology_service.get_dependencies(card_id).await
+    let dependencies = state.topology_service.get_dependencies(card_id).await
         .map_err(|e| AppError::Internal(anyhow::anyhow!("Failed to get dependencies: {}", e)))?;
 
     Ok(Json(dependencies))

@@ -1,14 +1,13 @@
 use axum::{
-    extract::{Path, Extension},
+    extract::{Path, State},
     response::Json,
 };
 use uuid::Uuid;
-use std::sync::Arc;
 
 use crate::models::migration::*;
 use crate::models::tco::TCOComparison;
-use crate::services::{MigrationService, CardService};
 use crate::error::AppError;
+use crate::state::AppState;
 
 /// Generate a migration recommendation for a card
 #[utoipa::path(
@@ -24,14 +23,13 @@ use crate::error::AppError;
     tag = "Migration"
 )]
 pub async fn assess_migration(
-    Extension(migration_service): Extension<Arc<MigrationService>>,
-    Extension(card_service): Extension<Arc<CardService>>,
-    Json(mut req): Json<MigrationAssessmentRequest>,
+    State(state): State<AppState>,
+    Json(req): Json<MigrationAssessmentRequest>,
 ) -> Result<Json<MigrationRecommendation>, AppError> {
     // Get the card to retrieve its name
-    let card = card_service.get(req.card_id).await?;
+    let card = state.card_service.get(req.card_id).await?;
 
-    let recommendation = migration_service.assess_migration(
+    let recommendation = state.migration_service.assess_migration(
         req.card_id,
         card.name.clone(),
         req,
@@ -76,7 +74,7 @@ pub async fn get_recommendation(
     tag = "Migration"
 )]
 pub async fn get_card_recommendations(
-    Path(card_id): Path<Uuid>,
+    Path(_card_id): Path<Uuid>,
 ) -> Result<Json<Vec<MigrationRecommendation>>, AppError> {
     // For now, return empty list
     // In production, this would query from database

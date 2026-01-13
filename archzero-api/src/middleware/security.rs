@@ -1,6 +1,6 @@
 use axum::{
     extract::Request,
-    http::header::{HeaderMap, HeaderValue, CONTENT_TYPE, HOST},
+    http::header::HeaderValue,
     middleware::Next,
     response::Response,
 };

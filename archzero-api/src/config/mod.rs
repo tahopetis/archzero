@@ -11,6 +11,11 @@ pub struct Database {
 }
 
 #[derive(Debug, Deserialize, Clone)]
+pub struct Cache {
+    pub redis_url: Option<String>,
+}
+
+#[derive(Debug, Deserialize, Clone)]
 pub struct Jwt {
     pub secret: String,
     pub expiration_hours: i64,
@@ -25,6 +30,7 @@ pub struct Server {
 #[derive(Debug, Deserialize, Clone)]
 pub struct Settings {
     pub database: Database,
+    pub cache: Cache,
     pub jwt: Jwt,
     pub server: Server,
 }

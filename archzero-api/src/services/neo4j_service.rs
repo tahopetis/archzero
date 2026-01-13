@@ -58,7 +58,7 @@ impl Neo4jService {
             "#,
         );
 
-        let mut query = neo4rs::query(&query)
+        let query = neo4rs::query(&query)
             .param("id", card.id.to_string())
             .param("name", card.name.clone())
             .param("type", card_type_str)
@@ -98,7 +98,7 @@ impl Neo4jService {
             "#,
         );
 
-        let mut query = neo4rs::query(&query)
+        let query = neo4rs::query(&query)
             .param("id", card.id.to_string())
             .param("name", card.name.clone())
             .param("type", card_type_str)
@@ -120,7 +120,7 @@ impl Neo4jService {
 
         let query = "MATCH (c:Card {id: $id}) DETACH DELETE c";
 
-        let mut query = neo4rs::query(&query)
+        let query = neo4rs::query(&query)
             .param("id", card_id.to_string());
 
         graph.run(query).await
@@ -153,7 +153,7 @@ impl Neo4jService {
             REL_TYPE = edge_type.to_uppercase()
         );
 
-        let mut query = neo4rs::query(&query)
+        let query = neo4rs::query(&query)
             .param("fromId", relationship.from_card_id.to_string())
             .param("toId", relationship.to_card_id.to_string())
             .param("validFrom", relationship.valid_from.clone())
@@ -172,7 +172,7 @@ impl Neo4jService {
 
         let query = "MATCH ()-[r]->() WHERE elementId(r).toString() CONTAINS $id DELETE r";
 
-        let mut query = neo4rs::query(&query)
+        let query = neo4rs::query(&query)
             .param("id", relationship_id.to_string());
 
         graph.run(query).await
@@ -187,7 +187,7 @@ impl Neo4jService {
 
         let query = "MATCH (c:Card {id: $id})-[r]-(other) DELETE r";
 
-        let mut query = neo4rs::query(&query)
+        let query = neo4rs::query(&query)
             .param("id", card_id.to_string());
 
         graph.run(query).await

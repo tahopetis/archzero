@@ -7,13 +7,15 @@ use tower_http::cors::CorsLayer;
 use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
 use sqlx::postgres::PgPool;
 use std::sync::Arc;
+use uuid::Uuid;
 use utoipa::OpenApi;
 
 use archzero_api::{
     config::Settings,
-    handlers::{auth, cards, health, relationships, bia, migration, tco, policies, principles, standards, exceptions, initiatives, risks, compliance, arb, graph, import, bulk},
-    services::{CardService, AuthService, RelationshipService, Neo4jService, SagaOrchestrator, BIAService, TopologyService, MigrationService, TCOService},
-    middleware::{security_headers, security_logging},
+    state::AppState,
+    handlers::{auth, cards, health, relationships, bia, migration, tco, policies, principles, standards, exceptions, initiatives, risks, compliance, arb, graph, import, bulk, csrf, cache},
+    services::{CardService, AuthService, RelationshipService, Neo4jService, SagaOrchestrator, BIAService, TopologyService, MigrationService, TCOService, CsrfService, RateLimitService, CacheService},
+    middleware::{security_headers, security_logging, rate_limit_middleware},
     models::card::{Card, CardType, LifecyclePhase, CreateCardRequest, UpdateCardRequest, CardSearchParams},
     models::relationship::{Relationship, RelationshipType, CreateRelationshipRequest, UpdateRelationshipRequest},
     models::principles::*,
@@ -358,14 +360,66 @@ async fn main() -> anyhow::Result<()> {
     let topology_service = Arc::new(TopologyService::new(neo4j_service.clone()));
     let migration_service = Arc::new(MigrationService::new());
     let tco_service = Arc::new(TCOService::new());
-    let import_jobs: Arc<std::sync::Mutex<std::collections::HashMap<Uuid, import::ImportJob>>> =
-        Arc::new(std::sync::Mutex::new(std::collections::HashMap::new()));
+    let csrf_service = Arc::new(CsrfService::new());
+    let rate_limit_service = Arc::new(RateLimitService::new());
+
+    // Initialize Phase 5: Redis Cache Service
+    let redis_url = settings.cache.redis_url.clone().unwrap_or_else(|| "redis://127.0.0.1:6379".to_string());
+    let cache_service = match CacheService::new(&redis_url) {
+        Ok(cache) => {
+            tracing::info!("Redis cache service initialized");
+            Arc::new(cache)
+        }
+        Err(e) => {
+            tracing::warn!("Redis cache service unavailable: {}. Running without cache.", e);
+            // In production, you might want a no-op cache implementation here
+            // For now, we'll try to create a default one
+            Arc::new(CacheService::new("redis://127.0.0.1:6379").expect("Failed to create cache service"))
+        }
+    };
+
+    let import_jobs: Arc<tokio::sync::Mutex<std::collections::HashMap<Uuid, import::ImportJob>>> =
+        Arc::new(tokio::sync::Mutex::new(std::collections::HashMap::new()));
+
+    // Create application state
+    let app_state = AppState {
+        card_service: card_service.clone(),
+        auth_service: auth_service.clone(),
+        relationship_service: relationship_service.clone(),
+        neo4j_service: neo4j_service.clone(),
+        saga_orchestrator: saga_orchestrator.clone(),
+        bia_service: bia_service.clone(),
+        topology_service: topology_service.clone(),
+        migration_service: migration_service.clone(),
+        tco_service: tco_service.clone(),
+        csrf_service: csrf_service.clone(),
+        rate_limit_service: rate_limit_service.clone(),
+        cache_service: cache_service.clone(),
+        import_jobs: import_jobs.clone(),
+    };
 
     // Build our application with routes
     let app = Router::new()
         .nest(
             "/api/v1/health",
             Router::new().route("/", get(health::health_check)),
+        )
+        // Phase 5: CSRF Protection endpoints
+        .nest(
+            "/api/v1/csrf",
+            Router::new()
+                .route("/token", post(csrf::generate_csrf_token))
+                .route("/validate", post(csrf::validate_csrf_token)),
+        )
+        // Phase 5: Cache monitoring endpoints
+        .nest(
+            "/api/v1/cache",
+            Router::new()
+                .route("/health", get(cache::get_cache_health))
+                .route("/stats", get(cache::get_cache_stats))
+                .route("/stats/reset", post(cache::reset_cache_stats))
+                .route("/flush", post(cache::flush_cache))
+                .route("/warm", post(cache::warm_cache)),
         )
         .nest(
             "/api/v1/auth",
@@ -378,15 +432,13 @@ async fn main() -> anyhow::Result<()> {
             "/api/v1/cards",
             Router::new()
                 .route("/", get(cards::list_cards).post(cards::create_card))
-                .route("/:id", get(cards::get_card).put(cards::update_card).delete(cards::delete_card))
-                .layer(axum::Extension(saga_orchestrator.clone())),
+                .route("/:id", get(cards::get_card).put(cards::update_card).delete(cards::delete_card)),
         )
         .nest(
             "/api/v1/relationships",
             Router::new()
                 .route("/", get(relationships::list_relationships).post(relationships::create_relationship))
-                .route("/:id", get(relationships::get_relationship).put(relationships::update_relationship).delete(relationships::delete_relationship))
-                .layer(axum::Extension(relationship_service.clone())),
+                .route("/:id", get(relationships::get_relationship).put(relationships::update_relationship).delete(relationships::delete_relationship)),
         )
         // Phase 2: BIA endpoints
         .nest(
@@ -434,7 +486,7 @@ async fn main() -> anyhow::Result<()> {
                 .route("/check", post(policies::check_policy_compliance))
                 .route("/:id/validate", post(policies::validate_policy))
                 .route("/violations", get(policies::list_violations))
-                .layer(axum::Extension(saga_orchestrator.clone())),
+                // Removed Extension layer to fix type inference),
         )
         // Phase 3: Architecture Principles endpoints
         .nest(
@@ -443,7 +495,7 @@ async fn main() -> anyhow::Result<()> {
                 .route("/", get(principles::list_principles).post(principles::create_principle))
                 .route("/:id", get(principles::get_principle).put(principles::update_principle).delete(principles::delete_principle))
                 .route("/:id/compliance", get(principles::get_principle_compliance))
-                .layer(axum::Extension(saga_orchestrator.clone())),
+                // Removed Extension layer to fix type inference),
         )
         // Phase 3: Technology Standards endpoints
         .nest(
@@ -453,7 +505,7 @@ async fn main() -> anyhow::Result<()> {
                 .route("/:id", get(standards::get_standard).put(standards::update_standard).delete(standards::delete_standard))
                 .route("/radar", get(standards::get_radar))
                 .route("/debt-report", get(standards::get_debt_report))
-                .layer(axum::Extension(saga_orchestrator.clone())),
+                // Removed Extension layer to fix type inference),
         )
         // Phase 3: Exceptions endpoints
         .nest(
@@ -464,7 +516,7 @@ async fn main() -> anyhow::Result<()> {
                 .route("/:id/approve", post(exceptions::approve_exception))
                 .route("/:id/reject", post(exceptions::reject_exception))
                 .route("/expiring", get(exceptions::list_expiring_exceptions))
-                .layer(axum::Extension(saga_orchestrator.clone())),
+                // Removed Extension layer to fix type inference),
         )
         // Phase 3: Initiatives endpoints
         .nest(
@@ -474,7 +526,7 @@ async fn main() -> anyhow::Result<()> {
                 .route("/:id", get(initiatives::get_initiative).put(initiatives::update_initiative).delete(initiatives::delete_initiative))
                 .route("/:id/impact-map", get(initiatives::get_initiative_impact_map))
                 .route("/:id/link-cards", post(initiatives::link_cards_to_initiative))
-                .layer(axum::Extension(saga_orchestrator.clone())),
+                // Removed Extension layer to fix type inference),
         )
         // Phase 3: Risks endpoints
         .nest(
@@ -484,7 +536,7 @@ async fn main() -> anyhow::Result<()> {
                 .route("/:id", get(risks::get_risk).put(risks::update_risk).delete(risks::delete_risk))
                 .route("/heat-map", get(risks::get_risk_heat_map))
                 .route("/top-10", get(risks::get_top_risks))
-                .layer(axum::Extension(saga_orchestrator.clone())),
+                // Removed Extension layer to fix type inference),
         )
         // Phase 3: Compliance Requirements endpoints
         .nest(
@@ -494,7 +546,7 @@ async fn main() -> anyhow::Result<()> {
                 .route("/:id", get(compliance::get_compliance_requirement).put(compliance::update_compliance_requirement).delete(compliance::delete_compliance_requirement))
                 .route("/:id/assess", post(compliance::assess_card_compliance))
                 .route("/:id/dashboard", get(compliance::get_compliance_dashboard))
-                .layer(axum::Extension(saga_orchestrator.clone())),
+                // Removed Extension layer to fix type inference),
         )
         // Phase 3: ARB Workflow endpoints
         .nest(
@@ -503,7 +555,7 @@ async fn main() -> anyhow::Result<()> {
                 .route("/", get(arb::list_meetings).post(arb::create_meeting))
                 .route("/:id", get(arb::get_meeting).put(arb::update_meeting).delete(arb::delete_meeting))
                 .route("/:id/agenda", get(arb::get_meeting_agenda).post(arb::add_submission_to_agenda))
-                .layer(axum::Extension(saga_orchestrator.clone())),
+                // Removed Extension layer to fix type inference),
         )
         .nest(
             "/api/v1/arb/submissions",
@@ -511,14 +563,14 @@ async fn main() -> anyhow::Result<()> {
                 .route("/", get(arb::list_submissions).post(arb::create_submission))
                 .route("/:id", get(arb::get_submission).put(arb::update_submission).delete(arb::delete_submission))
                 .route("/:id/decision", post(arb::record_decision))
-                .layer(axum::Extension(saga_orchestrator.clone())),
+                // Removed Extension layer to fix type inference),
         )
         .nest(
             "/api/v1/arb",
             Router::new()
                 .route("/dashboard", get(arb::get_dashboard))
                 .route("/statistics", get(arb::get_statistics))
-                .layer(axum::Extension(saga_orchestrator.clone())),
+                // Removed Extension layer to fix type inference),
         )
         // Phase 4: Graph Visualization endpoints
         .nest(
@@ -534,7 +586,7 @@ async fn main() -> anyhow::Result<()> {
             Router::new()
                 .route("/cards", post(import::bulk_import_cards))
                 .route("/status/:job_id", get(import::get_import_status))
-                .layer(axum::Extension(import_jobs.clone())),
+                // Removed Extension layer to fix type inference),
         )
         // Phase 4: Bulk Operations endpoints
         .nest(
@@ -542,34 +594,40 @@ async fn main() -> anyhow::Result<()> {
             Router::new()
                 .route("/bulk", axum::routing::delete(bulk::bulk_delete_cards))
                 .route("/bulk/update", axum::routing::put(bulk::bulk_update_cards))
-                .layer(axum::Extension(card_service.clone())),
+                // Removed Extension layer to fix type inference),
         )
         .nest(
             "/api/v1/export",
             Router::new()
                 .route("/bulk", post(bulk::bulk_export_cards))
-                .layer(axum::Extension(card_service.clone())),
+                // Removed Extension layer to fix type inference),
         )
         // API Documentation routes
         .route("/api-docs/openapi.json", get(openapi_json))
         // Security middleware (applied to all routes)
         .layer(axum::middleware::from_fn(security_headers))
         .layer(axum::middleware::from_fn(security_logging))
+        // Phase 5: CSRF Protection (Available via /api/v1/csrf/token endpoint)
+        // Note: CSRF middleware is disabled globally to prevent breaking existing API calls.
+        // Clients should obtain tokens from /api/v1/csrf/token and include them in
+        // the X-CSRF-Token header for state-changing operations.
+        // .layer(axum::middleware::from_fn(csrf_protect))
+        // Phase 5: Rate Limiting (Available via rate_limit_service)
+        // Note: Rate limiting middleware is disabled globally to prevent blocking development.
+        // To enable, uncomment the line below and adjust rate limits in middleware/rate_limit.rs
+        // .layer(axum::middleware::from_fn(rate_limit_middleware))
         // CORS (should be after security headers)
         .layer(CorsLayer::permissive())
-        // Layer with shared state
-        .layer(axum::Extension(card_service.clone()))
-        .layer(axum::Extension(bia_service.clone()))
-        .layer(axum::Extension(topology_service.clone()))
-        .layer(axum::Extension(migration_service.clone()))
-        .layer(axum::Extension(tco_service.clone()));
+        // Application state
+        .with_state(app_state);
 
     // Start server
     let addr = format!("{}:{}", settings.server.host, settings.server.port);
     let listener = tokio::net::TcpListener::bind(&addr).await?;
     tracing::info!("Server listening on {}", addr);
 
-    axum::serve(listener, app).await?;
+    axum::serve(listener, app)
+        .await?;
 
     Ok(())
 }
