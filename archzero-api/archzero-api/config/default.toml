@@ -1,0 +1,14 @@
+[database]
+postgres_url = "postgresql://archzero:devpassword@localhost:5432/archzero_dev"
+neo4j_uri = "bolt://localhost:7687"
+neo4j_user = "neo4j"
+neo4j_password = "devpassword"
+redis_url = "redis://localhost:6379"
+
+[jwt]
+secret = "change-this-secret-in-production"
+expiration_hours = 24
+
+[server]
+host = "0.0.0.0"
+port = 3000

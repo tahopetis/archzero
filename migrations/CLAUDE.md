@@ -7,6 +7,8 @@
 
 | ID | Time | T | Title | Read |
 |----|------|---|-------|------|
+| #1306 | 3:55 PM | 🟣 | Card Schema Migration Created | ~231 |
+| #1305 | " | 🟣 | Schema Rollback Migration Created | ~205 |
 | #1197 | 3:23 PM | 🟣 | Initial Database Migration Created | ~332 |
 | #1196 | " | 🟣 | PostgreSQL Migration Rollback Script Created | ~272 |
 </claude-mem-context>

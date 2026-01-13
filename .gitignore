@@ -53,3 +53,13 @@ node_modules/
 package-lock.json
 yarn.lock
 pnpm-lock.yaml
+
+# Binaries (cleanup)
+bdui-linux-x64
+*.exe
+*.dll
+*.so
+*.dylib
+
+# Duplicate directories (cleanup)
+archzero/

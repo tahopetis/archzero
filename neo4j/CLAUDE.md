@@ -7,6 +7,7 @@
 
 | ID | Time | T | Title | Read |
 |----|------|---|-------|------|
+| #1274 | 3:44 PM | 🟣 | Neo4j Performance Indexes Applied | ~280 |
 | #1200 | 3:24 PM | 🟣 | Neo4j Performance Indexes Script Created | ~294 |
 | #1199 | " | 🟣 | Neo4j Uniqueness Constraints Defined | ~280 |
 </claude-mem-context>
