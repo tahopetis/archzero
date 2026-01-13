@@ -3,7 +3,7 @@
  * Show upstream and downstream dependencies
  */
 
-import { DependencyChain, DependencyNode, DependencyLink } from '@/lib/relationship-hooks';
+import type { DependencyChain, DependencyNode, DependencyLink } from '@/lib/relationship-hooks';
 import { cn } from '@/components/governance/shared';
 import { ChevronDown, ChevronRight, AlertTriangle } from 'lucide-react';
 import { useState } from 'react';
@@ -94,7 +94,7 @@ export function DependencyChainVisualization({
             </div>
           </div>
           {node.criticality >= 80 && (
-            <AlertTriangle className="w-4 h-4 text-rose-600" title="High criticality" />
+            <AlertTriangle className="w-4 h-4 text-rose-600" aria-label="High criticality" />
           )}
         </div>
 

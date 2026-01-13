@@ -3,7 +3,7 @@
  * Show relationships between cards in a matrix format
  */
 
-import { MatrixCell } from '@/lib/relationship-hooks';
+import type { MatrixCell } from '@/lib/relationship-hooks';
 import { cn } from '@/components/governance/shared';
 import { useState } from 'react';
 

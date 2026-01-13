@@ -5,7 +5,8 @@
 
 import { X } from 'lucide-react';
 import { cn } from '@/components/governance/shared';
-import { KeyboardShortcut, formatShortcut } from '@/lib/useKeyboardShortcuts';
+import type { KeyboardShortcut } from '@/lib/useKeyboardShortcuts';
+import { formatShortcut } from '@/lib/useKeyboardShortcuts';
 
 interface KeyboardShortcutsHelpProps {
   isOpen: boolean;

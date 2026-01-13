@@ -3,7 +3,7 @@
  */
 
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import api from '@/lib/api';
+import api from './api';
 
 export function useBulkDeleteCards() {
   const queryClient = useQueryClient();
@@ -35,8 +35,8 @@ export function useBulkUpdateCards() {
 
 export function useBulkExportCards() {
   return useMutation({
-    mutationFn: async (ids: string[], format: 'csv' | 'excel' = 'excel') => {
-      const { data } = await api.post('/api/v1/export/bulk', { ids, format }, {
+    mutationFn: async ({ ids, format }: { ids: string[]; format?: 'csv' | 'excel' }) => {
+      const { data } = await api.post('/api/v1/export/bulk', { ids, format: format || 'excel' }, {
         responseType: 'blob',
       });
       return data;

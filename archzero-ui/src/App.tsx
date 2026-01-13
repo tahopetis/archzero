@@ -6,25 +6,45 @@ import { IntelligencePage } from './pages/Intelligence';
 import { CardDetail } from './components/cards/CardDetail';
 import { CardForm } from './components/cards/CardForm';
 import { ProtectedRoute } from './components/ProtectedRoute';
+import { Layout } from './components/Layout';
+// Governance Pages
+import {
+  PrinciplesPage,
+  StandardsPage,
+  PoliciesPage,
+  ExceptionsPage,
+  InitiativesPage,
+  RisksPage,
+  CompliancePage,
+  ARBPage,
+} from './pages/governance';
 
 function App() {
   return (
     <BrowserRouter>
       <Routes>
         <Route path="/login" element={<Login />} />
+
+        {/* Routes with Navigation Layout */}
         <Route
           path="/dashboard"
           element={
             <ProtectedRoute>
-              <Dashboard />
+              <Layout>
+                <Dashboard />
+              </Layout>
             </ProtectedRoute>
           }
         />
+
+        {/* Card Routes */}
         <Route
           path="/cards"
           element={
             <ProtectedRoute>
-              <CardsPage />
+              <Layout>
+                <CardsPage />
+              </Layout>
             </ProtectedRoute>
           }
         />
@@ -32,7 +52,9 @@ function App() {
           path="/cards/new"
           element={
             <ProtectedRoute>
-              <CardForm mode="create" />
+              <Layout>
+                <CardForm mode="create" />
+              </Layout>
             </ProtectedRoute>
           }
         />
@@ -40,7 +62,9 @@ function App() {
           path="/cards/:id"
           element={
             <ProtectedRoute>
-              <CardDetail />
+              <Layout>
+                <CardDetail />
+              </Layout>
             </ProtectedRoute>
           }
         />
@@ -48,7 +72,9 @@ function App() {
           path="/cards/:id/edit"
           element={
             <ProtectedRoute>
-              <CardForm mode="edit" />
+              <Layout>
+                <CardForm mode="edit" />
+              </Layout>
             </ProtectedRoute>
           }
         />
@@ -56,10 +82,152 @@ function App() {
           path="/cards/:id/intelligence"
           element={
             <ProtectedRoute>
-              <IntelligencePage />
+              <Layout>
+                <IntelligencePage />
+              </Layout>
             </ProtectedRoute>
           }
         />
+
+        {/* Governance Routes */}
+        <Route
+          path="/governance/principles"
+          element={
+            <ProtectedRoute>
+              <Layout>
+                <PrinciplesPage />
+              </Layout>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/governance/principles/:id"
+          element={
+            <ProtectedRoute>
+              <Layout>
+                <PrinciplesPage />
+              </Layout>
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/governance/standards"
+          element={
+            <ProtectedRoute>
+              <Layout>
+                <StandardsPage />
+              </Layout>
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/governance/policies"
+          element={
+            <ProtectedRoute>
+              <Layout>
+                <PoliciesPage />
+              </Layout>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/governance/policies/:id"
+          element={
+            <ProtectedRoute>
+              <Layout>
+                <PoliciesPage />
+              </Layout>
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/governance/exceptions"
+          element={
+            <ProtectedRoute>
+              <Layout>
+                <ExceptionsPage />
+              </Layout>
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/governance/initiatives"
+          element={
+            <ProtectedRoute>
+              <Layout>
+                <InitiativesPage />
+              </Layout>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/governance/initiatives/:id"
+          element={
+            <ProtectedRoute>
+              <Layout>
+                <InitiativesPage />
+              </Layout>
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/governance/risks"
+          element={
+            <ProtectedRoute>
+              <Layout>
+                <RisksPage />
+              </Layout>
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/governance/compliance"
+          element={
+            <ProtectedRoute>
+              <Layout>
+                <CompliancePage />
+              </Layout>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/governance/compliance/:id"
+          element={
+            <ProtectedRoute>
+              <Layout>
+                <CompliancePage />
+              </Layout>
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/governance/arb"
+          element={
+            <ProtectedRoute>
+              <Layout>
+                <ARBPage />
+              </Layout>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/governance/arb/meetings/:id"
+          element={
+            <ProtectedRoute>
+              <Layout>
+                <ARBPage />
+              </Layout>
+            </ProtectedRoute>
+          }
+        />
+
         <Route path="/" element={<Navigate to="/cards" replace />} />
       </Routes>
     </BrowserRouter>

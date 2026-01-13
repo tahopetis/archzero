@@ -101,11 +101,11 @@ export function TCOVisualization({ cardId }: TCOVisualizationProps) {
     contingency: 'Contingency',
   };
 
-  const totalCost = Object.values(costs).reduce((sum, val) => sum + val, 0);
-  const maxCost = Math.max(...Object.values(costs));
+  const totalCost = Object.values(costs).reduce((sum: number, val: any) => sum + (val as number), 0);
+  const maxCost = Math.max(...Object.values(costs).map((v: any) => v as number));
 
   // Sort categories by amount
-  const sortedCategories = Object.entries(costs).sort(([, a], [, b]) => b - a);
+  const sortedCategories = Object.entries(costs).sort(([, a], [, b]) => (b as number) - (a as number));
 
   return (
     <div className="space-y-6">
@@ -143,9 +143,10 @@ export function TCOVisualization({ cardId }: TCOVisualizationProps) {
 
         <div className="space-y-3">
           {sortedCategories.map(([key, value]) => {
-            const percentage = (value / totalCost) * 100;
+            const numValue = value as number;
+            const percentage = (numValue / totalCost) * 100;
             const isExpanded = expandedCategory === key;
-            const width = (value / maxCost) * 100;
+            const width = (numValue / maxCost) * 100;
 
             return (
               <div key={key} className="space-y-2">
@@ -159,7 +160,7 @@ export function TCOVisualization({ cardId }: TCOVisualizationProps) {
                   </div>
                   <div className="flex items-center gap-4">
                     <span className="text-slate-400">{percentage.toFixed(1)}%</span>
-                    <span className="font-semibold text-white">${(value / 1000).toFixed(0)}K</span>
+                    <span className="font-semibold text-white">${(numValue / 1000).toFixed(0)}K</span>
                     {isExpanded ? (
                       <ChevronDown className="w-4 h-4 text-slate-400" />
                     ) : (
@@ -175,13 +176,13 @@ export function TCOVisualization({ cardId }: TCOVisualizationProps) {
                       <div>
                         <div className="text-sm text-slate-500 mb-1">Annual Cost</div>
                         <div className="text-xl font-bold text-white">
-                          ${(value / 1000).toFixed(0)}K
+                          ${(numValue / 1000).toFixed(0)}K
                         </div>
                       </div>
                       <div>
                         <div className="text-sm text-slate-500 mb-1">Monthly Cost</div>
                         <div className="text-xl font-bold text-white">
-                          ${(value / 12000).toFixed(1)}K
+                          ${(numValue / 12000).toFixed(1)}K
                         </div>
                       </div>
                     </div>
@@ -218,11 +219,12 @@ export function TCOVisualization({ cardId }: TCOVisualizationProps) {
           <div className="relative w-64 h-64">
             <svg viewBox="0 0 100 100" className="transform -rotate-90">
               {sortedCategories.map(([key, value], index) => {
-                const percentage = (value / totalCost) * 100;
+                const numValue = value as number;
+                const percentage = (numValue / totalCost) * 100;
                 const dashArray = `${percentage} ${100 - percentage}`;
                 const offset = sortedCategories
                   .slice(0, index)
-                  .reduce((sum, [, val]) => sum + (val / totalCost) * 100, 0);
+                  .reduce((sum: number, [, val]) => sum + ((val as number) / totalCost) * 100, 0);
 
                 return (
                   <circle
@@ -245,13 +247,16 @@ export function TCOVisualization({ cardId }: TCOVisualizationProps) {
 
           {/* Legend */}
           <div className="flex-1 space-y-2">
-            {sortedCategories.map(([key, value]) => (
-              <div key={key} className="flex items-center gap-3">
-                <div className={`w-3 h-3 rounded-sm ${categoryColors[key]}`}></div>
-                <span className="flex-1 text-white">{categoryLabels[key]}</span>
-                <span className="text-slate-400">{((value / totalCost) * 100).toFixed(1)}%</span>
-              </div>
-            ))}
+            {sortedCategories.map(([key, value]) => {
+              const numValue = value as number;
+              return (
+                <div key={key} className="flex items-center gap-3">
+                  <div className={`w-3 h-3 rounded-sm ${categoryColors[key]}`}></div>
+                  <span className="flex-1 text-white">{categoryLabels[key]}</span>
+                  <span className="text-slate-400">{((numValue / totalCost) * 100).toFixed(1)}%</span>
+                </div>
+              );
+            })}
           </div>
         </div>
       </div>

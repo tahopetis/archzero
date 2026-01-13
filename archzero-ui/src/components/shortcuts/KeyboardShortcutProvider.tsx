@@ -3,8 +3,8 @@
  * Global context for keyboard shortcuts
  */
 
-import { createContext, useContext, useState, useCallback, ReactNode } from 'react';
-import { KeyboardShortcut } from '@/lib/useKeyboardShortcuts';
+import { createContext, useContext, useState, useCallback, type ReactNode } from 'react';
+import type { KeyboardShortcut } from '@/lib/useKeyboardShortcuts';
 
 interface KeyboardShortcutContextType {
   shortcuts: KeyboardShortcut[];

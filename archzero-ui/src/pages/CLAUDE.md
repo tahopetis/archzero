@@ -7,6 +7,14 @@
 
 | ID | Time | T | Title | Read |
 |----|------|---|-------|------|
+| #1326 | 4:01 PM | 🔵 | Relationship UI Not Yet Implemented | ~205 |
 | #1237 | 3:33 PM | 🟣 | Dashboard Page Component Implemented | ~333 |
 | #1233 | 3:32 PM | 🟣 | Login Page Component Implemented | ~302 |
+
+### Jan 13, 2026
+
+| ID | Time | T | Title | Read |
+|----|------|---|-------|------|
+| #1375 | 1:45 AM | 🔄 | Type-Only Import Added to Cards Page | ~204 |
+| #1365 | 1:43 AM | 🟣 | Cards List Page Implemented | ~283 |
 </claude-mem-context>

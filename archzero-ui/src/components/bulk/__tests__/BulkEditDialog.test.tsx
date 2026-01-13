@@ -2,7 +2,7 @@
  * Bulk Edit Dialog Component Tests
  */
 
-import { describe, it, expect, vi } from 'vitest';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { BulkEditDialog } from '../BulkEditDialog';
 import { CardType, LifecyclePhase } from '@/types';
@@ -70,7 +70,7 @@ describe('BulkEditDialog', () => {
     const phaseSelect = screen.getByLabelText('Lifecycle Phase');
     expect(phaseSelect).toBeDefined();
 
-    fireEvent.change(phaseSelect, { target: { value: LifecyclePhase.Production } });
+    fireEvent.change(phaseSelect, { target: { value: LifecyclePhase.Active } });
     // Value change is handled by the component's state
   });
 

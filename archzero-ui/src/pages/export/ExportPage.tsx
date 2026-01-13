@@ -5,7 +5,7 @@
 import { useState } from 'react';
 import { Layout } from '@/components/Layout';
 import { ExportPanel } from '@/components/export/ExportPanel';
-import { ExportHistory, ExportHistoryItem } from '@/components/export/ExportHistory';
+import { ExportHistory, type ExportHistoryItem } from '@/components/export/ExportHistory';
 import { useQuery } from '@tanstack/react-query';
 import api from '@/lib/api';
 

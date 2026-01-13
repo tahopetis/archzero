@@ -97,3 +97,12 @@ export interface UpdateCardRequest {
   attributes?: Record<string, any>;
   tags?: string[];
 }
+
+export interface CardSearchParams {
+  q?: string;
+  type?: CardTypeValue;
+  lifecyclePhase?: LifecyclePhaseValue;
+  tags?: string[];
+  page?: number;
+  pageSize?: number;
+}

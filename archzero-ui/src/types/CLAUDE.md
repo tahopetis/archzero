@@ -7,6 +7,7 @@
 
 | ID | Time | T | Title | Read |
 |----|------|---|-------|------|
+| #1300 | 3:54 PM | 🔵 | Frontend TypeScript Types Match Backend | ~276 |
 | #1245 | 3:34 PM | 🟣 | API Types Created with Const Assertions | ~280 |
 | #1242 | 3:33 PM | 🔄 | TypeScript Enums Converted to Const Objects | ~253 |
 | #1231 | 3:32 PM | 🟣 | TypeScript API Types Defined | ~195 |

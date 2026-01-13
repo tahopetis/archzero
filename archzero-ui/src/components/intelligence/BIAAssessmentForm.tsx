@@ -114,8 +114,8 @@ export function BIAAssessmentForm({ cardId, cardName, profiles, onSubmit, onCanc
   const isNextDisabled = () => {
     if (step === 1) return !selectedProfile;
     if (step === 2 && dimension) {
-      const requiredQuestions = dimension.questions.filter(q => q.required);
-      return requiredQuestions.some(q => !responses[q.id]);
+      const requiredQuestions = dimension.questions.filter((q: any) => q.required);
+      return requiredQuestions.some((q: any) => !responses[q.id]);
     }
     return false;
   };
@@ -205,7 +205,7 @@ export function BIAAssessmentForm({ cardId, cardName, profiles, onSubmit, onCanc
 
               {/* Questions */}
               <div className="space-y-6">
-                {dimension.questions.map(question => (
+                {dimension.questions.map((question: any) => (
                   <div key={question.id} className="bg-slate-800/50 border border-slate-700 rounded-xl p-6">
                     <div className="flex items-start gap-3 mb-4">
                       <div className={`flex-shrink-0 w-6 h-6 rounded-full border-2 flex items-center justify-center ${
@@ -228,7 +228,7 @@ export function BIAAssessmentForm({ cardId, cardName, profiles, onSubmit, onCanc
                     </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                      {question.responseOptions.map(option => (
+                      {question.responseOptions.map((option: any) => (
                         <button
                           key={option.value}
                           onClick={() => handleResponse(question.id, option.score)}
