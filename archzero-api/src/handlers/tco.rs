@@ -18,20 +18,35 @@ pub struct TCOCalculationParams {
 }
 
 /// Calculate TCO for a specific card
+#[utoipa::path(
+    post,
+    path = "/api/v1/tco/calculate",
+    params(
+        ("include_dependencies" = Option<bool>, Query, description = "Include dependency TCO in calculation"),
+        ("max_depth" = Option<u32>, Query, description = "Maximum depth for dependency traversal")
+    ),
+    request_body = TCOCalculationRequest,
+    responses(
+        (status = 200, description = "TCO calculation result", body = TCOCalculation),
+        (status = 400, description = "Bad request"),
+        (status = 404, description = "Card not found"),
+        (status = 500, description = "Internal server error")
+    ),
+    tag = "TCO"
+)]
 pub async fn calculate_tco(
     Extension(tco_service): Extension<Arc<TCOService>>,
     Extension(card_service): Extension<Arc<CardService>>,
     Extension(topology_service): Extension<Arc<TopologyService>>,
-    Path(card_id): Path<Uuid>,
     Query(params): Query<TCOCalculationParams>,
     Json(req): Json<TCOCalculationRequest>,
 ) -> Result<Json<TCOCalculation>, AppError> {
     // Get the card
-    let card = card_service.get(card_id).await?;
+    let card = card_service.get(req.card_id).await?;
 
     // Get dependencies if requested
     let dependencies = if params.include_dependencies.unwrap_or(false) {
-        let deps = topology_service.get_dependencies(card_id).await
+        let deps = topology_service.get_dependencies(req.card_id).await
             .map_err(|e| AppError::Internal(anyhow::anyhow!("Failed to get dependencies: {}", e)))?;
 
         // Convert to DependencyInfo
@@ -50,7 +65,7 @@ pub async fn calculate_tco(
     };
 
     // Get consumers
-    let consumers = topology_service.get_dependents(card_id).await
+    let consumers = topology_service.get_dependents(req.card_id).await
         .map_err(|e| AppError::Internal(anyhow::anyhow!("Failed to get consumers: {}", e)))?;
 
     // Convert to ConsumerInfo
@@ -64,7 +79,7 @@ pub async fn calculate_tco(
     }).collect();
 
     let calculation = tco_service.calculate_tco(
-        card_id,
+        req.card_id,
         card.name.clone(),
         req,
         dependencies,
@@ -75,6 +90,15 @@ pub async fn calculate_tco(
 }
 
 /// Get TCO portfolio summary
+#[utoipa::path(
+    get,
+    path = "/api/v1/tco/portfolio",
+    responses(
+        (status = 200, description = "TCO portfolio summary", body = TCOPortfolio),
+        (status = 500, description = "Internal server error")
+    ),
+    tag = "TCO"
+)]
 pub async fn get_portfolio_tco(
     Extension(tco_service): Extension<Arc<TCOService>>,
 ) -> Result<Json<TCOPortfolio>, AppError> {
@@ -87,6 +111,19 @@ pub async fn get_portfolio_tco(
 }
 
 /// Get detailed TCO breakdown for a card
+#[utoipa::path(
+    get,
+    path = "/api/v1/tco/cards/{card_id}",
+    params(
+        ("card_id" = Uuid, Path, description = "Card ID")
+    ),
+    responses(
+        (status = 200, description = "Detailed TCO breakdown", body = TCOCalculation),
+        (status = 404, description = "TCO calculation not found"),
+        (status = 500, description = "Internal server error")
+    ),
+    tag = "TCO"
+)]
 pub async fn get_tco_breakdown(
     Path(card_id): Path<Uuid>,
 ) -> Result<Json<TCOCalculation>, AppError> {
@@ -96,6 +133,19 @@ pub async fn get_tco_breakdown(
 }
 
 /// Get TCO comparison between scenarios
+#[utoipa::path(
+    get,
+    path = "/api/v1/tco/cards/{card_id}/comparison",
+    params(
+        ("card_id" = Uuid, Path, description = "Card ID")
+    ),
+    responses(
+        (status = 200, description = "TCO comparison between scenarios", body = TCOComparison),
+        (status = 404, description = "TCO comparison not found"),
+        (status = 500, description = "Internal server error")
+    ),
+    tag = "TCO"
+)]
 pub async fn get_tco_comparison(
     Path(card_id): Path<Uuid>,
 ) -> Result<Json<TCOComparison>, AppError> {
@@ -105,6 +155,20 @@ pub async fn get_tco_comparison(
 }
 
 /// Get cost trend data
+#[utoipa::path(
+    get,
+    path = "/api/v1/tco/cards/{card_id}/trend",
+    params(
+        ("card_id" = Uuid, Path, description = "Card ID"),
+        ("period" = Option<String>, Query, description = "Time period for trend data (e.g., '6m', '1y')"),
+        ("granularity" = Option<String>, Query, description = "Data granularity (e.g., 'daily', 'monthly')")
+    ),
+    responses(
+        (status = 200, description = "Cost trend data points", body = Vec<CostTrendDataPoint>),
+        (status = 500, description = "Internal server error")
+    ),
+    tag = "TCO"
+)]
 pub async fn get_cost_trend(
     Path(card_id): Path<Uuid>,
     Query(params): Query<std::collections::HashMap<String, String>>,

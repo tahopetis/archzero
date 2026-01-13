@@ -11,6 +11,18 @@ use crate::services::{MigrationService, CardService};
 use crate::error::AppError;
 
 /// Generate a migration recommendation for a card
+#[utoipa::path(
+    post,
+    path = "/api/v1/migration/assess",
+    request_body = MigrationAssessmentRequest,
+    responses(
+        (status = 200, description = "Migration recommendation generated", body = MigrationRecommendation),
+        (status = 400, description = "Bad request"),
+        (status = 404, description = "Card not found"),
+        (status = 500, description = "Internal server error")
+    ),
+    tag = "Migration"
+)]
 pub async fn assess_migration(
     Extension(migration_service): Extension<Arc<MigrationService>>,
     Extension(card_service): Extension<Arc<CardService>>,
@@ -29,6 +41,19 @@ pub async fn assess_migration(
 }
 
 /// Get a migration recommendation by ID
+#[utoipa::path(
+    get,
+    path = "/api/v1/migration/recommendations/{id}",
+    params(
+        ("id" = Uuid, Path, description = "Recommendation ID")
+    ),
+    responses(
+        (status = 200, description = "Migration recommendation details", body = MigrationRecommendation),
+        (status = 404, description = "Recommendation not found"),
+        (status = 500, description = "Internal server error")
+    ),
+    tag = "Migration"
+)]
 pub async fn get_recommendation(
     Path(id): Path<Uuid>,
 ) -> Result<Json<MigrationRecommendation>, AppError> {
@@ -38,6 +63,18 @@ pub async fn get_recommendation(
 }
 
 /// Get all migration recommendations for a card
+#[utoipa::path(
+    get,
+    path = "/api/v1/migration/cards/{card_id}/recommendations",
+    params(
+        ("card_id" = Uuid, Path, description = "Card ID")
+    ),
+    responses(
+        (status = 200, description = "List of migration recommendations", body = Vec<MigrationRecommendation>),
+        (status = 500, description = "Internal server error")
+    ),
+    tag = "Migration"
+)]
 pub async fn get_card_recommendations(
     Path(card_id): Path<Uuid>,
 ) -> Result<Json<Vec<MigrationRecommendation>>, AppError> {

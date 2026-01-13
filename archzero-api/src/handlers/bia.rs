@@ -10,6 +10,15 @@ use crate::services::{BIAService, TopologyService, CardService};
 use crate::error::AppError;
 
 /// List all available BIA profiles
+#[utoipa::path(
+    get,
+    path = "/api/v1/bia/profiles",
+    responses(
+        (status = 200, description = "List of all available BIA profiles", body = Vec<String>),
+        (status = 500, description = "Internal server error")
+    ),
+    tag = "BIA"
+)]
 pub async fn list_profiles(
     Extension(bia_service): Extension<Arc<BIAService>>,
 ) -> Result<Json<Vec<String>>, AppError> {
@@ -18,6 +27,19 @@ pub async fn list_profiles(
 }
 
 /// Get details of a specific BIA profile
+#[utoipa::path(
+    get,
+    path = "/api/v1/bia/profiles/{name}",
+    params(
+        ("name" = String, Path, description = "Profile name")
+    ),
+    responses(
+        (status = 200, description = "BIA profile details", body = BIAProfile),
+        (status = 404, description = "Profile not found"),
+        (status = 500, description = "Internal server error")
+    ),
+    tag = "BIA"
+)]
 pub async fn get_profile(
     Extension(bia_service): Extension<Arc<BIAService>>,
     Path(name): Path<String>,
@@ -29,6 +51,18 @@ pub async fn get_profile(
 }
 
 /// Create a new BIA assessment
+#[utoipa::path(
+    post,
+    path = "/api/v1/bia/assessments",
+    request_body = CreateAssessmentRequest,
+    responses(
+        (status = 200, description = "BIA assessment created", body = BIAAssessment),
+        (status = 400, description = "Bad request"),
+        (status = 404, description = "Profile not found"),
+        (status = 500, description = "Internal server error")
+    ),
+    tag = "BIA"
+)]
 pub async fn create_assessment(
     Extension(bia_service): Extension<Arc<BIAService>>,
     Json(req): Json<CreateAssessmentRequest>,
@@ -47,6 +81,19 @@ pub async fn create_assessment(
 }
 
 /// Get a BIA assessment by ID
+#[utoipa::path(
+    get,
+    path = "/api/v1/bia/assessments/{id}",
+    params(
+        ("id" = Uuid, Path, description = "Assessment ID")
+    ),
+    responses(
+        (status = 200, description = "BIA assessment details", body = BIAAssessment),
+        (status = 404, description = "Assessment not found"),
+        (status = 500, description = "Internal server error")
+    ),
+    tag = "BIA"
+)]
 pub async fn get_assessment(
     Path(id): Path<Uuid>,
 ) -> Result<Json<BIAAssessment>, AppError> {
@@ -56,6 +103,19 @@ pub async fn get_assessment(
 }
 
 /// Get enhanced criticality (BIA + topology) for a card
+#[utoipa::path(
+    get,
+    path = "/api/v1/topology/cards/{card_id}/criticality",
+    params(
+        ("card_id" = Uuid, Path, description = "Card ID")
+    ),
+    responses(
+        (status = 200, description = "Enhanced criticality assessment", body = EnhancedCriticality),
+        (status = 404, description = "Card not found"),
+        (status = 500, description = "Internal server error")
+    ),
+    tag = "Topology"
+)]
 pub async fn get_enhanced_criticality(
     Extension(bia_service): Extension<Arc<BIAService>>,
     Extension(topology_service): Extension<Arc<TopologyService>>,
@@ -85,6 +145,18 @@ pub async fn get_enhanced_criticality(
 }
 
 /// Get topology metrics for a card
+#[utoipa::path(
+    get,
+    path = "/api/v1/topology/cards/{card_id}/metrics",
+    params(
+        ("card_id" = Uuid, Path, description = "Card ID")
+    ),
+    responses(
+        (status = 200, description = "Topology metrics", body = TopologyMetrics),
+        (status = 500, description = "Internal server error")
+    ),
+    tag = "Topology"
+)]
 pub async fn get_topology_metrics(
     Extension(topology_service): Extension<Arc<TopologyService>>,
     Path(card_id): Path<Uuid>,
@@ -96,6 +168,18 @@ pub async fn get_topology_metrics(
 }
 
 /// Get all critical paths (cards with high fan-in)
+#[utoipa::path(
+    get,
+    path = "/api/v1/topology/critical-paths",
+    params(
+        ("threshold" = Option<u32>, Query, description = "Minimum fan-in threshold (default: 10)")
+    ),
+    responses(
+        (status = 200, description = "List of critical paths with card IDs and fan-in counts", body = Vec<(Uuid, u32)>),
+        (status = 500, description = "Internal server error")
+    ),
+    tag = "Topology"
+)]
 pub async fn get_critical_paths(
     Extension(topology_service): Extension<Arc<TopologyService>>,
 ) -> Result<Json<Vec<(Uuid, u32)>>, AppError> {
@@ -106,6 +190,18 @@ pub async fn get_critical_paths(
 }
 
 /// Get dependents of a card (cards that depend on this card)
+#[utoipa::path(
+    get,
+    path = "/api/v1/topology/cards/{card_id}/dependents",
+    params(
+        ("card_id" = Uuid, Path, description = "Card ID")
+    ),
+    responses(
+        (status = 200, description = "List of dependent card IDs", body = Vec<Uuid>),
+        (status = 500, description = "Internal server error")
+    ),
+    tag = "Topology"
+)]
 pub async fn get_dependents(
     Extension(topology_service): Extension<Arc<TopologyService>>,
     Path(card_id): Path<Uuid>,
@@ -117,6 +213,18 @@ pub async fn get_dependents(
 }
 
 /// Get dependencies of a card (cards this card depends on)
+#[utoipa::path(
+    get,
+    path = "/api/v1/topology/cards/{card_id}/dependencies",
+    params(
+        ("card_id" = Uuid, Path, description = "Card ID")
+    ),
+    responses(
+        (status = 200, description = "List of dependency card IDs", body = Vec<Uuid>),
+        (status = 500, description = "Internal server error")
+    ),
+    tag = "Topology"
+)]
 pub async fn get_dependencies(
     Extension(topology_service): Extension<Arc<TopologyService>>,
     Path(card_id): Path<Uuid>,
