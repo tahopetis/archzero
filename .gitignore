@@ -1,17 +1,27 @@
 # Binaries
-bdui-linux-x64
 *.exe
 *.exe~
 *.dll
 *.so
 *.dylib
+bdui-linux-x64
 
-# Build outputs
-/target/
-/dist/
-/build/
+# Build outputs (match in any directory)
+target/
+dist/
+build/
 *.o
 *.a
+
+# Rust-specific
+Cargo.lock
+
+# Node modules (any directory)
+node_modules/
+
+# Frontend build artifacts
+archzero-ui/dist/
+archzero-ui/build/
 
 # IDE
 .vscode/
@@ -35,13 +45,21 @@ yarn-error.log*
 .env.local
 .env.*.local
 
+# Database files
+*.db
+*.sqlite
+*.sqlite3
+.beads/
+
 # Temporary files
 *.tmp
 *.temp
 docs/review.md
+CLEANUP_*.md
+CODEBASE_*.md
+GIT_BACKUP_*.md
 
 # Playwright (E2E Testing)
-node_modules/
 /test-results/
 /playwright-report/
 /playwright/.cache/
@@ -54,12 +72,5 @@ package-lock.json
 yarn.lock
 pnpm-lock.yaml
 
-# Binaries (cleanup)
-bdui-linux-x64
-*.exe
-*.dll
-*.so
-*.dylib
-
-# Duplicate directories (cleanup)
+# Cleanup duplicates
 archzero/
