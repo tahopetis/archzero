@@ -1,15 +1,38 @@
 import { test, expect } from '@playwright/test';
 import { CardListPage, CardDetailPage, NewCardPage } from '../pages/index';
 import { CardFactory } from '../factories/index';
-import { CARD_TYPES } from '../helpers/index';
+import { CARD_TYPES, API_URL } from '../helpers/index';
+import { LoginPage } from '../pages/index';
+
+// Authenticate via API before all tests
+test.beforeAll(async ({ request }) => {
+  try {
+    const response = await request.post(`${API_URL}/api/v1/auth/login`, {
+      data: {
+        email: 'admin@archzero.local',
+        password: 'changeme123'
+      }
+    });
+    if (!response.ok()) {
+      console.warn('Failed to authenticate for card tests');
+    }
+  } catch (error) {
+    console.warn('Auth setup failed:', error);
+  }
+});
 
 test.describe('Card Management', () => {
   let cardListPage: CardListPage;
   let newCardPage: NewCardPage;
+  let loginPage: LoginPage;
 
   test.beforeEach(async ({ page }) => {
+    loginPage = new LoginPage(page);
     cardListPage = new CardListPage(page);
     newCardPage = new NewCardPage(page);
+
+    // Login via API before each test
+    await loginPage.loginViaApi('admin@archzero.local', 'changeme123');
   });
 
   test('should display card list', async ({ page }) => {

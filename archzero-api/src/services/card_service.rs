@@ -81,40 +81,44 @@ impl CardService {
         let mut base_query = "SELECT id, name, type, lifecycle_phase, quality_score, description, owner_id, created_at, updated_at, attributes, tags, status FROM cards WHERE status = 'active'".to_string();
         let mut base_count = "SELECT COUNT(*) FROM cards WHERE status = 'active'".to_string();
         let mut conditions = Vec::new();
-        let mut param_idx = 1;
+        let mut bind_params: Vec<String> = Vec::new();
 
         // Search query parameter
         let search_pattern = if let Some(q) = &params.q {
-            param_idx += 1;
-            conditions.push(format!("(name ILIKE ${} OR description ILIKE ${})", param_idx - 1, param_idx));
-            param_idx += 1;
-            Some(format!("%{}%", q))
+            let param_num = bind_params.len() + 1;
+            let param_num2 = bind_params.len() + 2;
+            conditions.push(format!("(name ILIKE ${} OR description ILIKE ${})", param_num, param_num2));
+            bind_params.push(format!("%{}%", q));
+            bind_params.push(format!("%{}%", q));
+            Some((bind_params.len() - 2, bind_params.len() - 1))
         } else {
             None
         };
 
         // Card type parameter
         let card_type_str = if let Some(card_type) = &params.card_type {
-            param_idx += 1;
             let type_str = serde_json::to_string(card_type)
                 .map_err(|e| AppError::Internal(anyhow::anyhow!("Failed to serialize card type: {}", e)))?
                 .trim_matches('"')
                 .to_string();
-            conditions.push(format!("type = ${}", param_idx));
-            Some(type_str)
+            let param_num = bind_params.len() + 1;
+            conditions.push(format!("type = ${}", param_num));
+            bind_params.push(type_str);
+            Some(bind_params.len() - 1)
         } else {
             None
         };
 
         // Lifecycle phase parameter
         let lifecycle_phase_str = if let Some(lifecycle_phase) = &params.lifecycle_phase {
-            param_idx += 1;
             let phase_str = serde_json::to_string(lifecycle_phase)
                 .map_err(|e| AppError::Internal(anyhow::anyhow!("Failed to serialize lifecycle phase: {}", e)))?
                 .trim_matches('"')
                 .to_string();
-            conditions.push(format!("lifecycle_phase = ${}", param_idx));
-            Some(phase_str)
+            let param_num = bind_params.len() + 1;
+            conditions.push(format!("lifecycle_phase = ${}", param_num));
+            bind_params.push(phase_str);
+            Some(bind_params.len() - 1)
         } else {
             None
         };
@@ -122,9 +126,10 @@ impl CardService {
         // Tags parameter - use ANY for secure parameterization
         let tags_array = if let Some(tags) = &params.tags {
             if !tags.is_empty() {
-                param_idx += 1;
-                conditions.push(format!("tags && ${}", param_idx));
-                Some(tags.clone())
+                let param_num = bind_params.len() + 1;
+                conditions.push(format!("tags && ${}", param_num));
+                bind_params.push(format!("{:?}", tags));
+                Some(bind_params.len() - 1)
             } else {
                 None
             }
@@ -141,18 +146,9 @@ impl CardService {
         // Build count query with parameters
         let mut count_query = sqlx::query_as::<_, (i64,)>(&base_count);
 
-        // Bind parameters in correct order
-        if let Some(ref pattern) = search_pattern {
-            count_query = count_query.bind(pattern).bind(pattern);
-        }
-        if let Some(ref type_str) = card_type_str {
-            count_query = count_query.bind(type_str);
-        }
-        if let Some(ref phase_str) = lifecycle_phase_str {
-            count_query = count_query.bind(phase_str);
-        }
-        if let Some(ref tags) = tags_array {
-            count_query = count_query.bind(tags);
+        // Bind parameters for count query
+        for param in &bind_params {
+            count_query = count_query.bind(param);
         }
 
         let count_row = count_query
@@ -161,24 +157,18 @@ impl CardService {
             .map_err(|e| AppError::Internal(anyhow::anyhow!("Failed to count cards: {}", e)))?;
 
         // Build data query with parameters
+        let limit_param = bind_params.len() + 1;
+        let offset_param = bind_params.len() + 2;
         let data_query = format!("{} ORDER BY created_at DESC LIMIT ${} OFFSET ${}",
-            base_query, param_idx + 1, param_idx + 2);
+            base_query, limit_param, offset_param);
 
         let mut data_query_builder = sqlx::query(&data_query);
 
-        // Bind parameters in correct order
-        if let Some(ref pattern) = search_pattern {
-            data_query_builder = data_query_builder.bind(pattern).bind(pattern);
+        // Bind filter parameters for data query
+        for param in &bind_params {
+            data_query_builder = data_query_builder.bind(param);
         }
-        if let Some(ref type_str) = card_type_str {
-            data_query_builder = data_query_builder.bind(type_str);
-        }
-        if let Some(ref phase_str) = lifecycle_phase_str {
-            data_query_builder = data_query_builder.bind(phase_str);
-        }
-        if let Some(ref tags) = tags_array {
-            data_query_builder = data_query_builder.bind(tags);
-        }
+        // Bind LIMIT and OFFSET
         data_query_builder = data_query_builder.bind(page_size as i64).bind(offset as i64);
 
         let rows = data_query_builder
