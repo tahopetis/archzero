@@ -64,6 +64,13 @@ export class LoginPage extends BasePage {
 
   /**
    * Login via API (bypasses UI for faster tests)
+   *
+   * @deprecated This method is deprecated. Use Playwright's storageState instead.
+   * Authentication is now handled globally via auth.setup.ts which creates
+   * persistent auth state files that all tests automatically use.
+   *
+   * This method is kept for backwards compatibility or for tests that need
+   * to authenticate as different users during the test.
    */
   async loginViaApi(email: string, password: string) {
     const response = await this.page.request.post(`${API_URL}/api/v1/auth/login`, {
@@ -120,6 +127,10 @@ export class LoginPage extends BasePage {
 
   /**
    * Login as test user (default: admin)
+   *
+   * @deprecated This method is deprecated. All tests are now authenticated
+   * by default via storageState. Only use this if you need to switch users
+   * during a test.
    */
   async loginAsTestUser(role: 'admin' | 'architect' | 'editor' | 'viewer' = 'admin') {
     const user = TEST_USERS[role.toUpperCase()];

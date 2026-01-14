@@ -38,7 +38,7 @@ export function PrincipleCard({ principle, onEdit }: PrincipleCardProps) {
   const [isExpanded, setIsExpanded] = useState(false);
 
   return (
-    <Card variant="elevated" className="group hover:shadow-xl transition-all duration-300">
+    <Card variant="elevated" className="group hover:shadow-xl transition-all duration-300" data-testid={`principle-item-${principle.id}`}>
       <div className="flex items-start justify-between gap-4">
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 mb-2">
@@ -145,7 +145,7 @@ export function PrinciplesList({ category, onEdit }: PrinciplesListProps) {
   }
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-4" data-testid="principles-list">
       {principles.data.map((principle) => (
         <PrincipleCard key={principle.id} principle={principle} onEdit={onEdit} />
       ))}

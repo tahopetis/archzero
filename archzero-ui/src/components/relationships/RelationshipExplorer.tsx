@@ -6,7 +6,7 @@
 import { useState } from 'react';
 import { useDependencyChains } from '@/lib/relationship-hooks';
 import { cn } from '@/components/governance/shared';
-import { Search, Filter, RotateCw } from 'lucide-react';
+import { Search, Filter, RotateCw, Download } from 'lucide-react';
 
 type RelationshipType = 'all' | 'depends_on' | 'implements' | 'similar_to' | 'conflicts_with';
 
@@ -43,7 +43,7 @@ export function RelationshipExplorer({ cardId }: RelationshipExplorerProps) {
   }
 
   return (
-    <div className="bg-white rounded-lg shadow">
+    <div className="bg-white rounded-lg shadow" data-testid="relationship-explorer">
       {/* Header */}
       <div className="p-6 border-b">
         <div className="flex items-center justify-between mb-4">
@@ -55,6 +55,7 @@ export function RelationshipExplorer({ cardId }: RelationshipExplorerProps) {
           </div>
           <button
             onClick={() => refetch()}
+            data-testid="relationship-refresh-button"
             className={cn(
               'p-2 rounded-lg transition-colors',
               'hover:bg-slate-100 text-slate-600'
@@ -63,10 +64,33 @@ export function RelationshipExplorer({ cardId }: RelationshipExplorerProps) {
           >
             <RotateCw className="w-4 h-4" />
           </button>
+
+          <button
+            onClick={() => {}} // TODO: Implement export functionality
+            data-testid="relationship-export-button"
+            className={cn(
+              'p-2 rounded-lg transition-colors',
+              'hover:bg-slate-100 text-slate-600'
+            )}
+            title="Export"
+          >
+            <Download className="w-4 h-4" />
+          </button>
         </div>
 
         {/* Controls */}
         <div className="flex items-center gap-4">
+          {/* Search Input */}
+          <div className="flex items-center gap-2">
+            <Search className="w-4 h-4 text-slate-500" />
+            <input
+              type="text"
+              placeholder="Search..."
+              className="px-3 py-1.5 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              data-testid="relationship-search-input"
+            />
+          </div>
+
           {/* Relationship Type Filter */}
           <div className="flex items-center gap-2">
             <Filter className="w-4 h-4 text-slate-500" />
@@ -75,6 +99,7 @@ export function RelationshipExplorer({ cardId }: RelationshipExplorerProps) {
                 <button
                   key={type.value}
                   onClick={() => setSelectedType(type.value)}
+                  data-testid="relationship-type-filter"
                   className={cn(
                     'px-3 py-1.5 rounded-lg text-sm font-medium transition-colors',
                     selectedType === type.value
@@ -95,6 +120,7 @@ export function RelationshipExplorer({ cardId }: RelationshipExplorerProps) {
             <select
               value={maxDepth}
               onChange={(e) => setMaxDepth(Number(e.target.value))}
+              data-testid="relationship-depth-selector"
               className="px-3 py-1.5 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
             >
               <option value={1}>1 level</option>
@@ -109,6 +135,7 @@ export function RelationshipExplorer({ cardId }: RelationshipExplorerProps) {
           <div className="flex items-center gap-1 bg-slate-100 rounded-lg p-1">
             <button
               onClick={() => setView('tree')}
+              data-testid="relationship-layout-toggle"
               className={cn(
                 'px-3 py-1 rounded text-sm font-medium transition-colors',
                 view === 'tree'
@@ -120,6 +147,7 @@ export function RelationshipExplorer({ cardId }: RelationshipExplorerProps) {
             </button>
             <button
               onClick={() => setView('graph')}
+              data-testid="relationship-layout-toggle"
               className={cn(
                 'px-3 py-1 rounded text-sm font-medium transition-colors',
                 view === 'graph'
@@ -143,7 +171,10 @@ export function RelationshipExplorer({ cardId }: RelationshipExplorerProps) {
             </div>
           </div>
         ) : (
-          <div className="min-h-[400px] flex items-center justify-center text-slate-500">
+          <div
+            className="min-h-[400px] flex items-center justify-center text-slate-500"
+            data-testid="relationship-graph-container"
+          >
             <div className="text-center">
               <p className="text-sm">Graph view visualization</p>
               <p className="text-xs mt-1">Use the ReactFlow graph component for full visualization</p>

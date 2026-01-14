@@ -28,27 +28,21 @@ test.describe('Dashboard Visualizations', () => {
 
     // Look for heatmap visualization
     const heatmap = page.locator('[data-testid="landscape-heatmap"], canvas.heatmap, .heat-map');
-    const hasHeatmap = await heatmap.count();
-
-    if (hasHeatmap > 0) {
-      await expect(heatmap.first()).toBeVisible({ timeout: 10000 });
-    }
+    await expect(heatmap.first()).toBeVisible({ timeout: 10000 });
   });
 
   test('should allow drill-down on heatmap', async ({ page }) => {
     await page.goto('/dashboard');
 
     const heatmap = page.locator('[data-testid="landscape-heatmap"], canvas.heatmap');
-    const hasHeatmap = await heatmap.count();
+    await expect(heatmap.first()).toBeVisible();
 
-    if (hasHeatmap > 0) {
-      // Click on heatmap to drill down
-      await heatmap.first().click();
+    // Click on heatmap to drill down
+    await heatmap.first().click();
 
-      // Verify detail view or tooltip appears
-      const detailView = page.locator('[data-testid="heatmap-detail"], .detail-panel');
-      await expect(detailView.first()).toBeVisible({ timeout: 5000 });
-    }
+    // Verify detail view or tooltip appears
+    const detailView = page.locator('[data-testid="heatmap-detail"], .detail-panel');
+    await expect(detailView.first()).toBeVisible({ timeout: 5000 });
   });
 
   test('should support color-by options for heatmap', async ({ page }) => {
@@ -56,18 +50,16 @@ test.describe('Dashboard Visualizations', () => {
 
     // Look for color-by selector
     const colorBySelect = page.locator('[data-testid="color-by-select"], select[name="colorBy"]');
-    const hasSelect = await colorBySelect.count();
+    await expect(colorBySelect.first()).toBeVisible();
 
-    if (hasSelect > 0) {
-      await colorBySelect.selectOption('lifecycle_phase');
+    await colorBySelect.selectOption('lifecycle_phase');
 
-      // Verify heatmap updates
-      await page.waitForTimeout(500);
+    // Verify heatmap updates
+    await page.waitForLoadState('networkidle');
 
-      // Check that colors have changed (this would require visual comparison)
-      const heatmap = page.locator('[data-testid="landscape-heatmap"], canvas.heatmap');
-      await expect(heatmap.first()).toBeVisible();
-    }
+    // Check that colors have changed (this would require visual comparison)
+    const heatmap = page.locator('[data-testid="landscape-heatmap"], canvas.heatmap');
+    await expect(heatmap.first()).toBeVisible();
   });
 
   test('should display summary metrics cards', async ({ page }) => {
@@ -75,15 +67,11 @@ test.describe('Dashboard Visualizations', () => {
 
     // Look for metric cards
     const metricCards = page.locator('[data-testid="metric-card"], .summary-card');
-    const hasMetrics = await metricCards.count();
+    await expect(metricCards.first()).toBeVisible();
 
-    if (hasMetrics > 0) {
-      await expect(metricCards.first()).toBeVisible();
-
-      // Verify cards show values
-      const count = await metricCards.count();
-      expect(count).toBeGreaterThan(0);
-    }
+    // Verify cards show values
+    const count = await metricCards.count();
+    expect(count).toBeGreaterThan(0);
   });
 
   test('should display charts and graphs', async ({ page }) => {
@@ -91,11 +79,7 @@ test.describe('Dashboard Visualizations', () => {
 
     // Look for various chart types
     const charts = page.locator('[data-testid="chart"], canvas.chart, .graph, .visualization');
-    const hasCharts = await charts.count();
-
-    if (hasCharts > 0) {
-      await expect(charts.first()).toBeVisible();
-    }
+    await expect(charts.first()).toBeVisible();
   });
 });
 
@@ -123,23 +107,21 @@ test.describe('Time Machine Roadmap', () => {
 
     // Look for time slider control
     const timeSlider = page.locator('[data-testid="time-slider"], input[type="range"], .timeline-slider');
-    const hasSlider = await timeSlider.count();
+    await expect(timeSlider.first()).toBeVisible();
 
-    if (hasSlider > 0) {
-      // Get initial value
-      const initialHandle = page.locator('[data-testid="slider-handle"], .slider-handle');
-      const sliderBox = await timeSlider.boundingBox();
+    // Get initial value
+    const initialHandle = page.locator('[data-testid="slider-handle"], .slider-handle');
+    const sliderBox = await timeSlider.boundingBox();
 
-      if (sliderBox) {
-        // Drag slider
-        await page.mouse.move(sliderBox.x + sliderBox.width / 2, sliderBox.y + sliderBox.height / 2);
-        await page.mouse.down();
-        await page.mouse.move(sliderBox.x + sliderBox.width / 2 + 50, sliderBox.y + sliderBox.height / 2);
-        await page.mouse.up();
+    if (sliderBox) {
+      // Drag slider
+      await page.mouse.move(sliderBox.x + sliderBox.width / 2, sliderBox.y + sliderBox.height / 2);
+      await page.mouse.down();
+      await page.mouse.move(sliderBox.x + sliderBox.width / 2 + 50, sliderBox.y + sliderBox.height / 2);
+      await page.mouse.up();
 
-        // Verify timeline updates
-        await page.waitForTimeout(500);
-      }
+      // Verify timeline updates
+      await page.waitForLoadState('networkidle');
     }
   });
 
@@ -148,11 +130,7 @@ test.describe('Time Machine Roadmap', () => {
 
     // Look for milestones
     const milestones = page.locator('[data-testid="milestone"], .milestone-marker');
-    const hasMilestones = await milestones.count();
-
-    if (hasMilestones > 0) {
-      await expect(milestones.first()).toBeVisible();
-    }
+    await expect(milestones.first()).toBeVisible();
   });
 
   test('should display initiative cards on timeline', async ({ page }) => {
@@ -160,11 +138,7 @@ test.describe('Time Machine Roadmap', () => {
 
     // Look for initiative cards
     const initiativeCards = page.locator('[data-testid="initiative-card"], .timeline-card');
-    const hasCards = await initiativeCards.count();
-
-    if (hasCards > 0) {
-      await expect(initiativeCards.first()).toBeVisible();
-    }
+    await expect(initiativeCards.first()).toBeVisible();
   });
 
   test('should filter roadmap by quarter', async ({ page }) => {
@@ -172,14 +146,15 @@ test.describe('Time Machine Roadmap', () => {
 
     // Look for quarter filter
     const quarterFilter = page.locator('[data-testid="quarter-filter"], select[name="quarter"]');
-    const hasFilter = await quarterFilter.count();
+    await expect(quarterFilter.first()).toBeVisible();
 
-    if (hasFilter > 0) {
-      await quarterFilter.selectOption('Q1 2026');
+    await quarterFilter.selectOption('Q1 2026');
 
-      // Verify filtered view
-      await page.waitForTimeout(500);
-    }
+    // Verify filtered view
+    await page.waitForResponse(response =>
+      response.url().includes('/roadmap') &&
+      (response.status() === 200 || response.status() === 304)
+    );
   });
 });
 
@@ -208,12 +183,8 @@ test.describe('Dependency Matrix Visualization', () => {
 
     // Look for highlighted dependencies
     const highlighted = page.locator('.highlighted, .selected, [data-highlighted="true"]');
-    await page.waitForTimeout(500);
-
-    const hasHighlighted = await highlighted.count();
-    if (hasHighlighted > 0) {
-      await expect(highlighted.first()).toBeVisible();
-    }
+    await page.waitForSelector(highlighted.first(), { timeout: 5000 });
+    await expect(highlighted.first()).toBeVisible();
   });
 
   test('should filter matrix by dependency type', async ({ page }) => {
@@ -221,14 +192,15 @@ test.describe('Dependency Matrix Visualization', () => {
 
     // Look for dependency type filter
     const typeFilter = page.locator('[data-testid="dependency-type-filter"], select[name="depType"]');
-    const hasFilter = await typeFilter.count();
+    await expect(typeFilter.first()).toBeVisible();
 
-    if (hasFilter > 0) {
-      await typeFilter.selectOption('depends_on');
+    await typeFilter.selectOption('depends_on');
 
-      // Verify filtered matrix
-      await page.waitForTimeout(500);
-    }
+    // Verify filtered matrix
+    await page.waitForResponse(response =>
+      response.url().includes('/matrix') &&
+      (response.status() === 200 || response.status() === 304)
+    );
   });
 
   test('should show legend for matrix colors', async ({ page }) => {
@@ -236,11 +208,7 @@ test.describe('Dependency Matrix Visualization', () => {
 
     // Look for legend
     const legend = page.locator('[data-testid="matrix-legend"], .legend, .color-key');
-    const hasLegend = await legend.count();
-
-    if (hasLegend > 0) {
-      await expect(legend.first()).toBeVisible();
-    }
+    await expect(legend.first()).toBeVisible();
   });
 });
 
@@ -260,11 +228,7 @@ test.describe('Technology Radar', () => {
 
     // Look for radar visualization
     const radar = page.locator('[data-testid="tech-radar"], canvas.radar, .radar-chart');
-    const hasRadar = await radar.count();
-
-    if (hasRadar > 0) {
-      await expect(radar.first()).toBeVisible();
-    }
+    await expect(radar.first()).toBeVisible();
   });
 
   test('should display four quadrants', async ({ page }) => {
@@ -272,12 +236,13 @@ test.describe('Technology Radar', () => {
 
     // Look for quadrants
     const quadrants = page.locator('[data-testid="quadrant"], .radar-quadrant');
-    const hasQuadrants = await quadrants.count();
+    await expect(quadrants.nth(0)).toBeVisible();
+    await expect(quadrants.nth(1)).toBeVisible();
+    await expect(quadrants.nth(2)).toBeVisible();
+    await expect(quadrants.nth(3)).toBeVisible();
 
-    if (hasQuadrants > 0) {
-      const count = await quadrants.count();
-      expect(count).toBe(4);
-    }
+    const count = await quadrants.count();
+    expect(count).toBe(4);
   });
 
   test('should show technology details on hover', async ({ page }) => {
@@ -285,15 +250,14 @@ test.describe('Technology Radar', () => {
 
     // Look for technology items
     const techItems = page.locator('[data-testid="tech-item"], .radar-item');
-    const count = await techItems.count();
+    await expect(techItems.first()).toBeVisible();
 
-    if (count > 0) {
-      await techItems.first().hover();
+    await techItems.first().hover();
 
-      // Look for tooltip or popover
-      const tooltip = page.locator('[data-testid="tech-tooltip"], .radar-tooltip');
-      await expect(tooltip.first()).toBeVisible({ timeout: 3000 });
-    }
+    // Look for tooltip or popover
+    const tooltip = page.locator('[data-testid="tech-tooltip"], .radar-tooltip');
+    await page.waitForSelector(tooltip.first(), { timeout: 3000 });
+    await expect(tooltip.first()).toBeVisible();
   });
 
   test('should allow filtering by radar ring', async ({ page }) => {
@@ -301,14 +265,12 @@ test.describe('Technology Radar', () => {
 
     // Look for ring filter
     const ringFilter = page.locator('[data-testid="ring-filter"], select[name="ring"]');
-    const hasFilter = await ringFilter.count();
+    await expect(ringFilter.first()).toBeVisible();
 
-    if (hasFilter > 0) {
-      await ringFilter.selectOption('adopt');
+    await ringFilter.selectOption('adopt');
 
-      // Verify filtered view
-      await page.waitForTimeout(500);
-    }
+    // Verify filtered view
+    await page.waitForLoadState('networkidle');
   });
 });
 
@@ -332,11 +294,7 @@ test.describe('BIA Assessment Visualization', () => {
 
     // Look for impact score visualization
     const scoreVis = page.locator('[data-testid="impact-score"], .score-visualization');
-    const hasScore = await scoreVis.count();
-
-    if (hasScore > 0) {
-      await expect(scoreVis.first()).toBeVisible();
-    }
+    await expect(scoreVis.first()).toBeVisible();
   });
 
   test('should display RTO/RPO metrics', async ({ page }) => {
@@ -344,11 +302,7 @@ test.describe('BIA Assessment Visualization', () => {
 
     // Look for RTO/RPO displays
     const rtoRpo = page.locator('[data-testid="rto-rpo"], .recovery-metrics');
-    const hasMetrics = await rtoRpo.count();
-
-    if (hasMetrics > 0) {
-      await expect(rtoRpo.first()).toBeVisible();
-    }
+    await expect(rtoRpo.first()).toBeVisible();
   });
 
   test('should show critical path analysis', async ({ page }) => {
@@ -356,11 +310,7 @@ test.describe('BIA Assessment Visualization', () => {
 
     // Look for critical path visualization
     const criticalPath = page.locator('[data-testid="critical-path"], .dependency-chain');
-    const hasPath = await criticalPath.count();
-
-    if (hasPath > 0) {
-      await expect(criticalPath.first()).toBeVisible();
-    }
+    await expect(criticalPath.first()).toBeVisible();
   });
 });
 
@@ -380,11 +330,7 @@ test.describe('Migration Advisor Report', () => {
 
     // Look for 6R recommendations (Rehost, Refactor, Revise, Rebuild, Replace, Retire)
     const recommendations = page.locator('[data-testid="6r-recommendation"], .migration-option');
-    const hasRecs = await recommendations.count();
-
-    if (hasRecs > 0) {
-      await expect(recommendations.first()).toBeVisible();
-    }
+    await expect(recommendations.first()).toBeVisible();
   });
 
   test('should show effort estimates for each option', async ({ page }) => {
@@ -392,11 +338,7 @@ test.describe('Migration Advisor Report', () => {
 
     // Look for effort estimates
     const effortEstimates = page.locator('[data-testid="effort-estimate"], .effort-bar');
-    const hasEffort = await effortEstimates.count();
-
-    if (hasEffort > 0) {
-      await expect(effortEstimates.first()).toBeVisible();
-    }
+    await expect(effortEstimates.first()).toBeVisible();
   });
 
   test('should allow comparing migration options', async ({ page }) => {
@@ -404,11 +346,7 @@ test.describe('Migration Advisor Report', () => {
 
     // Look for comparison view
     const compareView = page.locator('[data-testid="comparison-view"], .migration-compare');
-    const hasCompare = await compareView.count();
-
-    if (hasCompare > 0) {
-      await expect(compareView.first()).toBeVisible();
-    }
+    await expect(compareView.first()).toBeVisible();
   });
 });
 
@@ -432,11 +370,7 @@ test.describe('TCO Calculator', () => {
 
     // Look for cost breakdown chart
     const costBreakdown = page.locator('[data-testid="cost-breakdown"], .tco-chart, .cost-pie-chart');
-    const hasChart = await costBreakdown.count();
-
-    if (hasChart > 0) {
-      await expect(costBreakdown.first()).toBeVisible();
-    }
+    await expect(costBreakdown.first()).toBeVisible();
   });
 
   test('should display roll-up costs by category', async ({ page }) => {
@@ -444,11 +378,7 @@ test.describe('TCO Calculator', () => {
 
     // Look for roll-up metrics
     const rollup = page.locator('[data-testid="tco-rollup"], .cost-summary, .rollup-metrics');
-    const hasRollup = await rollup.count();
-
-    if (hasRollup > 0) {
-      await expect(rollup.first()).toBeVisible();
-    }
+    await expect(rollup.first()).toBeVisible();
   });
 
   test('should allow adjusting cost parameters', async ({ page }) => {
@@ -456,23 +386,20 @@ test.describe('TCO Calculator', () => {
 
     // Look for input parameters
     const paramInput = page.locator('[data-testid="tco-param"], input[name*="cost" i], input[name*="duration" i]');
-    const hasParam = await paramInput.count();
+    await expect(paramInput.first()).toBeVisible();
 
-    if (hasParam > 0) {
-      // Adjust a parameter
-      await paramInput.first().fill('100000');
+    // Adjust a parameter
+    await paramInput.first().fill('100000');
 
-      // Wait for calculation
-      await page.waitForTimeout(1000);
+    // Wait for calculation
+    await page.waitForResponse(response =>
+      response.url().includes('/tco') &&
+      (response.status() === 200 || response.status() === 304)
+    );
 
-      // Verify recalculation occurred
-      const updatedValue = page.locator('[data-testid="tco-total"], .total-cost');
-      const hasTotal = await updatedValue.count();
-
-      if (hasTotal > 0) {
-        await expect(updatedValue.first()).toBeVisible();
-      }
-    }
+    // Verify recalculation occurred
+    const updatedValue = page.locator('[data-testid="tco-total"], .total-cost');
+    await expect(updatedValue.first()).toBeVisible();
   });
 });
 
@@ -489,45 +416,41 @@ test.describe('Report Generation', () => {
 
     // Look for generate report button
     const generateBtn = page.locator('button:has-text("Generate"), [data-testid="generate-report-btn"]');
-    const hasGenerate = await generateBtn.count();
+    await expect(generateBtn.first()).toBeVisible();
 
-    if (hasGenerate > 0) {
-      await generateBtn.first().click();
+    await generateBtn.first().click();
 
-      // Select PDF format
-      await page.locator('[data-testid="format-select"]').selectOption('pdf');
+    // Select PDF format
+    await page.locator('[data-testid="format-select"]').selectOption('pdf');
 
-      // Setup download handler
-      const downloadPromise = page.waitForEvent('download');
+    // Setup download handler
+    const downloadPromise = page.waitForEvent('download');
 
-      // Confirm generation
-      await page.locator('button:has-text("Confirm"), [data-testid="confirm-generate-btn"]').click();
+    // Confirm generation
+    await page.locator('button:has-text("Confirm"), [data-testid="confirm-generate-btn"]').click();
 
-      // Wait for download
-      const download = await downloadPromise;
-      expect(download.suggestedFilename()).toMatch(/\.pdf$/);
-    }
+    // Wait for download
+    const download = await downloadPromise;
+    expect(download.suggestedFilename()).toMatch(/\.pdf$/);
   });
 
   test('should generate PowerPoint report', async ({ page }) => {
     await page.goto('/reports');
 
     const generateBtn = page.locator('button:has-text("Generate"), [data-testid="generate-report-btn"]');
-    const hasGenerate = await generateBtn.count();
+    await expect(generateBtn.first()).toBeVisible();
 
-    if (hasGenerate > 0) {
-      const downloadPromise = page.waitForEvent('download');
+    const downloadPromise = page.waitForEvent('download');
 
-      await generateBtn.first().click();
+    await generateBtn.first().click();
 
-      // Select PowerPoint format
-      await page.locator('[data-testid="format-select"]').selectOption('pptx');
+    // Select PowerPoint format
+    await page.locator('[data-testid="format-select"]').selectOption('pptx');
 
-      await page.locator('button:has-text("Confirm"), [data-testid="confirm-generate-btn"]').click();
+    await page.locator('button:has-text("Confirm"), [data-testid="confirm-generate-btn"]').click();
 
-      const download = await downloadPromise;
-      expect(download.suggestedFilename()).toMatch(/\.pptx$/);
-    }
+    const download = await downloadPromise;
+    expect(download.suggestedFilename()).toMatch(/\.pptx$/);
   });
 
   test('should allow custom report parameters', async ({ page }) => {
@@ -535,38 +458,31 @@ test.describe('Report Generation', () => {
 
     // Look for report configuration
     const configPanel = page.locator('[data-testid="report-config"], .report-builder');
-    const hasConfig = await configPanel.count();
+    await expect(configPanel.first()).toBeVisible();
 
-    if (hasConfig > 0) {
-      await expect(configPanel.first()).toBeVisible();
+    // Select sections to include
+    const sectionCheckbox = page.locator('[data-testid="report-section"] input[type="checkbox"]').first();
+    await expect(sectionCheckbox.first()).toBeVisible();
+    await sectionCheckbox.check();
 
-      // Select sections to include
-      const sectionCheckbox = page.locator('[data-testid="report-section"] input[type="checkbox"]').first();
-      await sectionCheckbox.check();
-
-      // Set date range
-      const dateRange = page.locator('[data-testid="date-range"], input[name="daterange"]');
-      const hasDateRange = await dateRange.count();
-
-      if (hasDateRange > 0) {
-        await dateRange.first().fill('2026-01-01 to 2026-12-31');
-      }
-    }
+    // Set date range
+    const dateRange = page.locator('[data-testid="date-range"], input[name="daterange"]');
+    await expect(dateRange.first()).toBeVisible();
+    await dateRange.first().fill('2026-01-01 to 2026-12-31');
   });
 
   test('should show report preview', async ({ page }) => {
     await page.goto('/reports');
 
     const previewBtn = page.locator('button:has-text("Preview"), [data-testid="preview-btn"]');
-    const hasPreview = await previewBtn.count();
+    await expect(previewBtn.first()).toBeVisible();
 
-    if (hasPreview > 0) {
-      await previewBtn.click();
+    await previewBtn.click();
 
-      // Verify preview modal/panel
-      const previewPanel = page.locator('[data-testid="report-preview"], .preview-modal');
-      await expect(previewPanel.first()).toBeVisible();
-    }
+    // Verify preview modal/panel
+    const previewPanel = page.locator('[data-testid="report-preview"], .preview-modal');
+    await page.waitForSelector(previewPanel.first(), { timeout: 5000 });
+    await expect(previewPanel.first()).toBeVisible();
   });
 
   test('should auto-generate executive summary', async ({ page }) => {
@@ -574,29 +490,25 @@ test.describe('Report Generation', () => {
 
     // Look for executive summary toggle
     const execSummaryToggle = page.locator('input[name="include-summary"][value="executive"], [data-testid="exec-summary-toggle"]');
-    const hasToggle = await execSummaryToggle.count();
+    await expect(execSummaryToggle.first()).toBeVisible();
 
-    if (hasToggle > 0) {
-      await execSummaryToggle.first().check();
+    await execSummaryToggle.first().check();
 
-      // Generate report
-      const generateBtn = page.locator('button:has-text("Generate"), [data-testid="generate-report-btn"]');
-      const hasGenerate = await generateBtn.count();
+    // Generate report
+    const generateBtn = page.locator('button:has-text("Generate"), [data-testid="generate-report-btn"]');
+    await expect(generateBtn.first()).toBeVisible();
 
-      if (hasGenerate > 0) {
-        await generateBtn.first().click();
+    await generateBtn.first().click();
 
-        // Select format
-        await page.locator('[data-testid="format-select"]').selectOption('pdf');
+    // Select format
+    await page.locator('[data-testid="format-select"]').selectOption('pdf');
 
-        const downloadPromise = page.waitForEvent('download');
+    const downloadPromise = page.waitForEvent('download');
 
-        await page.locator('button:has-text("Confirm"), [data-testid="confirm-generate-btn"]').click();
+    await page.locator('button:has-text("Confirm"), [data-testid="confirm-generate-btn"]').click();
 
-        const download = await downloadPromise;
-        expect(download.suggestedFilename()).toBeTruthy();
-      }
-    }
+    const download = await downloadPromise;
+    expect(download.suggestedFilename()).toBeTruthy();
   });
 });
 
@@ -652,45 +564,41 @@ test.describe('Graph Visualization Performance', () => {
 
     // Look for graph canvas/container
     const graphContainer = page.locator('[data-testid="graph-container"], .graph-canvas');
-    const hasGraph = await graphContainer.count();
+    await expect(graphContainer.first()).toBeVisible();
 
-    if (hasGraph > 0) {
-      const startTime = Date.now();
+    const startTime = Date.now();
 
-      // Wait for graph to load
-      await page.waitForSelector('[data-testid="graph-loaded"], .graph-loaded, canvas', {
-        timeout: 10000
-      }).catch(() => {
-        // Graph might be considered loaded when canvas is visible
-      });
+    // Wait for graph to load
+    await page.waitForSelector('[data-testid="graph-loaded"], .graph-loaded, canvas', {
+      timeout: 10000
+    }).catch(() => {
+      // Graph might be considered loaded when canvas is visible
+    });
 
-      const endTime = Date.now();
-      const loadTime = endTime - startTime;
+    const endTime = Date.now();
+    const loadTime = endTime - startTime;
 
-      // Graph should render within 5 seconds even with many nodes
-      expect(loadTime).toBeLessThan(5000);
-    }
+    // Graph should render within 5 seconds even with many nodes
+    expect(loadTime).toBeLessThan(5000);
   });
 
   test('should support graph zoom without performance degradation', async ({ page }) => {
     await page.goto('/relationships/graph');
 
     const graph = page.locator('[data-testid="relationship-graph"], canvas');
-    const hasGraph = await graph.count();
+    await expect(graph.first()).toBeVisible();
 
-    if (hasGraph > 0) {
-      const startTime = Date.now();
+    const startTime = Date.now();
 
-      // Perform zoom operation
-      await page.mouse.wheel(0, -100);
-      await page.waitForTimeout(500);
+    // Perform zoom operation
+    await page.mouse.wheel(0, -100);
+    await page.waitForLoadState('domcontentloaded');
 
-      const endTime = Date.now();
-      const zoomTime = endTime - startTime;
+    const endTime = Date.now();
+    const zoomTime = endTime - startTime;
 
-      // Zoom should be responsive
-      expect(zoomTime).toBeLessThan(1000);
-    }
+    // Zoom should be responsive
+    expect(zoomTime).toBeLessThan(1000);
   });
 
   test('should handle 1000+ node graph', async ({ page }) => {
@@ -700,6 +608,8 @@ test.describe('Graph Visualization Performance', () => {
     // Check if there are many nodes being rendered
     const nodeCount = page.locator('[data-testid="graph-node"], .node, circle.node');
     const count = await nodeCount.count();
+
+    expect(count).toBeGreaterThan(0);
 
     // If graph has many nodes, verify performance is acceptable
     if (count > 100) {
@@ -731,22 +641,21 @@ test.describe('Report Filtering', () => {
 
     // Look for date range filter
     const dateFilter = page.locator('[data-testid="date-range-filter"], input[name="daterange"]');
-    const hasFilter = await dateFilter.count();
+    await expect(dateFilter.first()).toBeVisible();
 
-    if (hasFilter > 0) {
-      await dateFilter.first().fill('2026-01-01 - 2026-03-31');
+    await dateFilter.first().fill('2026-01-01 - 2026-03-31');
 
-      // Apply filter
-      const applyBtn = page.locator('button:has-text("Apply"), [data-testid="apply-filter-btn"]');
-      const hasApply = await applyBtn.count();
+    // Apply filter
+    const applyBtn = page.locator('button:has-text("Apply"), [data-testid="apply-filter-btn"]');
+    await expect(applyBtn.first()).toBeVisible();
 
-      if (hasApply > 0) {
-        await applyBtn.click();
+    await applyBtn.click();
 
-        // Verify filtered report list
-        await page.waitForTimeout(500);
-      }
-    }
+    // Verify filtered report list
+    await page.waitForResponse(response =>
+      response.url().includes('/reports') &&
+      (response.status() === 200 || response.status() === 304)
+    );
   });
 
   test('should filter by report type', async ({ page }) => {
@@ -754,33 +663,36 @@ test.describe('Report Filtering', () => {
 
     // Look for type filter
     const typeFilter = page.locator('[data-testid="report-type-filter"], select[name="type"]');
-    const hasFilter = await typeFilter.count();
+    await expect(typeFilter.first()).toBeVisible();
 
-    if (hasFilter > 0) {
-      await typeFilter.selectOption('compliance');
+    await typeFilter.selectOption('compliance');
 
-      // Verify filter applied
-      await page.waitForTimeout(500);
-    }
+    // Verify filter applied
+    await page.waitForResponse(response =>
+      response.url().includes('/reports') &&
+      (response.status() === 200 || response.status() === 304)
+    );
   });
 
   test('should save report filters as preset', async ({ page }) => {
     await page.goto('/reports');
 
     const saveFilterBtn = page.locator('button:has-text("Save Filter"), [data-testid="save-filter-btn"]');
-    const hasSave = await saveFilterBtn.count();
+    await expect(saveFilterBtn.first()).toBeVisible();
 
-    if (hasSave > 0) {
-      await saveSaveBtn.click();
+    await saveFilterBtn.click();
 
-      // Enter preset name
-      await page.locator('[data-testid="preset-name"]').fill('Monthly Compliance Report');
+    // Enter preset name
+    const presetName = page.locator('[data-testid="preset-name"]');
+    await expect(presetName.first()).toBeVisible();
+    await presetName.fill('Monthly Compliance Report');
 
-      await page.locator('button:has-text("Save"), [data-testid="confirm-save-btn"]').click();
+    const confirmBtn = page.locator('button:has-text("Save"), [data-testid="confirm-save-btn"]');
+    await expect(confirmBtn.first()).toBeVisible();
+    await confirmBtn.click();
 
-      // Verify preset saved
-      await expect(page.locator('text=Filter saved')).toBeVisible({ timeout: 5000 });
-    }
+    // Verify preset saved
+    await expect(page.locator('text=Filter saved')).toBeVisible({ timeout: 5000 });
   });
 });
 
@@ -804,23 +716,21 @@ test.describe('Custom Report Builder', () => {
 
     // Look for available sections palette
     const palette = page.locator('[data-testid="sections-palette"], .report-sections');
-    const hasPalette = await palette.count();
+    await expect(palette.first()).toBeVisible();
 
-    if (hasPalette > 0) {
-      // Look for canvas/drop zone
-      const canvas = page.locator('[data-testid="report-canvas"], .drop-zone');
-      await expect(canvas.first()).toBeVisible();
+    // Look for canvas/drop zone
+    const canvas = page.locator('[data-testid="report-canvas"], .drop-zone');
+    await expect(canvas.first()).toBeVisible();
 
-      // Try dragging a section
-      const firstSection = palette.locator('[data-testid="section-item"]').first();
-      const canvasBox = await canvas.boundingBox();
+    // Try dragging a section
+    const firstSection = palette.locator('[data-testid="section-item"]').first();
+    const canvasBox = await canvas.boundingBox();
 
-      if (canvasBox && firstSection) {
-        await firstSection.dragTo(canvas);
+    if (canvasBox && firstSection) {
+      await firstSection.dragTo(canvas);
 
-        // Verify section added
-        await page.waitForTimeout(500);
-      }
+      // Verify section added
+      await page.waitForLoadState('networkidle');
     }
   });
 
@@ -831,13 +741,13 @@ test.describe('Custom Report Builder', () => {
     const canvasSections = page.locator('[data-testid="canvas-section"], .report-section');
     const count = await canvasSections.count();
 
-    if (count >= 2) {
-      // Drag first section to after second section
-      await canvasSections.nth(0).dragTo(canvasSections.nth(1));
+    expect(count).toBeGreaterThanOrEqual(2);
 
-      // Verify reordering
-      await page.waitForTimeout(500);
-    }
+    // Drag first section to after second section
+    await canvasSections.nth(0).dragTo(canvasSections.nth(1));
+
+    // Verify reordering
+    await page.waitForLoadState('networkidle');
   });
 
   test('should show live preview of custom report', async ({ page }) => {
@@ -845,43 +755,39 @@ test.describe('Custom Report Builder', () => {
 
     // Look for preview panel
     const previewPanel = page.locator('[data-testid="live-preview"], .report-preview');
-    const hasPreview = await previewPanel.count();
+    await expect(previewPanel.first()).toBeVisible();
 
-    if (hasPreview > 0) {
-      await expect(previewPanel.first()).toBeVisible();
+    // Modify a section
+    const sectionInput = page.locator('[data-testid="section-title-input"]').first();
+    await expect(sectionInput.first()).toBeVisible();
 
-      // Modify a section
-      const sectionInput = page.locator('[data-testid="section-title-input"]').first();
-      const hasInput = await sectionInput.count();
+    await sectionInput.fill('Custom Title');
 
-      if (hasInput) {
-        await sectionInput.fill('Custom Title');
+    // Verify preview updates
+    await page.waitForLoadState('networkidle');
 
-        // Verify preview updates
-        await page.waitForTimeout(500);
-
-        const previewTitle = previewPanel.locator('text=Custom Title');
-        await expect(previewTitle.first()).toBeVisible();
-      }
-    }
+    const previewTitle = previewPanel.locator('text=Custom Title');
+    await expect(previewTitle.first()).toBeVisible();
   });
 
   test('should save custom report template', async ({ page }) => {
     await page.goto('/reports/builder');
 
     const saveBtn = page.locator('button:has-text("Save Template"), [data-testid="save-template-btn"]');
-    const hasSave = await saveBtn.count();
+    await expect(saveBtn.first()).toBeVisible();
 
-    if (hasSave > 0) {
-      await saveBtn.click();
+    await saveBtn.click();
 
-      // Enter template name
-      await page.locator('[data-testid="template-name"]').fill('Executive Summary Report');
+    // Enter template name
+    const templateName = page.locator('[data-testid="template-name"]');
+    await expect(templateName.first()).toBeVisible();
+    await templateName.fill('Executive Summary Report');
 
-      await page.locator('button:has-text("Save"), [data-testid="confirm-save-btn"]').click();
+    const confirmBtn = page.locator('button:has-text("Save"), [data-testid="confirm-save-btn"]');
+    await expect(confirmBtn.first()).toBeVisible();
+    await confirmBtn.click();
 
-      // Verify saved
-      await expect(page.locator('text=Template saved')).toBeVisible({ timeout: 5000 });
-    }
+    // Verify saved
+    await expect(page.locator('text=Template saved')).toBeVisible({ timeout: 5000 });
   });
 });

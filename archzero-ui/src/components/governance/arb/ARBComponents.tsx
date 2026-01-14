@@ -60,7 +60,7 @@ export function MeetingCard({ meeting, onView }: MeetingCardProps) {
   const isUpcoming = upcomingDate > new Date();
 
   return (
-    <Card variant="bordered" className="group hover:shadow-lg transition-all">
+    <Card variant="bordered" className="group hover:shadow-lg transition-all" data-testid={`arb-meeting-${meeting.id}`}>
       <div className="flex items-start justify-between mb-3">
         <div className="flex-1">
           <div className="flex items-center gap-2 mb-2">
@@ -160,7 +160,7 @@ export function MeetingsList({ status, onView }: MeetingsListProps) {
   }
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-4" data-testid="arb-list">
       {meetings.data.map((meeting) => (
         <MeetingCard key={meeting.id} meeting={meeting} onView={onView} />
       ))}

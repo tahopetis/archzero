@@ -87,7 +87,7 @@ export function CardList({
   }
 
   return (
-    <div>
+    <div data-testid="card-list">
       <div className="mb-4 text-sm text-gray-600">
         Showing {cards.length} of {total} cards
       </div>
@@ -95,12 +95,13 @@ export function CardList({
       <CardGrid cards={cards} onCardClick={onCardClick} />
 
       {totalPages > 1 && (
-        <div className="mt-6 flex items-center justify-between">
+        <div data-testid="cards-pagination" className="mt-6 flex items-center justify-between">
           <div className="text-sm text-gray-600">
             Page {page} of {totalPages}
           </div>
           <div className="flex gap-2">
             <button
+              data-testid="cards-pagination-prev"
               onClick={() => setPage(p => Math.max(1, p - 1))}
               disabled={page === 1}
               className="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
@@ -108,6 +109,7 @@ export function CardList({
               Previous
             </button>
             <button
+              data-testid="cards-pagination-next"
               onClick={() => setPage(p => Math.min(totalPages, p + 1))}
               disabled={page === totalPages}
               className="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"

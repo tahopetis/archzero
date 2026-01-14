@@ -49,177 +49,148 @@ test.describe('Strategic Initiatives', () => {
   test('should track initiative budget', async ({ page }) => {
     await page.goto('/governance/initiatives');
 
+    // Wait for and click first initiative
     const firstInitiative = page.locator('[data-testid="initiative-item"]').first();
-    const count = await firstInitiative.count();
+    await firstInitiative.waitFor({ state: 'visible', timeout: 10000 });
+    await firstInitiative.click();
 
-    if (count > 0) {
-      await firstInitiative.click();
+    // View budget section
+    const budgetSection = page.locator('[data-testid="initiative-budget"], .budget-tracking');
+    await expect(budgetSection).toBeVisible();
 
-      // View budget section
-      const budgetSection = page.locator('[data-testid="initiative-budget"], .budget-tracking');
-      await expect(budgetSection).toBeVisible();
+    // Should show allocated, spent, and remaining budget
+    const allocatedBudget = budgetSection.locator('[data-testid="budget-allocated"]');
+    const spentBudget = budgetSection.locator('[data-testid="budget-spent"]');
+    const remainingBudget = budgetSection.locator('[data-testid="budget-remaining"]');
 
-      // Should show allocated, spent, and remaining budget
-      const allocatedBudget = budgetSection.locator('[data-testid="budget-allocated"]');
-      const spentBudget = budgetSection.locator('[data-testid="budget-spent"]');
-      const remainingBudget = budgetSection.locator('[data-testid="budget-remaining"]');
-
-      await expect(allocatedBudget).toBeVisible();
-      await expect(spentBudget).toBeVisible();
-      await expect(remainingBudget).toBeVisible();
-    }
+    await expect(allocatedBudget).toBeVisible();
+    await expect(spentBudget).toBeVisible();
+    await expect(remainingBudget).toBeVisible();
   });
 
   test('should show initiative health indicators', async ({ page }) => {
     await page.goto('/governance/initiatives');
 
+    // Wait for and click first initiative
     const firstInitiative = page.locator('[data-testid="initiative-item"]').first();
-    const count = await firstInitiative.count();
+    await firstInitiative.waitFor({ state: 'visible', timeout: 10000 });
+    await firstInitiative.click();
 
-    if (count > 0) {
-      await firstInitiative.click();
+    // Look for health indicator
+    const healthIndicator = page.locator('[data-testid="initiative-health"], .health-status');
+    await healthIndicator.waitFor({ state: 'visible', timeout: 5000 });
 
-      // Look for health indicator
-      const healthIndicator = page.locator('[data-testid="initiative-health"], .health-status');
-      const hasHealth = await healthIndicator.count();
-
-      if (hasHealth > 0) {
-        await expect(healthIndicator.first()).toBeVisible();
-
-        // Should be one of: On Track, At Risk, Behind Schedule
-        const healthText = await healthIndicator.first().textContent();
-        expect(['On Track', 'At Risk', 'Behind Schedule']).toContain(healthText);
-      }
-    }
+    // Should be one of: On Track, At Risk, Behind Schedule
+    const healthText = await healthIndicator.first().textContent();
+    expect(['On Track', 'At Risk', 'Behind Schedule']).toContain(healthText);
   });
 
   test('should update initiative health status', async ({ page }) => {
     await page.goto('/governance/initiatives');
 
+    // Wait for and click first initiative
     const firstInitiative = page.locator('[data-testid="initiative-item"]').first();
-    const count = await firstInitiative.count();
+    await firstInitiative.waitFor({ state: 'visible', timeout: 10000 });
+    await firstInitiative.click();
 
-    if (count > 0) {
-      await firstInitiative.click();
+    // Update health
+    await page.locator('[data-testid="initiative-health"]').selectOption('At Risk');
 
-      // Update health
-      await page.locator('[data-testid="initiative-health"]').selectOption('At Risk');
+    // Provide reason
+    await page.locator('[data-testid="health-reason"]').fill('Budget constraints and resource shortages');
 
-      // Provide reason
-      await page.locator('[data-testid="health-reason"]').fill('Budget constraints and resource shortages');
+    await page.locator('button:has-text("Save")').click();
 
-      await page.locator('button:has-text("Save")').click();
-
-      await expect(page.locator('text=Initiative updated')).toBeVisible({ timeout: 5000 });
-    }
+    await expect(page.locator('text=Initiative updated')).toBeVisible({ timeout: 5000 });
   });
 
   test('should show initiative impact map visualization', async ({ page }) => {
     await page.goto('/governance/initiatives');
 
+    // Wait for and click first initiative
     const firstInitiative = page.locator('[data-testid="initiative-item"]').first();
-    const count = await firstInitiative.count();
+    await firstInitiative.waitFor({ state: 'visible', timeout: 10000 });
+    await firstInitiative.click();
 
-    if (count > 0) {
-      await firstInitiative.click();
+    // Click impact map button
+    const impactMapBtn = page.locator('button:has-text("Impact Map"), [data-testid="impact-map-btn"]');
+    await impactMapBtn.waitFor({ state: 'visible', timeout: 5000 });
+    await impactMapBtn.click();
 
-      const impactMapBtn = page.locator('button:has-text("Impact Map"), [data-testid="impact-map-btn"]');
-      const hasButton = await impactMapBtn.count();
-
-      if (hasButton > 0) {
-        await impactMapBtn.click();
-
-        // Should show which cards/systems are affected
-        const impactMap = page.locator('[data-testid="impact-map"], .impact-visualization');
-        await expect(impactMap).toBeVisible({ timeout: 5000 });
-      }
-    }
+    // Should show which cards/systems are affected
+    const impactMap = page.locator('[data-testid="impact-map"], .impact-visualization');
+    await expect(impactMap).toBeVisible({ timeout: 5000 });
   });
 
   test('should link initiative to cards', async ({ page }) => {
     await page.goto('/governance/initiatives');
 
+    // Wait for and click first initiative
     const firstInitiative = page.locator('[data-testid="initiative-item"]').first();
-    const count = await firstInitiative.count();
+    await firstInitiative.waitFor({ state: 'visible', timeout: 10000 });
+    await firstInitiative.click();
 
-    if (count > 0) {
-      await firstInitiative.click();
+    // Click link cards button
+    const linkBtn = page.locator('button:has-text("Link Cards"), [data-testid="link-cards-btn"]');
+    await linkBtn.waitFor({ state: 'visible', timeout: 5000 });
+    await linkBtn.click();
 
-      const linkBtn = page.locator('button:has-text("Link Cards"), [data-testid="link-cards-btn"]');
-      const hasButton = await linkBtn.count();
+    // Select cards to link
+    const cardSelect = page.locator('[data-testid="card-select"]');
+    await cardSelect.waitFor({ state: 'visible', timeout: 5000 });
+    await cardSelect.selectOption({ index: 1 });
+    await page.locator('button:has-text("Link")').click();
 
-      if (hasButton > 0) {
-        await linkBtn.click();
-
-        // Select cards to link
-        const cardSelect = page.locator('[data-testid="card-select"]');
-        const hasSelect = await cardSelect.count();
-
-        if (hasSelect > 0) {
-          await cardSelect.selectOption({ index: 1 });
-          await page.locator('button:has-text("Link")').click();
-
-          await expect(page.locator('text=Cards linked')).toBeVisible({ timeout: 5000 });
-        }
-      }
-    }
+    await expect(page.locator('text=Cards linked')).toBeVisible({ timeout: 5000 });
   });
 
   test('should show initiative progress tracking', async ({ page }) => {
     await page.goto('/governance/initiatives');
 
+    // Wait for and click first initiative
     const firstInitiative = page.locator('[data-testid="initiative-item"]').first();
-    const count = await firstInitiative.count();
+    await firstInitiative.waitFor({ state: 'visible', timeout: 10000 });
+    await firstInitiative.click();
 
-    if (count > 0) {
-      await firstInitiative.click();
+    // Look for progress indicator
+    const progressBar = page.locator('[data-testid="initiative-progress"], .progress-bar');
+    await progressBar.waitFor({ state: 'visible', timeout: 5000 });
 
-      // Look for progress indicator
-      const progressBar = page.locator('[data-testid="initiative-progress"], .progress-bar');
-      const hasProgress = await progressBar.count();
-
-      if (hasProgress > 0) {
-        await expect(progressBar.first()).toBeVisible();
-
-        // Should show percentage
-        const progressText = await progressBar.first().textContent();
-        expect(progressText).toMatch(/\d+%/);
-      }
-    }
+    // Should show percentage
+    const progressText = await progressBar.first().textContent();
+    expect(progressText).toMatch(/\d+%/);
   });
 
   test('should filter initiatives by type', async ({ page }) => {
     await page.goto('/governance/initiatives');
 
+    // Wait for and use type filter
     const typeFilter = page.locator('[data-testid="initiative-type-filter"]');
-    const hasFilter = await typeFilter.count();
+    await typeFilter.waitFor({ state: 'visible', timeout: 5000 });
+    await typeFilter.selectOption('modernization');
 
-    if (hasFilter > 0) {
-      await typeFilter.selectOption('modernization');
+    // Wait for filter to apply
+    await page.waitForLoadState('networkidle');
 
-      await page.waitForTimeout(500);
-
-      // Should show only modernization initiatives
-      const initiatives = page.locator('[data-testid="initiative-item"][data-type="modernization"]');
-      expect(await initiatives.count()).toBeGreaterThanOrEqual(0);
-    }
+    // Should show only modernization initiatives
+    const initiatives = page.locator('[data-testid="initiative-item"][data-type="modernization"]');
+    expect(await initiatives.count()).toBeGreaterThanOrEqual(0);
   });
 
   test('should filter initiatives by status', async ({ page }) => {
     await page.goto('/governance/initiatives');
 
+    // Wait for and use status filter
     const statusFilter = page.locator('[data-testid="initiative-status-filter"]');
-    const hasFilter = await statusFilter.count();
+    await statusFilter.waitFor({ state: 'visible', timeout: 5000 });
+    await statusFilter.selectOption('active');
 
-    if (hasFilter > 0) {
-      await statusFilter.selectOption('active');
+    // Wait for filter to apply
+    await page.waitForLoadState('networkidle');
 
-      await page.waitForTimeout(500);
-
-      // Should show only active initiatives
-      const initiatives = page.locator('[data-testid="initiative-item"][data-status="active"]');
-      expect(await initiatives.count()).toBeGreaterThanOrEqual(0);
-    }
+    // Should show only active initiatives
+    const initiatives = page.locator('[data-testid="initiative-item"][data-status="active"]');
+    expect(await initiatives.count()).toBeGreaterThanOrEqual(0);
   });
 });
 
@@ -255,46 +226,39 @@ test.describe('Target State Architecture', () => {
   test('should add cards to target state', async ({ page }) => {
     await page.goto('/governance/target-state');
 
+    // Wait for and click first model
     const model = page.locator('[data-testid="target-state-model"]').first();
-    const count = await model.count();
+    await model.waitFor({ state: 'visible', timeout: 10000 });
+    await model.click();
 
-    if (count > 0) {
-      await model.click();
+    // Add card to target state
+    await page.locator('button:has-text("Add Card"), [data-testid="add-card-btn"]').click();
 
-      // Add card to target state
-      await page.locator('button:has-text("Add Card"), [data-testid="add-card-btn"]').click();
+    // Wait for and select card
+    const cardSelect = page.locator('[data-testid="card-select"]');
+    await cardSelect.waitFor({ state: 'visible', timeout: 5000 });
+    await cardSelect.selectOption({ index: 1 });
+    await page.locator('button:has-text("Add")').click();
 
-      const cardSelect = page.locator('[data-testid="card-select"]');
-      const hasSelect = await cardSelect.count();
-
-      if (hasSelect > 0) {
-        await cardSelect.selectOption({ index: 1 });
-        await page.locator('button:has-text("Add")').click();
-
-        await expect(page.locator('text=Card added')).toBeVisible({ timeout: 5000 });
-      }
-    }
+    await expect(page.locator('text=Card added')).toBeVisible({ timeout: 5000 });
   });
 
   test('should visualize target state dependencies', async ({ page }) => {
     await page.goto('/governance/target-state');
 
+    // Wait for and click first model
     const model = page.locator('[data-testid="target-state-model"]').first();
-    const count = await model.count();
+    await model.waitFor({ state: 'visible', timeout: 10000 });
+    await model.click();
 
-    if (count > 0) {
-      await model.click();
+    // Click dependency view
+    const dependencyView = page.locator('[data-testid="dependency-view"], button:has-text("Dependencies")');
+    await dependencyView.waitFor({ state: 'visible', timeout: 5000 });
+    await dependencyView.click();
 
-      const dependencyView = page.locator('[data-testid="dependency-view"], button:has-text("Dependencies")');
-      const hasView = await dependencyView.count();
-
-      if (hasView > 0) {
-        await dependencyView.click();
-
-        const dependencyGraph = page.locator('[data-testid="dependency-graph"]');
-        await expect(dependencyGraph).toBeVisible();
-      }
-    }
+    // Should show dependency graph
+    const dependencyGraph = page.locator('[data-testid="dependency-graph"]');
+    await expect(dependencyGraph).toBeVisible();
   });
 
   test('should support multiple target state versions', async ({ page }) => {
@@ -304,12 +268,13 @@ test.describe('Target State Architecture', () => {
     await page.locator('button:has-text("Create Model")').click();
     await page.locator('[data-testid="model-name"]').fill('2026 Target');
     await page.locator('button:has-text("Create")').click();
-    await page.waitForTimeout(500);
+    await page.waitForLoadState('networkidle');
 
     // Create second version
     await page.locator('button:has-text("Create Model")').click();
     await page.locator('[data-testid="model-name"]').fill('2027 Target');
     await page.locator('button:has-text("Create")').click();
+    await page.waitForLoadState('networkidle');
 
     // Should show both versions
     const models = page.locator('[data-testid="target-state-model"]');
@@ -350,60 +315,51 @@ test.describe('Baseline State Management', () => {
   test('should show baseline details', async ({ page }) => {
     await page.goto('/governance/baseline');
 
+    // Wait for and click first snapshot
     const snapshot = page.locator('[data-testid="baseline-snapshot"]').first();
-    const count = await snapshot.count();
+    await snapshot.waitFor({ state: 'visible', timeout: 10000 });
+    await snapshot.click();
 
-    if (count > 0) {
-      await snapshot.click();
-
-      // Should show captured cards and metrics
-      const cardsList = page.locator('[data-testid="baseline-cards"]');
-      await expect(cardsList).toBeVisible();
-    }
+    // Should show captured cards and metrics
+    const cardsList = page.locator('[data-testid="baseline-cards"]');
+    await expect(cardsList).toBeVisible();
   });
 
   test('should compare baseline with target state', async ({ page }) => {
     await page.goto('/governance/baseline');
 
+    // Wait for and click first snapshot
     const snapshot = page.locator('[data-testid="baseline-snapshot"]').first();
-    const count = await snapshot.count();
+    await snapshot.waitFor({ state: 'visible', timeout: 10000 });
+    await snapshot.click();
 
-    if (count > 0) {
-      await snapshot.click();
+    // Click compare button
+    const compareBtn = page.locator('button:has-text("Compare with Target"), [data-testid="compare-target-btn"]');
+    await compareBtn.waitFor({ state: 'visible', timeout: 5000 });
+    await compareBtn.click();
 
-      const compareBtn = page.locator('button:has-text("Compare with Target"), [data-testid="compare-target-btn"]');
-      const hasButton = await compareBtn.count();
-
-      if (hasButton > 0) {
-        await compareBtn.click();
-
-        const comparison = page.locator('[data-testid="gap-analysis"]');
-        await expect(comparison).toBeVisible({ timeout: 5000 });
-      }
-    }
+    // Should show gap analysis
+    const comparison = page.locator('[data-testid="gap-analysis"]');
+    await expect(comparison).toBeVisible({ timeout: 5000 });
   });
 
   test('should restore from baseline', async ({ page }) => {
     await page.goto('/governance/baseline');
 
+    // Wait for and click first snapshot
     const snapshot = page.locator('[data-testid="baseline-snapshot"]').first();
-    const count = await snapshot.count();
+    await snapshot.waitFor({ state: 'visible', timeout: 10000 });
+    await snapshot.click();
 
-    if (count > 0) {
-      await snapshot.click();
+    // Click restore button
+    const restoreBtn = page.locator('button:has-text("Restore"), [data-testid="restore-snapshot-btn"]');
+    await restoreBtn.waitFor({ state: 'visible', timeout: 5000 });
+    await restoreBtn.click();
 
-      const restoreBtn = page.locator('button:has-text("Restore"), [data-testid="restore-snapshot-btn"]');
-      const hasButton = await restoreBtn.count();
+    // Confirm restore
+    await page.locator('button:has-text("Confirm Restore")').click();
 
-      if (hasButton > 0) {
-        await restoreBtn.click();
-
-        // Confirm restore
-        await page.locator('button:has-text("Confirm Restore")').click();
-
-        await expect(page.locator('text=Restored from snapshot')).toBeVisible({ timeout: 10000 });
-      }
-    }
+    await expect(page.locator('text=Restored from snapshot')).toBeVisible({ timeout: 10000 });
   });
 });
 
@@ -443,35 +399,31 @@ test.describe('Gap Analysis', () => {
   test('should show gap details and recommendations', async ({ page }) => {
     await page.goto('/governance/gap-analysis');
 
+    // Wait for and click first gap
     const firstGap = page.locator('[data-testid="architecture-gap"]').first();
-    const count = await firstGap.count();
+    await firstGap.waitFor({ state: 'visible', timeout: 10000 });
+    await firstGap.click();
 
-    if (count > 0) {
-      await firstGap.click();
+    // Should show gap description and recommendations
+    const gapDetails = page.locator('[data-testid="gap-details"]');
+    await expect(gapDetails).toBeVisible();
 
-      // Should show gap description and recommendations
-      const gapDetails = page.locator('[data-testid="gap-details"]');
-      await expect(gapDetails).toBeVisible();
-
-      const recommendations = page.locator('[data-testid="gap-recommendations"]');
-      await expect(recommendations).toBeVisible();
-    }
+    const recommendations = page.locator('[data-testid="gap-recommendations"]');
+    await expect(recommendations).toBeVisible();
   });
 
   test('should export gap analysis report', async ({ page }) => {
     await page.goto('/governance/gap-analysis');
 
+    // Click export report button
     const exportBtn = page.locator('button:has-text("Export Report"), [data-testid="export-gap-btn"]');
-    const hasButton = await exportBtn.count();
+    await exportBtn.waitFor({ state: 'visible', timeout: 10000 });
 
-    if (hasButton > 0) {
-      const downloadPromise = page.waitForEvent('download');
+    const downloadPromise = page.waitForEvent('download');
+    await exportBtn.click();
 
-      await exportBtn.click();
-
-      const download = await downloadPromise;
-      expect(download.suggestedFilename()).toMatch(/\.(pdf|xlsx)$/);
-    }
+    const download = await downloadPromise;
+    expect(download.suggestedFilename()).toMatch(/\.(pdf|xlsx)$/);
   });
 });
 
@@ -492,45 +444,40 @@ test.describe('Transformation Roadmap', () => {
   test('should generate roadmap from gap analysis', async ({ page }) => {
     await page.goto('/governance/roadmap');
 
+    // Click generate roadmap button
     const generateBtn = page.locator('button:has-text("Generate Roadmap"), [data-testid="generate-roadmap-btn"]');
-    const hasButton = await generateBtn.count();
+    await generateBtn.waitFor({ state: 'visible', timeout: 10000 });
+    await generateBtn.click();
 
-    if (hasButton > 0) {
-      await generateBtn.click();
+    // Select baseline and target
+    await page.locator('[data-testid="baseline-select"]').selectOption({ index: 1 });
+    await page.locator('[data-testid="target-select"]').selectOption({ index: 1 });
 
-      // Select baseline and target
-      await page.locator('[data-testid="baseline-select"]').selectOption({ index: 1 });
-      await page.locator('[data-testid="target-select"]').selectOption({ index: 1 });
+    await page.locator('button:has-text("Generate")').click();
 
-      await page.locator('button:has-text("Generate")').click();
-
-      await expect(page.locator('text=Roadmap generated')).toBeVisible({ timeout: 10000 });
-    }
+    await expect(page.locator('text=Roadmap generated')).toBeVisible({ timeout: 10000 });
   });
 
   test('should show roadmap timeline', async ({ page }) => {
     await page.goto('/governance/roadmap');
 
+    // Wait for and verify timeline
     const timeline = page.locator('[data-testid="roadmap-timeline"], .timeline-view');
-    const hasTimeline = await timeline.count();
-
-    if (hasTimeline > 0) {
-      await expect(timeline.first()).toBeVisible();
-    }
+    await timeline.waitFor({ state: 'visible', timeout: 10000 });
+    await expect(timeline.first()).toBeVisible();
   });
 
   test('should visualize dependencies in roadmap', async ({ page }) => {
     await page.goto('/governance/roadmap');
 
+    // Click dependency view
     const dependencyView = page.locator('[data-testid="dependency-view"], button:has-text("Dependencies")');
-    const hasView = await dependencyView.count();
+    await dependencyView.waitFor({ state: 'visible', timeout: 10000 });
+    await dependencyView.click();
 
-    if (hasView > 0) {
-      await dependencyView.click();
-
-      const dependencyGraph = page.locator('[data-testid="roadmap-dependencies"]');
-      await expect(dependencyGraph).toBeVisible();
-    }
+    // Should show dependency graph
+    const dependencyGraph = page.locator('[data-testid="roadmap-dependencies"]');
+    await expect(dependencyGraph).toBeVisible();
   });
 
   test('should show roadmap milestones', async ({ page }) => {
@@ -545,37 +492,34 @@ test.describe('Transformation Roadmap', () => {
   test('should add milestone to roadmap', async ({ page }) => {
     await page.goto('/governance/roadmap');
 
+    // Click add milestone button
     const addMilestoneBtn = page.locator('button:has-text("Add Milestone"), [data-testid="add-milestone-btn"]');
-    const hasButton = await addMilestoneBtn.count();
+    await addMilestoneBtn.waitFor({ state: 'visible', timeout: 10000 });
+    await addMilestoneBtn.click();
 
-    if (hasButton > 0) {
-      await addMilestoneBtn.click();
+    await page.locator('[data-testid="milestone-name"]').fill('Cloud Migration Complete');
+    await page.locator('[data-testid="milestone-date"]').fill('2026-06-30');
+    await page.locator('[data-testid="milestone-description"]').fill('All systems migrated to cloud');
 
-      await page.locator('[data-testid="milestone-name"]').fill('Cloud Migration Complete');
-      await page.locator('[data-testid="milestone-date"]').fill('2026-06-30');
-      await page.locator('[data-testid="milestone-description"]').fill('All systems migrated to cloud');
+    await page.locator('button:has-text("Add")').click();
 
-      await page.locator('button:has-text("Add")').click();
-
-      await expect(page.locator('text=Milestone added')).toBeVisible({ timeout: 5000 });
-    }
+    await expect(page.locator('text=Milestone added')).toBeVisible({ timeout: 5000 });
   });
 
   test('should filter roadmap by phase', async ({ page }) => {
     await page.goto('/governance/roadmap');
 
+    // Wait for and use phase filter
     const phaseFilter = page.locator('[data-testid="phase-filter"]');
-    const hasFilter = await phaseFilter.count();
+    await phaseFilter.waitFor({ state: 'visible', timeout: 5000 });
+    await phaseFilter.selectOption('Phase 1');
 
-    if (hasFilter > 0) {
-      await phaseFilter.selectOption('Phase 1');
+    // Wait for filter to apply
+    await page.waitForLoadState('networkidle');
 
-      await page.waitForTimeout(500);
-
-      // Should show only Phase 1 items
-      const phaseItems = page.locator('[data-testid="roadmap-item"][data-phase="1"]');
-      expect(await phaseItems.count()).toBeGreaterThanOrEqual(0);
-    }
+    // Should show only Phase 1 items
+    const phaseItems = page.locator('[data-testid="roadmap-item"][data-phase="1"]');
+    expect(await phaseItems.count()).toBeGreaterThanOrEqual(0);
   });
 });
 
@@ -610,38 +554,33 @@ test.describe('Strategic Themes', () => {
   test('should assign initiatives to themes', async ({ page }) => {
     await page.goto('/governance/themes');
 
+    // Wait for and click first theme
     const theme = page.locator('[data-testid="strategic-theme"]').first();
-    const count = await theme.count();
+    await theme.waitFor({ state: 'visible', timeout: 10000 });
+    await theme.click();
 
-    if (count > 0) {
-      await theme.click();
+    // Click assign initiative button
+    const assignInitiativeBtn = page.locator('button:has-text("Assign Initiative"), [data-testid="assign-initiative-btn"]');
+    await assignInitiativeBtn.waitFor({ state: 'visible', timeout: 5000 });
+    await assignInitiativeBtn.click();
 
-      const assignInitiativeBtn = page.locator('button:has-text("Assign Initiative"), [data-testid="assign-initiative-btn"]');
-      const hasButton = await assignInitiativeBtn.count();
+    await page.locator('[data-testid="initiative-select"]').selectOption({ index: 1 });
+    await page.locator('button:has-text("Assign")').click();
 
-      if (hasButton > 0) {
-        await assignInitiativeBtn.click();
-
-        await page.locator('[data-testid="initiative-select"]').selectOption({ index: 1 });
-        await page.locator('button:has-text("Assign")').click();
-
-        await expect(page.locator('text=Initiative assigned')).toBeVisible({ timeout: 5000 });
-      }
-    }
+    await expect(page.locator('text=Initiative assigned')).toBeVisible({ timeout: 5000 });
   });
 
   test('should show theme progress', async ({ page }) => {
     await page.goto('/governance/themes');
 
+    // Wait for and click first theme
     const theme = page.locator('[data-testid="strategic-theme"]').first();
-    const count = await theme.count();
+    await theme.waitFor({ state: 'visible', timeout: 10000 });
+    await theme.click();
 
-    if (count > 0) {
-      await theme.click();
-
-      const themeProgress = page.locator('[data-testid="theme-progress"], .progress-indicator');
-      await expect(themeProgress).toBeVisible();
-    }
+    // Should show theme progress
+    const themeProgress = page.locator('[data-testid="theme-progress"], .progress-indicator');
+    await expect(themeProgress).toBeVisible();
   });
 });
 
@@ -676,87 +615,76 @@ test.describe('Objectives and Key Results (OKRs)', () => {
   test('should add key results to objective', async ({ page }) => {
     await page.goto('/governance/objectives');
 
+    // Wait for and click first objective
     const objective = page.locator('[data-testid="objective-item"]').first();
-    const count = await objective.count();
+    await objective.waitFor({ state: 'visible', timeout: 10000 });
+    await objective.click();
 
-    if (count > 0) {
-      await objective.click();
+    await page.locator('button:has-text("Add Key Result"), [data-testid="add-key-result-btn"]').click();
 
-      await page.locator('button:has-text("Add Key Result"), [data-testid="add-key-result-btn"]').click();
+    await page.locator('[data-testid="key-result-title"]').fill('Refactor 10 legacy modules');
+    await page.locator('[data-testid="key-result-target"]').fill('10');
+    await page.locator('[data-testid="key-result-unit"]').selectOption('modules');
 
-      await page.locator('[data-testid="key-result-title"]').fill('Refactor 10 legacy modules');
-      await page.locator('[data-testid="key-result-target"]').fill('10');
-      await page.locator('[data-testid="key-result-unit"]').selectOption('modules');
+    await page.locator('button:has-text("Add")').click();
 
-      await page.locator('button:has-text("Add")').click();
-
-      await expect(page.locator('text=Key result added')).toBeVisible({ timeout: 5000 });
-    }
+    await expect(page.locator('text=Key result added')).toBeVisible({ timeout: 5000 });
   });
 
   test('should track objective progress', async ({ page }) => {
     await page.goto('/governance/objectives');
 
+    // Wait for and click first objective
     const objective = page.locator('[data-testid="objective-item"]').first();
-    const count = await objective.count();
+    await objective.waitFor({ state: 'visible', timeout: 10000 });
+    await objective.click();
 
-    if (count > 0) {
-      await objective.click();
+    // Should show objective progress
+    const objectiveProgress = page.locator('[data-testid="objective-progress"]');
+    await expect(objectiveProgress).toBeVisible();
 
-      const objectiveProgress = page.locator('[data-testid="objective-progress"]');
-      await expect(objectiveProgress).toBeVisible();
-
-      // Should show percentage based on key results
-      const progressText = await objectiveProgress.textContent();
-      expect(progressText).toMatch(/\d+%/);
-    }
+    // Should show percentage based on key results
+    const progressText = await objectiveProgress.textContent();
+    expect(progressText).toMatch(/\d+%/);
   });
 
   test('should update key result progress', async ({ page }) => {
     await page.goto('/governance/objectives');
 
+    // Wait for and click first objective
     const objective = page.locator('[data-testid="objective-item"]').first();
-    const count = await objective.count();
+    await objective.waitFor({ state: 'visible', timeout: 10000 });
+    await objective.click();
 
-    if (count > 0) {
-      await objective.click();
+    // Wait for and click first key result
+    const keyResult = page.locator('[data-testid="key-result-item"]').first();
+    await keyResult.waitFor({ state: 'visible', timeout: 5000 });
+    await keyResult.click();
 
-      const keyResult = page.locator('[data-testid="key-result-item"]').first();
-      const krCount = await keyResult.count();
+    await page.locator('[data-testid="key-result-current"]').fill('5');
 
-      if (krCount > 0) {
-        await keyResult.click();
+    await page.locator('button:has-text("Update Progress")').click();
 
-        await page.locator('[data-testid="key-result-current"]').fill('5');
-
-        await page.locator('button:has-text("Update Progress")').click();
-
-        await expect(page.locator('text=Progress updated')).toBeVisible({ timeout: 5000 });
-      }
-    }
+    await expect(page.locator('text=Progress updated')).toBeVisible({ timeout: 5000 });
   });
 
   test('should link objectives to initiatives', async ({ page }) => {
     await page.goto('/governance/objectives');
 
+    // Wait for and click first objective
     const objective = page.locator('[data-testid="objective-item"]').first();
-    const count = await objective.count();
+    await objective.waitFor({ state: 'visible', timeout: 10000 });
+    await objective.click();
 
-    if (count > 0) {
-      await objective.click();
+    // Click link initiative button
+    const linkBtn = page.locator('button:has-text("Link Initiative"), [data-testid="link-initiative-btn"]');
+    await linkBtn.waitFor({ state: 'visible', timeout: 5000 });
+    await linkBtn.click();
 
-      const linkBtn = page.locator('button:has-text("Link Initiative"), [data-testid="link-initiative-btn"]');
-      const hasButton = await linkBtn.count();
+    await page.locator('[data-testid="initiative-select"]').selectOption({ index: 1 });
+    await page.locator('button:has-text("Link")').click();
 
-      if (hasButton > 0) {
-        await linkBtn.click();
-
-        await page.locator('[data-testid="initiative-select"]').selectOption({ index: 1 });
-        await page.locator('button:has-text("Link")').click();
-
-        await expect(page.locator('text=Initiative linked')).toBeVisible({ timeout: 5000 });
-      }
-    }
+    await expect(page.locator('text=Initiative linked')).toBeVisible({ timeout: 5000 });
   });
 });
 
@@ -771,61 +699,51 @@ test.describe('Strategic Planning Analytics', () => {
   test('should show initiative portfolio overview', async ({ page }) => {
     await page.goto('/governance/analytics');
 
+    // Wait for and verify portfolio overview
     const portfolioOverview = page.locator('[data-testid="portfolio-overview"]');
-    const hasOverview = await portfolioOverview.count();
-
-    if (hasOverview > 0) {
-      await expect(portfolioOverview.first()).toBeVisible();
-    }
+    await portfolioOverview.waitFor({ state: 'visible', timeout: 10000 });
+    await expect(portfolioOverview.first()).toBeVisible();
   });
 
   test('should show budget utilization across initiatives', async ({ page }) => {
     await page.goto('/governance/analytics');
 
+    // Wait for and verify budget chart
     const budgetChart = page.locator('[data-testid="budget-utilization-chart"]');
-    const hasChart = await budgetChart.count();
-
-    if (hasChart > 0) {
-      await expect(budgetChart.first()).toBeVisible();
-    }
+    await budgetChart.waitFor({ state: 'visible', timeout: 10000 });
+    await expect(budgetChart.first()).toBeVisible();
   });
 
   test('should show initiative status distribution', async ({ page }) => {
     await page.goto('/governance/analytics');
 
+    // Wait for and verify status chart
     const statusChart = page.locator('[data-testid="initiative-status-chart"]');
-    const hasChart = await statusChart.count();
-
-    if (hasChart > 0) {
-      await expect(statusChart.first()).toBeVisible();
-    }
+    await statusChart.waitFor({ state: 'visible', timeout: 10000 });
+    await expect(statusChart.first()).toBeVisible();
   });
 
   test('should show roadmap progress timeline', async ({ page }) => {
     await page.goto('/governance/analytics');
 
+    // Wait for and verify timeline chart
     const timelineChart = page.locator('[data-testid="roadmap-timeline-chart"]');
-    const hasChart = await timelineChart.count();
-
-    if (hasChart > 0) {
-      await expect(timelineChart.first()).toBeVisible();
-    }
+    await timelineChart.waitFor({ state: 'visible', timeout: 10000 });
+    await expect(timelineChart.first()).toBeVisible();
   });
 
   test('should export strategic planning report', async ({ page }) => {
     await page.goto('/governance/analytics');
 
+    // Click export report button
     const exportBtn = page.locator('button:has-text("Export Report"), [data-testid="export-report-btn"]');
-    const hasButton = await exportBtn.count();
+    await exportBtn.waitFor({ state: 'visible', timeout: 10000 });
 
-    if (hasButton > 0) {
-      const downloadPromise = page.waitForEvent('download');
+    const downloadPromise = page.waitForEvent('download');
+    await exportBtn.click();
 
-      await exportBtn.click();
-
-      const download = await downloadPromise;
-      expect(download.suggestedFilename()).toMatch(/\.(pdf|xlsx)$/);
-    }
+    const download = await downloadPromise;
+    expect(download.suggestedFilename()).toMatch(/\.(pdf|xlsx)$/);
   });
 });
 
@@ -840,83 +758,68 @@ test.describe('Strategic Planning Collaboration', () => {
   test('should allow commenting on initiatives', async ({ page }) => {
     await page.goto('/governance/initiatives');
 
+    // Wait for and click first initiative
     const initiative = page.locator('[data-testid="initiative-item"]').first();
-    const count = await initiative.count();
+    await initiative.waitFor({ state: 'visible', timeout: 10000 });
+    await initiative.click();
 
-    if (count > 0) {
-      await initiative.click();
+    await page.locator('[data-testid="comment-input"]').fill('This initiative looks good. Let\'s ensure we have proper resource allocation.');
+    await page.locator('[data-testid="add-comment-btn"]').click();
 
-      await page.locator('[data-testid="comment-input"]').fill('This initiative looks good. Let\'s ensure we have proper resource allocation.');
-      await page.locator('[data-testid="add-comment-btn"]').click();
-
-      await expect(page.locator('text=Comment added')).toBeVisible({ timeout: 5000 });
-    }
+    await expect(page.locator('text=Comment added')).toBeVisible({ timeout: 5000 });
   });
 
   test('should assign initiative owners', async ({ page }) => {
     await page.goto('/governance/initiatives');
 
+    // Wait for and click first initiative
     const initiative = page.locator('[data-testid="initiative-item"]').first();
-    const count = await initiative.count();
+    await initiative.waitFor({ state: 'visible', timeout: 10000 });
+    await initiative.click();
 
-    if (count > 0) {
-      await initiative.click();
+    // Click assign owner button
+    const assignBtn = page.locator('button:has-text("Assign Owner"), [data-testid="assign-owner-btn"]');
+    await assignBtn.waitFor({ state: 'visible', timeout: 5000 });
+    await assignBtn.click();
 
-      const assignBtn = page.locator('button:has-text("Assign Owner"), [data-testid="assign-owner-btn"]');
-      const hasButton = await assignBtn.count();
+    await page.locator('[data-testid="owner-select"]').selectOption('architect@archzero.local');
+    await page.locator('button:has-text("Assign")').click();
 
-      if (hasButton > 0) {
-        await assignBtn.click();
-
-        await page.locator('[data-testid="owner-select"]').selectOption('architect@archzero.local');
-        await page.locator('button:has-text("Assign")').click();
-
-        await expect(page.locator('text=Owner assigned')).toBeVisible({ timeout: 5000 });
-      }
-    }
+    await expect(page.locator('text=Owner assigned')).toBeVisible({ timeout: 5000 });
   });
 
   test('should notify stakeholders of updates', async ({ page }) => {
     await page.goto('/governance/initiatives');
 
+    // Wait for and click first initiative
     const initiative = page.locator('[data-testid="initiative-item"]').first();
-    const count = await initiative.count();
+    await initiative.waitFor({ state: 'visible', timeout: 10000 });
+    await initiative.click();
 
-    if (count > 0) {
-      await initiative.click();
+    await page.locator('[data-testid="initiative-health"]').selectOption('At Risk');
+    await page.locator('button:has-text("Save")').click();
 
-      await page.locator('[data-testid="initiative-health"]').selectOption('At Risk');
-      await page.locator('button:has-text("Save")').click();
-
-      // Should show notification will be sent
-      const notificationMsg = page.locator('text=stakeholders notified, text=notifications sent');
-      const hasMsg = await notificationMsg.count();
-
-      if (hasMsg > 0) {
-        await expect(notificationMsg.first()).toBeVisible();
-      }
-    }
+    // Should show notification will be sent
+    const notificationMsg = page.locator('text=stakeholders notified, text=notifications sent');
+    await expect(notificationMsg.first()).toBeVisible();
   });
 
   test('should show initiative activity feed', async ({ page }) => {
     await page.goto('/governance/initiatives');
 
+    // Wait for and click first initiative
     const initiative = page.locator('[data-testid="initiative-item"]').first();
-    const count = await initiative.count();
+    await initiative.waitFor({ state: 'visible', timeout: 10000 });
+    await initiative.click();
 
-    if (count > 0) {
-      await initiative.click();
+    // Click activity tab
+    const activityTab = page.locator('[data-testid="activity-tab"], button:has-text("Activity")');
+    await activityTab.waitFor({ state: 'visible', timeout: 5000 });
+    await activityTab.click();
 
-      const activityTab = page.locator('[data-testid="activity-tab"], button:has-text("Activity")');
-      const hasTab = await activityTab.count();
-
-      if (hasTab > 0) {
-        await activityTab.click();
-
-        const activityFeed = page.locator('[data-testid="activity-feed"]');
-        await expect(activityFeed).toBeVisible();
-      }
-    }
+    // Should show activity feed
+    const activityFeed = page.locator('[data-testid="activity-feed"]');
+    await expect(activityFeed).toBeVisible();
   });
 });
 
@@ -931,65 +834,56 @@ test.describe('Strategic Planning Integration', () => {
   test('should link roadmap milestones to cards', async ({ page }) => {
     await page.goto('/governance/roadmap');
 
+    // Wait for and click first milestone
     const milestone = page.locator('[data-testid="roadmap-milestone"]').first();
-    const count = await milestone.count();
+    await milestone.waitFor({ state: 'visible', timeout: 10000 });
+    await milestone.click();
 
-    if (count > 0) {
-      await milestone.click();
+    // Click link cards button
+    const linkBtn = page.locator('button:has-text("Link Cards"), [data-testid="link-cards-btn"]');
+    await linkBtn.waitFor({ state: 'visible', timeout: 5000 });
+    await linkBtn.click();
 
-      const linkBtn = page.locator('button:has-text("Link Cards"), [data-testid="link-cards-btn"]');
-      const hasButton = await linkBtn.count();
+    await page.locator('[data-testid="card-select"]').selectOption({ index: 1 });
+    await page.locator('button:has-text("Link")').click();
 
-      if (hasButton > 0) {
-        await linkBtn.click();
-
-        await page.locator('[data-testid="card-select"]').selectOption({ index: 1 });
-        await page.locator('button:has-text("Link")').click();
-
-        await expect(page.locator('text=Cards linked')).toBeVisible({ timeout: 5000 });
-      }
-    }
+    await expect(page.locator('text=Cards linked')).toBeVisible({ timeout: 5000 });
   });
 
   test('should show initiative impact on card inventory', async ({ page }) => {
     await page.goto('/governance/initiatives');
 
+    // Wait for and click first initiative
     const initiative = page.locator('[data-testid="initiative-item"]').first();
-    const count = await initiative.count();
+    await initiative.waitFor({ state: 'visible', timeout: 10000 });
+    await initiative.click();
 
-    if (count > 0) {
-      await initiative.click();
+    // Click impact tab
+    const impactTab = page.locator('[data-testid="impact-tab"], button:has-text("Impact")');
+    await impactTab.waitFor({ state: 'visible', timeout: 5000 });
+    await impactTab.click();
 
-      const impactTab = page.locator('[data-testid="impact-tab"], button:has-text("Impact")');
-      const hasTab = await impactTab.count();
-
-      if (hasTab > 0) {
-        await impactTab.click();
-
-        const cardImpact = page.locator('[data-testid="card-impact"]');
-        await expect(cardImpact).toBeVisible();
-      }
-    }
+    // Should show card impact
+    const cardImpact = page.locator('[data-testid="card-impact"]');
+    await expect(cardImpact).toBeVisible();
   });
 
   test('should generate cross-workspace reports', async ({ page }) => {
     await page.goto('/governance/reports');
 
+    // Click cross-workspace report button
     const crossWorkspaceBtn = page.locator('button:has-text("Cross-Workspace Report"), [data-testid="cross-workspace-report-btn"]');
-    const hasButton = await crossWorkspaceBtn.count();
+    await crossWorkspaceBtn.waitFor({ state: 'visible', timeout: 10000 });
+    await crossWorkspaceBtn.click();
 
-    if (hasButton > 0) {
-      await crossWorkspaceBtn.click();
+    // Select workspaces to include
+    await page.locator('[data-testid="include-initiatives"]').check();
+    await page.locator('[data-testid="include-risks"]').check();
+    await page.locator('[data-testid="include-governance"]').check();
 
-      // Select workspaces to include
-      await page.locator('[data-testid="include-initiatives"]').check();
-      await page.locator('[data-testid="include-risks"]').check();
-      await page.locator('[data-testid="include-governance"]').check();
+    await page.locator('button:has-text("Generate")').click();
 
-      await page.locator('button:has-text("Generate")').click();
-
-      const reportPreview = page.locator('[data-testid="report-preview"]');
-      await expect(reportPreview).toBeVisible({ timeout: 10000 });
-    }
+    const reportPreview = page.locator('[data-testid="report-preview"]');
+    await expect(reportPreview).toBeVisible({ timeout: 10000 });
   });
 });

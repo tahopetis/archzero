@@ -12,19 +12,19 @@ test.beforeAll(async ({ request }) => {
   }
 });
 
-test.describe('Authentication Flow', () => {
+test.describe('@smoke @critical Authentication Flow', () => {
   let loginPage: LoginPage;
 
   test.beforeEach(async ({ page }) => {
     loginPage = new LoginPage(page);
   });
 
-  test('should display login form', async ({ page }) => {
+  test('@smoke should display login form', async ({ page }) => {
     await loginPage.goto();
     await loginPage.verifyLoginFormVisible();
   });
 
-  test('should login with valid credentials', async ({ page }) => {
+  test('@critical should login with valid credentials', async ({ page }) => {
     await loginPage.login(
       TEST_USERS.ADMIN.email,
       TEST_USERS.ADMIN.password
@@ -38,7 +38,7 @@ test.describe('Authentication Flow', () => {
     await dashboard.verifyDashboardLoaded();
   });
 
-  test('should show error with invalid credentials', async ({ page }) => {
+  test('@critical should show error with invalid credentials', async ({ page }) => {
     await loginPage.goto();
     await loginPage.emailInput.fill('invalid@test.com');
     await loginPage.passwordInput.fill('wrongpassword');

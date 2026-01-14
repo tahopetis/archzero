@@ -135,7 +135,7 @@ export function StandardCard({ standard, onEdit }: StandardCardProps) {
   };
 
   return (
-    <Card variant="bordered" className="group hover:shadow-lg transition-all">
+    <Card variant="bordered" className="group hover:shadow-lg transition-all" data-testid={`standard-item-${standard.id}`}>
       <div className="flex items-start justify-between mb-3">
         <div className="flex-1">
           <h3 className="text-lg font-bold text-slate-900 mb-1">{standard.name}</h3>
@@ -184,7 +184,7 @@ export function StandardsList({ category, status, onEdit }: StandardsListProps) 
   }
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4" data-testid="standards-list">
       {standards?.data.map((standard) => (
         <StandardCard key={standard.id} standard={standard} onEdit={onEdit} />
       ))}

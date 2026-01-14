@@ -3,7 +3,7 @@
  */
 
 import { Link, useLocation } from 'react-router-dom';
-import { ChevronDown, LayoutDashboard, Layers, Brain, Scale, Menu, X } from 'lucide-react';
+import { ChevronDown, LayoutDashboard, Layers, Brain, Scale, Menu, X, BarChart3 } from 'lucide-react';
 import { useState } from 'react';
 
 export function Navigation() {
@@ -24,6 +24,7 @@ export function Navigation() {
             ? 'bg-indigo-50 text-indigo-700 font-medium'
             : 'text-slate-600 hover:bg-slate-50'
         }`}
+        data-testid="nav-dashboard"
       >
         <LayoutDashboard className="w-5 h-5" />
         Dashboard
@@ -36,6 +37,7 @@ export function Navigation() {
             ? 'bg-indigo-50 text-indigo-700 font-medium'
             : 'text-slate-600 hover:bg-slate-50'
         }`}
+        data-testid="nav-cards"
       >
         <Layers className="w-5 h-5" />
         Cards
@@ -48,9 +50,23 @@ export function Navigation() {
             ? 'bg-indigo-50 text-indigo-700 font-medium'
             : 'text-slate-600 hover:bg-slate-50'
         }`}
+        data-testid="nav-intelligence"
       >
         <Brain className="w-5 h-5" />
         Intelligence
+      </Link>
+
+      <Link
+        to="/reports"
+        className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-colors ${
+          isActive('/reports')
+            ? 'bg-indigo-50 text-indigo-700 font-medium'
+            : 'text-slate-600 hover:bg-slate-50'
+        }`}
+        data-testid="nav-reports"
+      >
+        <BarChart3 className="w-5 h-5" />
+        Reports
       </Link>
 
       {/* Governance Dropdown */}
@@ -62,6 +78,7 @@ export function Navigation() {
               ? 'bg-indigo-50 text-indigo-700 font-medium'
               : 'text-slate-600 hover:bg-slate-50'
           }`}
+          data-testid="nav-governance-toggle"
         >
           <Scale className="w-5 h-5" />
           Governance
@@ -73,50 +90,72 @@ export function Navigation() {
             <Link
               to="/governance/principles"
               className="block px-4 py-2 text-sm text-slate-600 hover:text-indigo-700 hover:bg-indigo-50 rounded-lg transition-colors"
+              data-testid="nav-principles"
             >
               Principles
             </Link>
             <Link
               to="/governance/standards"
               className="block px-4 py-2 text-sm text-slate-600 hover:text-indigo-700 hover:bg-indigo-50 rounded-lg transition-colors"
+              data-testid="nav-standards"
             >
               Technology Standards
             </Link>
             <Link
               to="/governance/policies"
               className="block px-4 py-2 text-sm text-slate-600 hover:text-indigo-700 hover:bg-indigo-50 rounded-lg transition-colors"
+              data-testid="nav-policies"
             >
               Policies
             </Link>
             <Link
               to="/governance/exceptions"
               className="block px-4 py-2 text-sm text-slate-600 hover:text-indigo-700 hover:bg-indigo-50 rounded-lg transition-colors"
+              data-testid="nav-exceptions"
             >
               Exceptions
             </Link>
             <Link
               to="/governance/initiatives"
               className="block px-4 py-2 text-sm text-slate-600 hover:text-indigo-700 hover:bg-indigo-50 rounded-lg transition-colors"
+              data-testid="nav-initiatives"
             >
               Initiatives
             </Link>
             <Link
               to="/governance/risks"
               className="block px-4 py-2 text-sm text-slate-600 hover:text-indigo-700 hover:bg-indigo-50 rounded-lg transition-colors"
+              data-testid="nav-risks"
             >
               Risks
             </Link>
             <Link
               to="/governance/compliance"
               className="block px-4 py-2 text-sm text-slate-600 hover:text-indigo-700 hover:bg-indigo-50 rounded-lg transition-colors"
+              data-testid="nav-compliance"
             >
               Compliance
             </Link>
             <Link
               to="/governance/arb"
               className="block px-4 py-2 text-sm text-slate-600 hover:text-indigo-700 hover:bg-indigo-50 rounded-lg transition-colors"
+              data-testid="nav-arb"
             >
               ARB Portal
+            </Link>
+            <Link
+              to="/governance/themes"
+              className="block px-4 py-2 text-sm text-slate-600 hover:text-indigo-700 hover:bg-indigo-50 rounded-lg transition-colors"
+              data-testid="nav-themes"
+            >
+              Strategic Themes
+            </Link>
+            <Link
+              to="/governance/objectives"
+              className="block px-4 py-2 text-sm text-slate-600 hover:text-indigo-700 hover:bg-indigo-50 rounded-lg transition-colors"
+              data-testid="nav-objectives"
+            >
+              Objectives & OKRs
             </Link>
           </div>
         )}
@@ -130,7 +169,7 @@ export function Navigation() {
         <div className="flex justify-between h-16">
           {/* Logo */}
           <div className="flex items-center">
-            <Link to="/cards" className="flex items-center gap-2">
+            <Link to="/cards" className="flex items-center gap-2" data-testid="nav-logo">
               <div className="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center">
                 <span className="text-white font-bold text-sm">AZ</span>
               </div>
@@ -139,7 +178,7 @@ export function Navigation() {
           </div>
 
           {/* Desktop Navigation */}
-          <div className="hidden md:flex items-center space-x-2">
+          <div className="hidden md:flex items-center space-x-2" data-testid="desktop-nav">
             <NavItems />
           </div>
 
@@ -148,6 +187,7 @@ export function Navigation() {
             <button
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
               className="p-2 rounded-md text-slate-600 hover:bg-slate-50"
+              data-testid="mobile-menu-toggle"
             >
               {isMobileMenuOpen ? (
                 <X className="w-6 h-6" />
@@ -161,7 +201,7 @@ export function Navigation() {
 
       {/* Mobile Navigation */}
       {isMobileMenuOpen && (
-        <div className="md:hidden border-t border-slate-200">
+        <div className="md:hidden border-t border-slate-200" data-testid="mobile-nav">
           <div className="px-4 py-4 space-y-2">
             <NavItems />
           </div>

@@ -96,8 +96,9 @@ export function CardDetail() {
   const phaseColor = lifecyclePhaseColors[card.lifecyclePhase] || 'bg-gray-100 text-gray-600';
 
   return (
-    <div>
+    <div data-testid="card-detail">
       <button
+        data-testid="card-detail-back-button"
         onClick={() => navigate('/cards')}
         className="mb-4 flex items-center text-sm text-gray-600 hover:text-gray-900"
       >
@@ -110,21 +111,23 @@ export function CardDetail() {
       <div className="bg-white rounded-lg shadow-md p-6 border border-gray-200">
         <div className="flex items-start justify-between mb-4">
           <div className="flex-1">
-            <h1 className="text-2xl font-bold text-gray-900 mb-3">{card.name}</h1>
+            <h1 className="text-2xl font-bold text-gray-900 mb-3" data-testid="card-name">{card.name}</h1>
             <div className="flex items-center gap-3">
               <button
+                data-testid="card-detail-edit-button"
                 onClick={() => navigate(`/cards/${card.id}/edit`)}
                 className="px-3 py-1 bg-indigo-600 text-white text-sm rounded-md hover:bg-indigo-700"
               >
                 Edit
               </button>
               <button
+                data-testid="card-detail-intelligence-button"
                 onClick={() => navigate(`/cards/${card.id}/intelligence`)}
                 className="px-3 py-1 bg-gradient-to-r from-amber-500 to-amber-400 text-white text-sm rounded-md hover:shadow-lg hover:shadow-amber-500/20 font-medium"
               >
                 Intelligence
               </button>
-              <span className={`px-3 py-1 rounded-md text-sm font-medium ${typeColor}`}>
+              <span className={`px-3 py-1 rounded-md text-sm font-medium ${typeColor}`} data-testid="card-type">
                 {card.type}
               </span>
               <span className={`px-3 py-1 rounded-md text-sm font-medium ${phaseColor}`}>
@@ -154,7 +157,7 @@ export function CardDetail() {
             <h2 className="text-sm font-medium text-gray-500 uppercase tracking-wide mb-2">
               Description
             </h2>
-            <p className="text-gray-700">{card.description}</p>
+            <p className="text-gray-700" data-testid="card-description">{card.description}</p>
           </div>
         )}
 

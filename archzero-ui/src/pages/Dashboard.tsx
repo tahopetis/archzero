@@ -31,19 +31,19 @@ export function Dashboard() {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <div className="bg-white rounded-lg shadow p-6">
+          <div className="bg-white rounded-lg shadow p-6" data-testid="widget-portfolio-health">
             <h3 className="text-lg font-medium text-gray-900 mb-2">Cards</h3>
-            <p className="text-3xl font-bold text-blue-600">0</p>
+            <p className="text-3xl font-bold text-blue-600" data-testid="health-score">0</p>
             <p className="text-sm text-gray-600 mt-1">Total entities</p>
           </div>
 
-          <div className="bg-white rounded-lg shadow p-6">
+          <div className="bg-white rounded-lg shadow p-6" data-testid="widget-data-quality">
             <h3 className="text-lg font-medium text-gray-900 mb-2">Applications</h3>
-            <p className="text-3xl font-bold text-green-600">0</p>
+            <p className="text-3xl font-bold text-green-600" data-testid="quality-score">0</p>
             <p className="text-sm text-gray-600 mt-1">Application portfolio</p>
           </div>
 
-          <div className="bg-white rounded-lg shadow p-6">
+          <div className="bg-white rounded-lg shadow p-6" data-testid="widget-criticality-watch">
             <h3 className="text-lg font-medium text-gray-900 mb-2">Relationships</h3>
             <p className="text-3xl font-bold text-purple-600">0</p>
             <p className="text-sm text-gray-600 mt-1">Dependencies</p>

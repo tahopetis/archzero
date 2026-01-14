@@ -139,8 +139,6 @@ const governanceQueryKeys = {
   arbSubmission: (id: string) => [...governanceQueryKeys.allARBSubmissions(), id] as const,
 };
 
-const queryClient = useQueryClient();
-
 // ============================================================================
 // ARCHITECTURE PRINCIPLES HOOKS
 // ============================================================================
@@ -166,6 +164,7 @@ export const usePrinciple = (id: string, options?: any):
 
 export const useCreatePrinciple = ():
   UseMutationResult<ArchitecturePrinciple, Error, CreatePrincipleRequest> => {
+  const queryClient = useQueryClient();
   return useMutation({
     mutationFn: principlesApi.create,
     onSuccess: () => {
@@ -176,6 +175,7 @@ export const useCreatePrinciple = ():
 
 export const useUpdatePrinciple = ():
   UseMutationResult<ArchitecturePrinciple, Error, { id: string; data: UpdatePrincipleRequest }> => {
+  const queryClient = useQueryClient();
   return useMutation({
     mutationFn: ({ id, data }) => principlesApi.update(id, data),
     onSuccess: () => {
@@ -186,6 +186,7 @@ export const useUpdatePrinciple = ():
 
 export const useDeletePrinciple = ():
   UseMutationResult<void, Error, string> => {
+  const queryClient = useQueryClient();
   return useMutation({
     mutationFn: principlesApi.delete,
     onSuccess: () => {
@@ -229,6 +230,7 @@ export const useStandard = (id: string, options?: any):
 
 export const useCreateStandard = ():
   UseMutationResult<TechnologyStandard, Error, CreateStandardRequest> => {
+  const queryClient = useQueryClient();
   return useMutation({
     mutationFn: standardsApi.create,
     onSuccess: () => {
@@ -239,6 +241,7 @@ export const useCreateStandard = ():
 
 export const useUpdateStandard = ():
   UseMutationResult<TechnologyStandard, Error, { id: string; data: UpdateStandardRequest }> => {
+  const queryClient = useQueryClient();
   return useMutation({
     mutationFn: ({ id, data }) => standardsApi.update(id, data),
     onSuccess: () => {
@@ -249,6 +252,7 @@ export const useUpdateStandard = ():
 
 export const useDeleteStandard = ():
   UseMutationResult<void, Error, string> => {
+  const queryClient = useQueryClient();
   return useMutation({
     mutationFn: standardsApi.delete,
     onSuccess: () => {
@@ -300,6 +304,7 @@ export const usePolicy = (id: string, options?: any):
 
 export const useCreatePolicy = ():
   UseMutationResult<ArchitecturePolicy, Error, CreatePolicyRequest> => {
+  const queryClient = useQueryClient();
   return useMutation({
     mutationFn: policiesApi.create,
     onSuccess: () => {
@@ -310,6 +315,7 @@ export const useCreatePolicy = ():
 
 export const useUpdatePolicy = ():
   UseMutationResult<ArchitecturePolicy, Error, { id: string; data: UpdatePolicyRequest }> => {
+  const queryClient = useQueryClient();
   return useMutation({
     mutationFn: ({ id, data }) => policiesApi.update(id, data),
     onSuccess: () => {
@@ -320,6 +326,7 @@ export const useUpdatePolicy = ():
 
 export const useDeletePolicy = ():
   UseMutationResult<void, Error, string> => {
+  const queryClient = useQueryClient();
   return useMutation({
     mutationFn: policiesApi.delete,
     onSuccess: () => {
@@ -339,6 +346,7 @@ export const usePolicyComplianceCheck = (id: string, cardIds: string[]):
 
 export const useValidatePolicy = (id: string, options?: any):
   UseMutationResult<ValidatePolicyResponse, Error, ValidatePolicyRequest> => {
+  const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (data) => policiesApi.validate(id, data),
     onSuccess: () => {
@@ -381,6 +389,7 @@ export const useException = (id: string, options?: any):
 
 export const useCreateException = ():
   UseMutationResult<Exception, Error, CreateExceptionRequest> => {
+  const queryClient = useQueryClient();
   return useMutation({
     mutationFn: exceptionsApi.create,
     onSuccess: () => {
@@ -391,6 +400,7 @@ export const useCreateException = ():
 
 export const useUpdateException = ():
   UseMutationResult<Exception, Error, { id: string; data: UpdateExceptionRequest }> => {
+  const queryClient = useQueryClient();
   return useMutation({
     mutationFn: ({ id, data }) => exceptionsApi.update(id, data),
     onSuccess: () => {
@@ -401,6 +411,7 @@ export const useUpdateException = ():
 
 export const useApproveException = ():
   UseMutationResult<Exception, Error, { id: string; data?: ApproveExceptionRequest }> => {
+  const queryClient = useQueryClient();
   return useMutation({
     mutationFn: ({ id, data }) => exceptionsApi.approve(id, data),
     onSuccess: () => {
@@ -411,6 +422,7 @@ export const useApproveException = ():
 
 export const useRejectException = ():
   UseMutationResult<Exception, Error, { id: string; data: RejectExceptionRequest }> => {
+  const queryClient = useQueryClient();
   return useMutation({
     mutationFn: ({ id, data }) => exceptionsApi.reject(id, data),
     onSuccess: () => {
@@ -430,6 +442,7 @@ export const useExpiringExceptions = (options?: any):
 
 export const useDeleteException = ():
   UseMutationResult<void, Error, string> => {
+  const queryClient = useQueryClient();
   return useMutation({
     mutationFn: exceptionsApi.delete,
     onSuccess: () => {
@@ -463,6 +476,7 @@ export const useInitiative = (id: string, options?: any):
 
 export const useCreateInitiative = ():
   UseMutationResult<Initiative, Error, CreateInitiativeRequest> => {
+  const queryClient = useQueryClient();
   return useMutation({
     mutationFn: initiativesApi.create,
     onSuccess: () => {
@@ -473,6 +487,7 @@ export const useCreateInitiative = ():
 
 export const useUpdateInitiative = ():
   UseMutationResult<Initiative, Error, { id: string; data: UpdateInitiativeRequest }> => {
+  const queryClient = useQueryClient();
   return useMutation({
     mutationFn: ({ id, data }) => initiativesApi.update(id, data),
     onSuccess: () => {
@@ -483,6 +498,7 @@ export const useUpdateInitiative = ():
 
 export const useDeleteInitiative = ():
   UseMutationResult<void, Error, string> => {
+  const queryClient = useQueryClient();
   return useMutation({
     mutationFn: initiativesApi.delete,
     onSuccess: () => {
@@ -503,6 +519,7 @@ export const useInitiativeImpactMap = (id: string, options?: any):
 
 export const useLinkCards = (id: string, options?: any):
   UseMutationResult<CardLinkResponse, Error, CardLinkRequest> => {
+  const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (data) => initiativesApi.linkCards(id, data),
     onSuccess: () => {
@@ -536,6 +553,7 @@ export const useRisk = (id: string, options?: any):
 
 export const useCreateRisk = ():
   UseMutationResult<Risk, Error, CreateRiskRequest> => {
+  const queryClient = useQueryClient();
   return useMutation({
     mutationFn: risksApi.create,
     onSuccess: () => {
@@ -546,6 +564,7 @@ export const useCreateRisk = ():
 
 export const useUpdateRisk = ():
   UseMutationResult<Risk, Error, { id: string; data: UpdateRiskRequest }> => {
+  const queryClient = useQueryClient();
   return useMutation({
     mutationFn: ({ id, data }) => risksApi.update(id, data),
     onSuccess: () => {
@@ -556,6 +575,7 @@ export const useUpdateRisk = ():
 
 export const useDeleteRisk = ():
   UseMutationResult<void, Error, string> => {
+  const queryClient = useQueryClient();
   return useMutation({
     mutationFn: risksApi.delete,
     onSuccess: () => {
@@ -607,6 +627,7 @@ export const useComplianceRequirement = (id: string, options?: any):
 
 export const useCreateComplianceRequirement = ():
   UseMutationResult<ComplianceRequirement, Error, CreateComplianceRequirementRequest> => {
+  const queryClient = useQueryClient();
   return useMutation({
     mutationFn: complianceApi.create,
     onSuccess: () => {
@@ -617,6 +638,7 @@ export const useCreateComplianceRequirement = ():
 
 export const useUpdateComplianceRequirement = ():
   UseMutationResult<ComplianceRequirement, Error, { id: string; data: UpdateComplianceRequirementRequest }> => {
+  const queryClient = useQueryClient();
   return useMutation({
     mutationFn: ({ id, data }) => complianceApi.update(id, data),
     onSuccess: () => {
@@ -627,6 +649,7 @@ export const useUpdateComplianceRequirement = ():
 
 export const useDeleteComplianceRequirement = ():
   UseMutationResult<void, Error, string> => {
+  const queryClient = useQueryClient();
   return useMutation({
     mutationFn: complianceApi.delete,
     onSuccess: () => {
@@ -637,6 +660,7 @@ export const useDeleteComplianceRequirement = ():
 
 export const useAssessCompliance = (id: string, options?: any):
   UseMutationResult<ComplianceAssessment, Error, AssessComplianceRequest> => {
+  const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (data) => complianceApi.assessCompliance(id, data),
     onSuccess: () => {
@@ -683,6 +707,7 @@ export const useARBMeeting = (id: string, options?: any):
 
 export const useCreateARBMeeting = ():
   UseMutationResult<ARBMeeting, Error, CreateARBMeetingRequest> => {
+  const queryClient = useQueryClient();
   return useMutation({
     mutationFn: arbApi.createMeeting,
     onSuccess: () => {
@@ -693,6 +718,7 @@ export const useCreateARBMeeting = ():
 
 export const useUpdateARBMeeting = ():
   UseMutationResult<ARBMeeting, Error, { id: string; data: UpdateARBMeetingRequest }> => {
+  const queryClient = useQueryClient();
   return useMutation({
     mutationFn: ({ id, data }) => arbApi.updateMeeting(id, data),
     onSuccess: () => {
@@ -703,6 +729,7 @@ export const useUpdateARBMeeting = ():
 
 export const useDeleteARBMeeting = ():
   UseMutationResult<void, Error, string> => {
+  const queryClient = useQueryClient();
   return useMutation({
     mutationFn: arbApi.deleteMeeting,
     onSuccess: () => {
@@ -742,6 +769,7 @@ export const useARBSubmission = (id: string, options?: any):
 
 export const useCreateARBSubmission = ():
   UseMutationResult<ARBSubmission, Error, CreateARBSubmissionRequest> => {
+  const queryClient = useQueryClient();
   return useMutation({
     mutationFn: arbApi.createSubmission,
     onSuccess: () => {
@@ -752,6 +780,7 @@ export const useCreateARBSubmission = ():
 
 export const useUpdateARBSubmission = ():
   UseMutationResult<ARBSubmission, Error, { id: string; data: UpdateARBSubmissionRequest }> => {
+  const queryClient = useQueryClient();
   return useMutation({
     mutationFn: ({ id, data }) => arbApi.updateSubmission(id, data),
     onSuccess: () => {
@@ -762,6 +791,7 @@ export const useUpdateARBSubmission = ():
 
 export const useDeleteARBSubmission = ():
   UseMutationResult<void, Error, string> => {
+  const queryClient = useQueryClient();
   return useMutation({
     mutationFn: arbApi.deleteSubmission,
     onSuccess: () => {
@@ -772,6 +802,7 @@ export const useDeleteARBSubmission = ():
 
 export const useRecordARBDecision = ():
   UseMutationResult<ARBDecision, Error, { id: string; data: CreateARBDecisionRequest }> => {
+  const queryClient = useQueryClient();
   return useMutation({
     mutationFn: ({ id, data }) => arbApi.recordDecision(id, data),
     onSuccess: () => {
@@ -803,5 +834,4 @@ export const useARBStatistics = (options?: any):
 
 export {
   governanceQueryKeys,
-  queryClient,
 };

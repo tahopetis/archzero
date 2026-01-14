@@ -64,7 +64,7 @@ export function RiskForm({ risk, onSuccess, onCancel }: RiskFormProps) {
   };
 
   return (
-    <div className="bg-white rounded-lg shadow p-6">
+    <div className="bg-white rounded-lg shadow p-6" data-testid="risk-form">
       <h2 className="text-xl font-bold text-slate-900 mb-4">
         {risk ? 'Edit Risk' : 'New Risk'}
       </h2>
@@ -81,6 +81,7 @@ export function RiskForm({ risk, onSuccess, onCancel }: RiskFormProps) {
             className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
             placeholder="e.g., Database Single Point of Failure"
             required
+            data-testid="risk-name-input"
           />
         </div>
 
@@ -94,6 +95,7 @@ export function RiskForm({ risk, onSuccess, onCancel }: RiskFormProps) {
               onChange={(e) => setRiskType(e.target.value as RiskType)}
               className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
               required
+              data-testid="risk-type-select"
             >
               {Object.values(RiskType).map((t) => (
                 <option key={t} value={t}>{t}</option>
@@ -110,6 +112,7 @@ export function RiskForm({ risk, onSuccess, onCancel }: RiskFormProps) {
               onChange={(e) => setLikelihood(e.target.value)}
               className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
               required
+              data-testid="risk-likelihood-select"
             >
               {[1, 2, 3, 4, 5].map((v) => (
                 <option key={v} value={v}>{v}</option>
@@ -126,6 +129,7 @@ export function RiskForm({ risk, onSuccess, onCancel }: RiskFormProps) {
               onChange={(e) => setImpact(e.target.value)}
               className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
               required
+              data-testid="risk-impact-select"
             >
               {[1, 2, 3, 4, 5].map((v) => (
                 <option key={v} value={v}>{v}</option>
@@ -164,6 +168,7 @@ export function RiskForm({ risk, onSuccess, onCancel }: RiskFormProps) {
               onChange={(e) => setStatus(e.target.value as RiskStatus)}
               className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
               required
+              data-testid="risk-status-select"
             >
               {Object.values(RiskStatus).map((s) => (
                 <option key={s} value={s}>{s}</option>
@@ -181,6 +186,7 @@ export function RiskForm({ risk, onSuccess, onCancel }: RiskFormProps) {
               onChange={(e) => setOwner(e.target.value)}
               className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
               placeholder="Risk owner name"
+              data-testid="risk-owner-input"
             />
           </div>
         </div>
@@ -195,6 +201,7 @@ export function RiskForm({ risk, onSuccess, onCancel }: RiskFormProps) {
             rows={4}
             className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
             placeholder="Describe the mitigation strategy..."
+            data-testid="risk-mitigation-input"
           />
         </div>
 
@@ -207,6 +214,7 @@ export function RiskForm({ risk, onSuccess, onCancel }: RiskFormProps) {
             value={targetClosureDate}
             onChange={(e) => setTargetClosureDate(e.target.value)}
             className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+            data-testid="risk-target-closure-date-input"
           />
         </div>
 
@@ -215,6 +223,7 @@ export function RiskForm({ risk, onSuccess, onCancel }: RiskFormProps) {
             type="submit"
             disabled={createMutation.isPending || updateMutation.isPending}
             className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors font-medium disabled:opacity-50"
+            data-testid="risk-save-button"
           >
             {createMutation.isPending || updateMutation.isPending
               ? 'Saving...'
@@ -226,6 +235,7 @@ export function RiskForm({ risk, onSuccess, onCancel }: RiskFormProps) {
             type="button"
             onClick={onCancel}
             className="px-4 py-2 bg-slate-100 text-slate-700 rounded-lg hover:bg-slate-200 transition-colors"
+            data-testid="risk-cancel-button"
           >
             Cancel
           </button>

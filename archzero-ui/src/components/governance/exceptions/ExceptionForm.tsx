@@ -50,7 +50,7 @@ export function ExceptionForm({ exception, onSuccess, onCancel }: ExceptionFormP
   };
 
   return (
-    <div className="bg-white rounded-lg shadow p-6">
+    <div className="bg-white rounded-lg shadow p-6" data-testid="exception-form">
       <h2 className="text-xl font-bold text-slate-900 mb-4">
         {exception ? 'Edit Exception' : 'Request Exception'}
       </h2>
@@ -68,6 +68,7 @@ export function ExceptionForm({ exception, onSuccess, onCancel }: ExceptionFormP
               className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
               placeholder="e.g., Legacy Database Exception"
               required
+              data-testid="exception-name-input"
             />
           </div>
         )}
@@ -83,6 +84,7 @@ export function ExceptionForm({ exception, onSuccess, onCancel }: ExceptionFormP
             className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
             placeholder="Explain why this exception is needed..."
             required
+            data-testid="exception-justification-input"
           />
         </div>
 
@@ -95,6 +97,7 @@ export function ExceptionForm({ exception, onSuccess, onCancel }: ExceptionFormP
             onChange={(e) => setDuration(e.target.value as ExceptionDuration)}
             className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
             required
+            data-testid="exception-type-select"
           >
             {Object.values(ExceptionDuration).map((d) => (
               <option key={d} value={d}>{d.replace('Days', ' Days')}</option>
@@ -112,6 +115,7 @@ export function ExceptionForm({ exception, onSuccess, onCancel }: ExceptionFormP
             rows={4}
             className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
             placeholder="Enter one compensating control per line..."
+            data-testid="exception-controls-input"
           />
           <p className="text-xs text-slate-500 mt-1">Alternative measures to mitigate risk</p>
         </div>
@@ -121,6 +125,7 @@ export function ExceptionForm({ exception, onSuccess, onCancel }: ExceptionFormP
             type="submit"
             disabled={createMutation.isPending || updateMutation.isPending}
             className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors font-medium disabled:opacity-50"
+            data-testid="exception-save-button"
           >
             {createMutation.isPending || updateMutation.isPending
               ? 'Saving...'
@@ -132,6 +137,7 @@ export function ExceptionForm({ exception, onSuccess, onCancel }: ExceptionFormP
             type="button"
             onClick={onCancel}
             className="px-4 py-2 bg-slate-100 text-slate-700 rounded-lg hover:bg-slate-200 transition-colors"
+            data-testid="exception-cancel-button"
           >
             Cancel
           </button>

@@ -13,7 +13,7 @@ use utoipa::OpenApi;
 use archzero_api::{
     config::Settings,
     state::AppState,
-    handlers::{auth, cards, health, relationships, bia, migration, tco, policies, principles, standards, exceptions, initiatives, risks, compliance, arb, graph, import, bulk, csrf, cache},
+    handlers::{auth, cards, health, relationships, bia, migration, tco, policies, principles, standards, exceptions, initiatives, risks, compliance, arb, graph, import, bulk, csrf, cache, test_reset},
     services::{CardService, AuthService, RelationshipService, Neo4jService, SagaOrchestrator, BIAService, TopologyService, MigrationService, TCOService, CsrfService, RateLimitService, CacheService},
     middleware::{security_headers, security_logging, rate_limit_middleware},
     models::card::{Card, CardType, LifecyclePhase, CreateCardRequest, UpdateCardRequest, CardSearchParams},
@@ -421,6 +421,8 @@ async fn main() -> anyhow::Result<()> {
                 .route("/flush", post(cache::flush_cache))
                 .route("/warm", post(cache::warm_cache)),
         )
+        // Test-only endpoints (only available in development)
+        .route("/api/v1/test/reset-auth-state", post(test_reset::reset_auth_state))
         .nest(
             "/api/v1/auth",
             Router::new()

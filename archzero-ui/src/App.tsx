@@ -3,6 +3,9 @@ import { Login } from './pages/Login';
 import { Dashboard } from './pages/Dashboard';
 import { CardsPage } from './pages/Cards';
 import { IntelligencePage } from './pages/Intelligence';
+import { SearchPage } from './pages/SearchPage';
+import { ProfilePage } from './pages/ProfilePage';
+import { ReportsDashboard } from './pages/ReportsDashboard';
 import { CardDetail } from './components/cards/CardDetail';
 import { CardForm } from './components/cards/CardForm';
 import { ProtectedRoute } from './components/ProtectedRoute';
@@ -17,7 +20,29 @@ import {
   RisksPage,
   CompliancePage,
   ARBPage,
+  ThemesPage,
+  ObjectivesPage,
+  TargetStatePage,
+  BaselinePage,
+  GapAnalysisPage,
+  RoadmapPage,
+  RiskAssessmentPage,
+  RiskMitigationPage,
+  ComplianceEvidencePage,
+  ComplianceReportsPage,
 } from './pages/governance';
+// Import/Export Pages
+import { BulkImportPage } from './pages/import/BulkImportPage';
+import { ExportPage } from './pages/export/ExportPage';
+// Relationship Pages
+import { RelationshipExplorerPage } from './pages/RelationshipExplorerPage';
+import { RelationshipMatrixPage } from './pages/RelationshipMatrixPage';
+// Admin Pages
+import {
+  UsersPage,
+  RolesPage,
+  PermissionsPage,
+} from './pages/admin';
 
 function App() {
   return (
@@ -32,6 +57,18 @@ function App() {
             <ProtectedRoute>
               <Layout>
                 <Dashboard />
+              </Layout>
+            </ProtectedRoute>
+          }
+        />
+
+        {/* Search Route */}
+        <Route
+          path="/search"
+          element={
+            <ProtectedRoute>
+              <Layout>
+                <SearchPage />
               </Layout>
             </ProtectedRoute>
           }
@@ -186,6 +223,28 @@ function App() {
           }
         />
 
+        {/* Risk Advanced Pages */}
+        <Route
+          path="/governance/risks/:id/assessment"
+          element={
+            <ProtectedRoute>
+              <Layout>
+                <RiskAssessmentPage />
+              </Layout>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/governance/risks/:id/mitigation"
+          element={
+            <ProtectedRoute>
+              <Layout>
+                <RiskMitigationPage />
+              </Layout>
+            </ProtectedRoute>
+          }
+        />
+
         <Route
           path="/governance/compliance"
           element={
@@ -207,6 +266,28 @@ function App() {
           }
         />
 
+        {/* Compliance Advanced Pages */}
+        <Route
+          path="/governance/compliance/:id/evidence"
+          element={
+            <ProtectedRoute>
+              <Layout>
+                <ComplianceEvidencePage />
+              </Layout>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/governance/compliance/reports"
+          element={
+            <ProtectedRoute>
+              <Layout>
+                <ComplianceReportsPage />
+              </Layout>
+            </ProtectedRoute>
+          }
+        />
+
         <Route
           path="/governance/arb"
           element={
@@ -223,6 +304,175 @@ function App() {
             <ProtectedRoute>
               <Layout>
                 <ARBPage />
+              </Layout>
+            </ProtectedRoute>
+          }
+        />
+
+        {/* Governance - Strategic Themes */}
+        <Route
+          path="/governance/themes"
+          element={
+            <ProtectedRoute>
+              <Layout>
+                <ThemesPage />
+              </Layout>
+            </ProtectedRoute>
+          }
+        />
+
+        {/* Governance - Objectives & OKRs */}
+        <Route
+          path="/governance/objectives"
+          element={
+            <ProtectedRoute>
+              <Layout>
+                <ObjectivesPage />
+              </Layout>
+            </ProtectedRoute>
+          }
+        />
+
+        {/* Governance - Strategic Planning */}
+        <Route
+          path="/governance/target-state"
+          element={
+            <ProtectedRoute>
+              <Layout>
+                <TargetStatePage />
+              </Layout>
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/governance/baseline"
+          element={
+            <ProtectedRoute>
+              <Layout>
+                <BaselinePage />
+              </Layout>
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/governance/gap-analysis"
+          element={
+            <ProtectedRoute>
+              <Layout>
+                <GapAnalysisPage />
+              </Layout>
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/governance/roadmap"
+          element={
+            <ProtectedRoute>
+              <Layout>
+                <RoadmapPage />
+              </Layout>
+            </ProtectedRoute>
+          }
+        />
+
+        {/* Import/Export Routes */}
+        <Route
+          path="/import"
+          element={
+            <ProtectedRoute>
+              <Layout>
+                <BulkImportPage />
+              </Layout>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/export"
+          element={
+            <ProtectedRoute>
+              <Layout>
+                <ExportPage />
+              </Layout>
+            </ProtectedRoute>
+          }
+        />
+
+        {/* Relationship Routes */}
+        <Route
+          path="/relationships"
+          element={
+            <ProtectedRoute>
+              <Layout>
+                <RelationshipExplorerPage />
+              </Layout>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/relationships/matrix"
+          element={
+            <ProtectedRoute>
+              <Layout>
+                <RelationshipMatrixPage />
+              </Layout>
+            </ProtectedRoute>
+          }
+        />
+
+        {/* Reports Route */}
+        <Route
+          path="/reports"
+          element={
+            <ProtectedRoute>
+              <Layout>
+                <ReportsDashboard />
+              </Layout>
+            </ProtectedRoute>
+          }
+        />
+
+        {/* Profile Route */}
+        <Route
+          path="/profile"
+          element={
+            <ProtectedRoute>
+              <Layout>
+                <ProfilePage />
+              </Layout>
+            </ProtectedRoute>
+          }
+        />
+
+        {/* Admin Routes */}
+        <Route
+          path="/admin/users"
+          element={
+            <ProtectedRoute>
+              <Layout>
+                <UsersPage />
+              </Layout>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/admin/roles"
+          element={
+            <ProtectedRoute>
+              <Layout>
+                <RolesPage />
+              </Layout>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/admin/permissions"
+          element={
+            <ProtectedRoute>
+              <Layout>
+                <PermissionsPage />
               </Layout>
             </ProtectedRoute>
           }

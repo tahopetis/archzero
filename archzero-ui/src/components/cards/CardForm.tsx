@@ -123,7 +123,7 @@ export function CardForm({ mode = 'create' }: CardFormProps) {
         </button>
       </div>
 
-      <div className="bg-white rounded-lg shadow-md p-6 border border-gray-200">
+      <div className="bg-white rounded-lg shadow-md p-6 border border-gray-200" data-testid="card-form">
         <h1 className="text-2xl font-bold text-gray-900 mb-6">
           {mode === 'create' ? 'Create New Card' : 'Edit Card'}
         </h1>
@@ -146,6 +146,7 @@ export function CardForm({ mode = 'create' }: CardFormProps) {
               value={formData.name}
               onChange={handleChange}
               required
+              data-testid="card-name-input"
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
             />
           </div>
@@ -160,6 +161,7 @@ export function CardForm({ mode = 'create' }: CardFormProps) {
                 name="type"
                 value={formData.type}
                 onChange={handleChange}
+                data-testid="card-type-select"
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
               >
                 {Object.entries(CardType).map(([key, value]) => (
@@ -177,6 +179,7 @@ export function CardForm({ mode = 'create' }: CardFormProps) {
                 name="lifecyclePhase"
                 value={formData.lifecyclePhase}
                 onChange={handleChange}
+                data-testid="card-lifecycle-select"
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
               >
                 {Object.entries(LifecyclePhase).map(([key, value]) => (
@@ -212,6 +215,7 @@ export function CardForm({ mode = 'create' }: CardFormProps) {
               value={formData.description}
               onChange={handleChange}
               rows={4}
+              data-testid="card-description-input"
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
             />
           </div>
@@ -262,6 +266,7 @@ export function CardForm({ mode = 'create' }: CardFormProps) {
           <div className="flex justify-end gap-3 pt-4 border-t border-gray-200">
             <button
               type="button"
+              data-testid="card-cancel-button"
               onClick={() => navigate('/cards')}
               className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
             >
@@ -269,6 +274,7 @@ export function CardForm({ mode = 'create' }: CardFormProps) {
             </button>
             <button
               type="submit"
+              data-testid="card-save-button"
               disabled={loading}
               className="px-6 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 disabled:opacity-50"
             >

@@ -59,7 +59,7 @@ export function ComplianceForm({ requirement, onSuccess, onCancel }: ComplianceF
   };
 
   return (
-    <div className="bg-white rounded-lg shadow p-6">
+    <div className="bg-white rounded-lg shadow p-6" data-testid="compliance-form">
       <h2 className="text-xl font-bold text-slate-900 mb-4">
         {requirement ? 'Edit Requirement' : 'New Compliance Requirement'}
       </h2>
@@ -74,6 +74,7 @@ export function ComplianceForm({ requirement, onSuccess, onCancel }: ComplianceF
               type="text"
               value={name}
               onChange={(e) => setName(e.target.value)}
+              data-testid="compliance-name-input"
               className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
               placeholder="e.g., GDPR Data Processing"
               required
@@ -87,6 +88,7 @@ export function ComplianceForm({ requirement, onSuccess, onCancel }: ComplianceF
             <select
               value={framework}
               onChange={(e) => setFramework(e.target.value as ComplianceFramework)}
+              data-testid="compliance-framework-select"
               className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
               required
             >
@@ -104,6 +106,7 @@ export function ComplianceForm({ requirement, onSuccess, onCancel }: ComplianceF
           <textarea
             value={description}
             onChange={(e) => setDescription(e.target.value)}
+            data-testid="compliance-description-input"
             rows={4}
             className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
             placeholder="Describe the compliance requirement..."
@@ -119,6 +122,7 @@ export function ComplianceForm({ requirement, onSuccess, onCancel }: ComplianceF
             type="text"
             value={applicableCardTypes}
             onChange={(e) => setApplicableCardTypes(e.target.value)}
+            data-testid="compliance-applicableCardTypes-input"
             className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
             placeholder="Application, Database, ITComponent"
             required
@@ -133,6 +137,7 @@ export function ComplianceForm({ requirement, onSuccess, onCancel }: ComplianceF
           <textarea
             value={requiredControls}
             onChange={(e) => setRequiredControls(e.target.value)}
+            data-testid="compliance-requiredControls-input"
             rows={3}
             className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
             placeholder="Data encryption at rest, Access logging, Data retention policy"
@@ -149,6 +154,7 @@ export function ComplianceForm({ requirement, onSuccess, onCancel }: ComplianceF
             type="text"
             value={auditFrequency}
             onChange={(e) => setAuditFrequency(e.target.value)}
+            data-testid="compliance-auditFrequency-input"
             className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
             placeholder="e.g., Annually, Quarterly, Monthly"
             required
@@ -158,6 +164,7 @@ export function ComplianceForm({ requirement, onSuccess, onCancel }: ComplianceF
         <div className="flex items-center gap-3 pt-4">
           <button
             type="submit"
+            data-testid="compliance-save-button"
             disabled={createMutation.isPending || updateMutation.isPending}
             className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors font-medium disabled:opacity-50"
           >
@@ -169,6 +176,7 @@ export function ComplianceForm({ requirement, onSuccess, onCancel }: ComplianceF
           </button>
           <button
             type="button"
+            data-testid="compliance-cancel-button"
             onClick={onCancel}
             className="px-4 py-2 bg-slate-100 text-slate-700 rounded-lg hover:bg-slate-200 transition-colors"
           >

@@ -19,7 +19,9 @@ export function Login() {
       await login(email, password);
       navigate('/dashboard');
     } catch (err) {
-      setError('Invalid credentials. Please try again.');
+      // Display the actual error message from the backend
+      const errorMessage = err instanceof Error ? err.message : 'An error occurred';
+      setError(errorMessage);
     } finally {
       setIsLoading(false);
     }
@@ -35,7 +37,7 @@ export function Login() {
 
         <form onSubmit={handleSubmit} className="space-y-4">
           {error && (
-            <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded">
+            <div data-testid="login-error" className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded">
               {error}
             </div>
           )}
@@ -46,6 +48,7 @@ export function Login() {
             </label>
             <input
               id="email"
+              data-testid="login-email"
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
@@ -61,6 +64,7 @@ export function Login() {
             </label>
             <input
               id="password"
+              data-testid="login-password"
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
@@ -72,6 +76,7 @@ export function Login() {
 
           <button
             type="submit"
+            data-testid="login-button"
             disabled={isLoading}
             className="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
           >

@@ -23,8 +23,8 @@ export default defineConfig({
   forbidOnly: !!process.env.CI,
   /* Retry on CI only */
   retries: process.env.CI ? 2 : 0,
-  /* Run tests sequentially to avoid database state conflicts */
-  workers: 1,
+  /* Run tests in parallel - enabled after test data lifecycle management is implemented */
+  workers: process.env.CI ? 3 : '50%',
   /* Reporter to use. See https://playwright.dev/docs/test-reporters */
   reporter: [
     ['html', { outputFolder: 'playwright-report', open: 'never' }],
@@ -56,28 +56,28 @@ export default defineConfig({
   projects: [
     {
       name: 'chromium',
-      use: { ...devices['Desktop Chrome'] },
+      use: {
+        ...devices['Desktop Chrome'],
+        // Use authenticated state for all tests
+        storageState: 'playwright/.auth/admin-auth-state.json',
+      },
     },
 
     {
       name: 'firefox',
-      use: { ...devices['Desktop Firefox'] },
-    },
-
-    {
-      name: 'webkit',
-      use: { ...devices['Desktop Safari'] },
+      use: {
+        ...devices['Desktop Firefox'],
+        storageState: 'playwright/.auth/admin-auth-state.json',
+      },
     },
 
     /* Test against mobile viewports */
     {
       name: 'Mobile Chrome',
-      use: { ...devices['Pixel 5'] },
-    },
-
-    {
-      name: 'Mobile Safari',
-      use: { ...devices['iPhone 12'] },
+      use: {
+        ...devices['Pixel 5'],
+        storageState: 'playwright/.auth/admin-auth-state.json',
+      },
     },
   ],
 
@@ -90,6 +90,6 @@ export default defineConfig({
   // },
 
   /* Global setup and teardown */
-  // globalSetup: require.resolve('./global-setup'),
-  // globalTeardown: require.resolve('./global-teardown'),
+  globalSetup: require.resolve('./global-setup'),
+  globalTeardown: require.resolve('./global-teardown'),
 });

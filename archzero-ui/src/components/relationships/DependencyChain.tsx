@@ -5,8 +5,8 @@
 
 import type { DependencyChain, DependencyNode, DependencyLink } from '@/lib/relationship-hooks';
 import { cn } from '@/components/governance/shared';
-import { ChevronDown, ChevronRight, AlertTriangle } from 'lucide-react';
-import { useState } from 'react';
+import { ChevronDown, ChevronRight, AlertTriangle, ChevronLeft, ChevronRight as ChevronRightIcon } from 'lucide-react';
+import { useState, useMemo } from 'react';
 
 interface DependencyChainProps {
   chain: DependencyChain;
@@ -20,6 +20,7 @@ export function DependencyChainVisualization({
   onNodeClick,
 }: DependencyChainProps) {
   const [expandedNodes, setExpandedNodes] = useState<Set<string>>(new Set([chain.nodes[0]?.id]));
+  const [maxDepth, setMaxDepth] = useState<number>(Infinity);
 
   const toggleNode = (nodeId: string) => {
     setExpandedNodes((prev) => {
@@ -37,8 +38,41 @@ export function DependencyChainVisualization({
     return chain.links.filter((link) => link.source === nodeId);
   };
 
+  const expandAll = () => {
+    const allNodeIds = chain.nodes.map(node => node.id);
+    setExpandedNodes(new Set(allNodeIds));
+  };
+
+  const collapseAll = () => {
+    setExpandedNodes(new Set([chain.nodes[0]?.id]));
+  };
+
+  const visibleNodes = useMemo(() => {
+    const result: DependencyNode[] = [];
+    const visited = new Set<string>();
+
+    const traverse = (nodeId: string, depth: number) => {
+      if (depth > maxDepth) return;
+
+      const node = chain.nodes.find(n => n.id === nodeId);
+      if (!node || visited.has(nodeId)) return;
+
+      visited.add(nodeId);
+      result.push(node);
+
+      const children = chain.links.filter(link => link.source === nodeId);
+      children.forEach(child => traverse(child.target, depth + 1));
+    };
+
+    if (chain.nodes[0]) {
+      traverse(chain.nodes[0].id, 0);
+    }
+
+    return result;
+  }, [chain.nodes, chain.links, maxDepth]);
+
   const renderNode = (node: DependencyNode, depth: number = 0) => {
-    const children = getNodeChildren(node.id);
+    const children = getNodeChildren(node.id).filter(link => visibleNodes.some(n => n.id === link.target));
     const hasChildren = children.length > 0;
     const isExpanded = expandedNodes.has(node.id);
     const isSelected = selectedNodeId === node.id;
@@ -47,6 +81,7 @@ export function DependencyChainVisualization({
     return (
       <div key={node.id} className="select-none">
         <div
+          data-testid={`chain-link-${node.id}`}
           className={cn(
             'flex items-center gap-2 py-2 px-3 rounded-lg transition-colors cursor-pointer',
             'hover:bg-slate-100',
@@ -122,14 +157,47 @@ export function DependencyChainVisualization({
   const rootNode = chain.nodes[0];
 
   return (
-    <div className="bg-white rounded-lg shadow p-6">
+    <div className="bg-white rounded-lg shadow p-6" data-testid="dependency-chain">
       <div className="mb-4">
         <h3 className="text-lg font-semibold text-slate-900">Dependency Chain</h3>
         <p className="text-sm text-slate-500">
-          Showing {chain.nodes.length} cards with {chain.links.length} relationships
+          Showing {visibleNodes.length} of {chain.nodes.length} cards with {chain.links.length} relationships
         </p>
       </div>
-      <div className="border-t pt-4">
+
+      <div className="flex gap-2 mb-4">
+        <button
+          onClick={expandAll}
+          className="flex items-center gap-1 px-3 py-1 text-sm bg-slate-100 hover:bg-slate-200 rounded transition-colors"
+          data-testid="dependency-expand-all"
+        >
+          <ChevronDown className="w-3 h-3" />
+          Expand All
+        </button>
+        <button
+          onClick={collapseAll}
+          className="flex items-center gap-1 px-3 py-1 text-sm bg-slate-100 hover:bg-slate-200 rounded transition-colors"
+          data-testid="dependency-collapse-all"
+        >
+          <ChevronRight className="w-3 h-3" />
+          Collapse All
+        </button>
+        <select
+          value={maxDepth === Infinity ? '' : maxDepth.toString()}
+          onChange={(e) => setMaxDepth(e.target.value ? parseInt(e.target.value) : Infinity)}
+          className="px-3 py-1 text-sm bg-slate-100 hover:bg-slate-200 rounded transition-colors"
+          data-testid="dependency-depth-filter"
+        >
+          <option value="">All Depths</option>
+          <option value="1">Level 1 Only</option>
+          <option value="2">Level 1-2</option>
+          <option value="3">Level 1-3</option>
+          <option value="4">Level 1-4</option>
+          <option value="5">Level 1-5</option>
+        </select>
+      </div>
+
+      <div data-testid="dependency-chain-list" className="border-t pt-4">
         {renderNode(rootNode)}
       </div>
     </div>

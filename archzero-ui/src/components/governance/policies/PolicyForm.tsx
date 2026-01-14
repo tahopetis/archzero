@@ -56,7 +56,7 @@ export function PolicyForm({ policy, onSuccess, onCancel }: PolicyFormProps) {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6" data-testid="policy-form">
       <div className="bg-white rounded-lg shadow p-6">
         <h2 className="text-xl font-bold text-slate-900 mb-4">
           {policy ? 'Edit Policy' : 'New Architecture Policy'}
@@ -74,6 +74,7 @@ export function PolicyForm({ policy, onSuccess, onCancel }: PolicyFormProps) {
               className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
               placeholder="e.g., Database Encryption Required"
               required
+              data-testid="policy-name-input"
             />
           </div>
 
@@ -87,6 +88,7 @@ export function PolicyForm({ policy, onSuccess, onCancel }: PolicyFormProps) {
                 onChange={(e) => setSeverity(e.target.value as PolicySeverity)}
                 className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
                 required
+                data-testid="policy-severity-select"
               >
                 {Object.values(PolicySeverity).map((s) => (
                   <option key={s} value={s}>{s}</option>
@@ -103,6 +105,7 @@ export function PolicyForm({ policy, onSuccess, onCancel }: PolicyFormProps) {
                 onChange={(e) => setEnforcement(e.target.value as PolicyEnforcement)}
                 className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
                 required
+                data-testid="policy-enforcement-select"
               >
                 {Object.values(PolicyEnforcement).map((e) => (
                   <option key={e} value={e}>{e}</option>
@@ -121,6 +124,7 @@ export function PolicyForm({ policy, onSuccess, onCancel }: PolicyFormProps) {
               rows={3}
               className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
               placeholder="Describe the policy purpose..."
+              data-testid="policy-description-input"
             />
           </div>
 
@@ -129,6 +133,7 @@ export function PolicyForm({ policy, onSuccess, onCancel }: PolicyFormProps) {
               type="submit"
               disabled={createMutation.isPending || updateMutation.isPending || !rule}
               className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors font-medium disabled:opacity-50"
+              data-testid="policy-save-button"
             >
               {createMutation.isPending || updateMutation.isPending
                 ? 'Saving...'
@@ -140,6 +145,7 @@ export function PolicyForm({ policy, onSuccess, onCancel }: PolicyFormProps) {
               type="button"
               onClick={onCancel}
               className="px-4 py-2 bg-slate-100 text-slate-700 rounded-lg hover:bg-slate-200 transition-colors"
+              data-testid="policy-cancel-button"
             >
               Cancel
             </button>

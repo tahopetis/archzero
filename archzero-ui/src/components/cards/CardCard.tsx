@@ -38,6 +38,7 @@ export function CardCard({ card, onClick }: CardCardProps) {
 
   return (
     <div
+      data-testid={`card-item-${card.id}`}
       onClick={onClick}
       className="bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow duration-200 p-6 border border-gray-200 cursor-pointer"
     >

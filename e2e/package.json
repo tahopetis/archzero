@@ -12,7 +12,22 @@
     "test:report": "playwright show-report",
     "test:chromium": "playwright test --project=chromium",
     "test:firefox": "playwright test --project=firefox",
-    "test:webkit": "playwright test --project=webkit"
+    "test:webkit": "playwright test --project=webkit",
+    "test:smoke": "playwright test --grep @smoke",
+    "test:critical": "playwright test --grep @critical",
+    "test:regression": "playwright test",
+    "test:batch:auth": "playwright test auth/ multi-user/ --grep @critical",
+    "test:batch:cards": "playwright test cards/ relationships/",
+    "test:batch:governance": "playwright test governance/ risk-compliance/ strategic-planning/",
+    "test:batch:arb": "playwright test arb/",
+    "test:batch:search": "playwright test search/",
+    "test:batch:import-export": "playwright test import-export/",
+    "test:batch:visualizations": "playwright test visualizations/",
+    "test:batch:api-mocking": "playwright test api-mocking/ error-handling/",
+    "test:feature:cards": "playwright test cards/ --grep @critical",
+    "test:feature:governance": "playwright test governance/ --grep @critical",
+    "test:feature:arb": "playwright test arb/ --grep @critical",
+    "test:failures": "playwright test --last-failed"
   },
   "devDependencies": {
     "@playwright/test": "^1.57.0",

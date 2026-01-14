@@ -52,7 +52,7 @@ export function ImpactAnalysis({ cardId }: ImpactAnalysisProps) {
   const RiskIcon = riskIcons[impact.risk_level];
 
   return (
-    <div className="bg-white rounded-lg shadow p-6">
+    <div className="bg-white rounded-lg shadow p-6" data-testid="impact-analyze-button">
       <div className="mb-6">
         <h3 className="text-lg font-semibold text-slate-900">Impact Analysis</h3>
         <p className="text-sm text-slate-500">
@@ -63,7 +63,8 @@ export function ImpactAnalysis({ cardId }: ImpactAnalysisProps) {
       <div className={cn(
         'flex items-center gap-3 p-4 rounded-lg border mb-6',
         riskColors[impact.risk_level]
-      )}>
+      )}
+        data-testid="impact-score-summary">
         <RiskIcon className="w-6 h-6" />
         <div>
           <div className="font-semibold text-lg capitalize">{impact.risk_level} Risk</div>
@@ -80,13 +81,14 @@ export function ImpactAnalysis({ cardId }: ImpactAnalysisProps) {
               {impact.upstream.length}
             </span>
           </div>
-          <div className="space-y-2 max-h-48 overflow-y-auto">
+          <div className="space-y-2 max-h-48 overflow-y-auto" data-testid="impact-upstream-list">
             {impact.upstream.length === 0 ? (
               <p className="text-sm text-slate-500">No upstream dependencies</p>
             ) : (
               impact.upstream.map((id) => (
                 <div
                   key={id}
+                  data-testid={`impact-item-${id}`}
                   className="p-2 bg-slate-50 rounded text-sm text-slate-700 font-mono"
                 >
                   {id.slice(0, 8)}...
@@ -104,13 +106,14 @@ export function ImpactAnalysis({ cardId }: ImpactAnalysisProps) {
               {impact.downstream.length}
             </span>
           </div>
-          <div className="space-y-2 max-h-48 overflow-y-auto">
+          <div className="space-y-2 max-h-48 overflow-y-auto" data-testid="impact-downstream-list">
             {impact.downstream.length === 0 ? (
               <p className="text-sm text-slate-500">No downstream dependencies</p>
             ) : (
               impact.downstream.map((id) => (
                 <div
                   key={id}
+                  data-testid={`impact-item-${id}`}
                   className="p-2 bg-slate-50 rounded text-sm text-slate-700 font-mono"
                 >
                   {id.slice(0, 8)}...

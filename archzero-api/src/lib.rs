@@ -11,7 +11,7 @@ pub mod services;
 pub use error::{AppError, Result};
 pub use config::Settings;
 
-use axum::{Router, Json, routing::{get, post}};
+use axum::{Router, Json, routing::{get, post, put, delete}};
 use std::sync::Arc;
 use utoipa::OpenApi;
 
@@ -123,7 +123,8 @@ async fn openapi_json() -> Json<utoipa::openapi::OpenApi> {
 pub async fn create_app(settings: Settings) -> axum::Router {
     use sqlx::postgres::PgPool;
     use tokio::sync::Mutex;
-    use handlers::{auth, cards, health, relationships, bia, migration, tco, risks, compliance};
+    use handlers::{auth, cards, health, relationships, bia, migration, tco, risks, compliance,
+                    principles, standards, policies, exceptions, initiatives, arb, graph, import as import_handler, bulk, cache};
     use services::{
         CardService, AuthService, RelationshipService, Neo4jService,
         SagaOrchestrator, BIAService, TopologyService, MigrationService, TCOService, CsrfService, RateLimitService, CacheService
@@ -278,6 +279,96 @@ pub async fn create_app(settings: Settings) -> axum::Router {
                 .route("/:id", get(compliance::get_compliance_requirement).put(compliance::update_compliance_requirement).delete(compliance::delete_compliance_requirement))
                 .route("/:id/assess", post(compliance::assess_card_compliance))
                 .route("/:id/dashboard", get(compliance::get_compliance_dashboard)),
+        )
+        // Phase 3: Governance - Principles
+        .nest(
+            "/api/v1/principles",
+            Router::new()
+                .route("/", get(principles::list_principles).post(principles::create_principle))
+                .route("/:id", get(principles::get_principle).put(principles::update_principle).delete(principles::delete_principle))
+                .route("/:id/compliance", get(principles::get_principle_compliance)),
+        )
+        // Phase 3: Governance - Standards
+        .nest(
+            "/api/v1/standards",
+            Router::new()
+                .route("/", get(standards::list_standards).post(standards::create_standard))
+                .route("/:id", get(standards::get_standard).put(standards::update_standard).delete(standards::delete_standard))
+                .route("/:id/radar", get(standards::get_radar))
+                .route("/debt-report", get(standards::get_debt_report)),
+        )
+        // Phase 3: Governance - Policies
+        .nest(
+            "/api/v1/policies",
+            Router::new()
+                .route("/", get(policies::list_policies).post(policies::create_policy))
+                .route("/:id", get(policies::get_policy).put(policies::update_policy).delete(policies::delete_policy))
+                .route("/:id/compliance", post(policies::check_policy_compliance))
+                .route("/:id/validate", post(policies::validate_policy))
+                .route("/violations", get(policies::list_violations)),
+        )
+        // Phase 3: Governance - Exceptions
+        .nest(
+            "/api/v1/exceptions",
+            Router::new()
+                .route("/", get(exceptions::list_exceptions).post(exceptions::create_exception_request))
+                .route("/:id", get(exceptions::get_exception).delete(exceptions::delete_exception))
+                .route("/:id/approve", post(exceptions::approve_exception))
+                .route("/:id/reject", post(exceptions::reject_exception))
+                .route("/expiring", get(exceptions::list_expiring_exceptions)),
+        )
+        // Phase 3: Governance - Initiatives
+        .nest(
+            "/api/v1/initiatives",
+            Router::new()
+                .route("/", get(initiatives::list_initiatives).post(initiatives::create_initiative))
+                .route("/:id", get(initiatives::get_initiative).put(initiatives::update_initiative).delete(initiatives::delete_initiative))
+                .route("/:id/impact-map", get(initiatives::get_initiative_impact_map))
+                .route("/:id/link-cards", post(initiatives::link_cards_to_initiative)),
+        )
+        // Phase 3: Governance - ARB (Architecture Review Board)
+        .nest(
+            "/api/v1/arb",
+            Router::new()
+                .route("/meetings", get(arb::list_meetings).post(arb::create_meeting))
+                .route("/meetings/:id", get(arb::get_meeting).put(arb::update_meeting).delete(arb::delete_meeting))
+                .route("/meetings/:id/agenda", get(arb::get_meeting_agenda))
+                .route("/meetings/:id/agenda/:submission_id", post(arb::add_submission_to_agenda))
+                .route("/submissions", get(arb::list_submissions).post(arb::create_submission))
+                .route("/submissions/:id", get(arb::get_submission)),
+        )
+        // Phase 4: Graph endpoints
+        .nest(
+            "/api/v1/graph",
+            Router::new()
+                .route("/", get(graph::get_graph))
+                .route("/stats", get(graph::get_graph_stats))
+                .route("/nodes/count", get(graph::get_node_count)),
+        )
+        // Phase 4: Import endpoints
+        .nest(
+            "/api/v1/import",
+            Router::new()
+                .route("/bulk", post(import_handler::bulk_import_cards))
+                .route("/jobs/:job_id", get(import_handler::get_import_status)),
+        )
+        // Phase 4: Bulk operations endpoints
+        .nest(
+            "/api/v1/bulk",
+            Router::new()
+                .route("/cards/delete", post(bulk::bulk_delete_cards))
+                .route("/cards/update", post(bulk::bulk_update_cards))
+                .route("/cards/export", post(bulk::bulk_export_cards)),
+        )
+        // Phase 5: Cache endpoints
+        .nest(
+            "/api/v1/cache",
+            Router::new()
+                .route("/health", get(cache::get_cache_health))
+                .route("/stats", get(cache::get_cache_stats))
+                .route("/stats/reset", post(cache::reset_cache_stats))
+                .route("/flush", delete(cache::flush_cache))
+                .route("/warm", post(cache::warm_cache)),
         )
         // API Documentation
         .route("/api-docs/openapi.json", get(openapi_json))

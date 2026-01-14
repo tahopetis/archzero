@@ -66,7 +66,7 @@ export function InitiativeCard({ initiative, onEdit, onDelete }: InitiativeCardP
   };
 
   return (
-    <Card variant="bordered" className="group hover:shadow-lg transition-all">
+    <Card variant="bordered" className="group hover:shadow-lg transition-all" data-testid={`initiative-item-${initiative.id}`}>
       <div className="flex items-start justify-between mb-3">
         <div className="flex-1">
           <div className="flex items-center gap-2 mb-2 flex-wrap">
@@ -189,7 +189,7 @@ export function InitiativesList({ status, onEdit, onDelete }: InitiativesListPro
   }
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4" data-testid="initiatives-list">
       {initiatives?.data.map((initiative) => (
         <InitiativeCard key={initiative.id} initiative={initiative} onEdit={onEdit} onDelete={onDelete} />
       ))}

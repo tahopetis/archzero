@@ -68,9 +68,24 @@ GIT_BACKUP_*.md
 /e2e/test-results/
 /e2e/playwright-report/
 /e2e/blob-report/
+/e2e/junit-results.xml
+/e2e/test-results.json
+/e2e/debug-*.png
+/e2e/*.png
 package-lock.json
 yarn.lock
 pnpm-lock.yaml
+
+# AI Assistant Files
+.claude/
+CLAUDE.md
+**/CLAUDE.md
+.sisyphus/
+
+# Implementation Audit Files
+IMPLEMENTATION_STATUS.md
+TASK_GAP_COVERAGE.md
+IMPLEMENTATION_AUDIT.md
 
 # Cleanup duplicates
 archzero/

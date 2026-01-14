@@ -31,29 +31,28 @@ test.describe('Role-Based Access Control (RBAC)', () => {
   test('should create custom role with granular permissions', async ({ page }) => {
     await page.goto('/admin/roles');
 
-    // Click "Add Role" button
+    // Wait for and click "Add Role" button
     const addRoleBtn = page.locator('button:has-text("Add Role"), [data-testid="add-role-btn"]');
-    const hasButton = await addRoleBtn.count();
+    await expect(addRoleBtn).toBeVisible({ timeout: 10000 });
+    await addRoleBtn.click();
 
-    if (hasButton > 0) {
-      await addRoleBtn.first().click();
+    // Fill role details
+    await page.locator('[data-testid="role-name"]').fill('Custom Architect');
+    await page.locator('[data-testid="role-description"]').fill('Limited architect access');
 
-      // Fill role details
-      await page.locator('[data-testid="role-name"]').fill('Custom Architect');
-      await page.locator('[data-testid="role-description"]').fill('Limited architect access');
+    // Grant specific permissions
+    await page.locator('[data-testid="perm-cards-create"]').check();
+    await page.locator('[data-testid="perm-cards-read"]').check();
+    await page.locator('[data-testid="perm-cards-update"]').check();
+    await page.locator('[data-testid="perm-cards-delete"]').uncheck();
 
-      // Grant specific permissions
-      await page.locator('[data-testid="perm-cards-create"]').check();
-      await page.locator('[data-testid="perm-cards-read"]').check();
-      await page.locator('[data-testid="perm-cards-update"]').check();
-      await page.locator('[data-testid="perm-cards-delete"]').uncheck();
+    // Save role
+    const saveBtn = page.locator('button:has-text("Save"), [data-testid="save-role-btn"]');
+    await expect(saveBtn).toBeVisible();
+    await saveBtn.click();
 
-      // Save role
-      await page.locator('button:has-text("Save"), [data-testid="save-role-btn"]').click();
-
-      // Verify success
-      await expect(page.locator('text=Role created, text=Success')).toBeVisible({ timeout: 5000 });
-    }
+    // Verify success
+    await expect(page.locator('text=Role created, text=Success')).toBeVisible({ timeout: 5000 });
   });
 
   test('should enforce role permissions', async ({ page }) => {
@@ -64,13 +63,11 @@ test.describe('Role-Based Access Control (RBAC)', () => {
 
     // Try to create card (should be denied)
     const createBtn = page.locator('button:has-text("Add Card"), [data-testid="add-card-btn"]');
-    const hasButton = await createBtn.count();
+    await expect(createBtn).toBeVisible({ timeout: 10000 });
 
-    if (hasButton > 0) {
-      // Button should be disabled or not visible
-      const isEnabled = await createBtn.first().isEnabled();
-      expect(isEnabled).toBe(false);
-    }
+    // Button should be disabled or not visible
+    const isEnabled = await createBtn.isEnabled();
+    expect(isEnabled).toBe(false);
   });
 
   test('should show permission denied for unauthorized actions', async ({ page }) => {
@@ -80,13 +77,11 @@ test.describe('Role-Based Access Control (RBAC)', () => {
     // Try to access admin panel
     await page.goto('/admin/users');
 
-    // Should show permission denied or redirect
+    // Wait and check for permission denied message
     const deniedMsg = page.locator('text=Permission denied, text=Access denied, text=Unauthorized');
-    const count = await deniedMsg.count();
-
-    if (count > 0) {
-      await expect(deniedMsg.first()).toBeVisible();
-    } else {
+    try {
+      await expect(deniedMsg).toBeVisible({ timeout: 5000 });
+    } catch {
       // Alternative: should redirect
       await expect(page).toHaveURL(/\/(dashboard|cards)/);
     }
@@ -95,38 +90,32 @@ test.describe('Role-Based Access Control (RBAC)', () => {
   test('should allow admin to assign roles', async ({ page }) => {
     await page.goto('/admin/users');
 
-    // Find first user
+    // Find first user and click
     const firstUser = page.locator('[data-testid="user-item"], tr.user-row').first();
-    const count = await firstUser.count();
+    await expect(firstUser).toBeVisible({ timeout: 10000 });
+    await firstUser.click();
 
-    if (count > 0) {
-      await firstUser.click();
+    // Look for role assignment
+    const roleSelect = page.locator('[data-testid="user-role-select"], select[name="role"]');
+    await expect(roleSelect).toBeVisible();
 
-      // Look for role assignment
-      const roleSelect = page.locator('[data-testid="user-role-select"], select[name="role"]');
-      const hasSelect = await roleSelect.count();
+    // Select editor role and save
+    await roleSelect.selectOption('editor');
 
-      if (hasSelect > 0) {
-        await roleSelect.first().selectOption('editor');
+    // Save changes
+    const saveBtn = page.locator('button:has-text("Save"), [data-testid="save-user-btn"]');
+    await expect(saveBtn).toBeVisible();
+    await saveBtn.click();
 
-        // Save changes
-        await page.locator('button:has-text("Save"), [data-testid="save-user-btn"]').click();
-
-        await expect(page.locator('text=User updated, text=Success')).toBeVisible({ timeout: 5000 });
-      }
-    }
+    await expect(page.locator('text=User updated, text=Success')).toBeVisible({ timeout: 5000 });
   });
 
   test('should display permission matrix', async ({ page }) => {
     await page.goto('/admin/permissions');
 
-    // Look for permission matrix
+    // Wait for permission matrix
     const matrix = page.locator('[data-testid="permission-matrix"], table.permissions-matrix');
-    const hasMatrix = await matrix.count();
-
-    if (hasMatrix > 0) {
-      await expect(matrix.first()).toBeVisible();
-    }
+    await expect(matrix).toBeVisible({ timeout: 10000 });
   });
 });
 
@@ -143,24 +132,30 @@ test.describe('Card-Level Access Control', () => {
 
     // Click on a card
     const firstCard = page.locator('[data-testid="card-item"]').first();
+    await expect(firstCard).toBeVisible({ timeout: 10000 });
     await firstCard.click();
 
     // Look for permissions settings
     const permissionsBtn = page.locator('button:has-text("Permissions"), [data-testid="card-permissions-btn"]');
-    const hasButton = await permissionsBtn.count();
+    await expect(permissionsBtn).toBeVisible();
+    await permissionsBtn.click();
 
-    if (hasButton > 0) {
-      await permissionsBtn.first().click();
+    // Set who can view/edit
+    const viewPermission = page.locator('[data-testid="card-view-permission"]');
+    const editPermission = page.locator('[data-testid="card-edit-permission"]');
 
-      // Set who can view/edit
-      await page.locator('[data-testid="card-view-permission"]').selectOption('owner');
-      await page.locator('[data-testid="card-edit-permission"]').selectOption('owner');
+    await expect(viewPermission).toBeVisible();
+    await expect(editPermission).toBeVisible();
 
-      // Save
-      await page.locator('button:has-text("Save"), [data-testid="save-permissions-btn"]').click();
+    await viewPermission.selectOption('owner');
+    await editPermission.selectOption('owner');
 
-      await expect(page.locator('text=Permissions updated')).toBeVisible({ timeout: 5000 });
-    }
+    // Save
+    const saveBtn = page.locator('button:has-text("Save"), [data-testid="save-permissions-btn"]');
+    await expect(saveBtn).toBeVisible();
+    await saveBtn.click();
+
+    await expect(page.locator('text=Permissions updated')).toBeVisible({ timeout: 5000 });
   });
 
   test('should enforce card-level access restrictions', async ({ page }) => {
@@ -171,45 +166,41 @@ test.describe('Card-Level Access Control', () => {
 
     // Try to access restricted card
     const restrictedCard = page.locator('[data-testid="card-item"][data-restricted="true"]').first();
-    const count = await restrictedCard.count();
+    await expect(restrictedCard).toBeVisible({ timeout: 10000 });
+    await restrictedCard.click();
 
-    if (count > 0) {
-      await restrictedCard.click();
-
-      // Should show access denied
-      const denied = page.locator('text=Access denied, text=Not authorized');
-      await expect(denied.first()).toBeVisible({ timeout: 5000 });
-    }
+    // Should show access denied
+    const denied = page.locator('text=Access denied, text=Not authorized');
+    await expect(denied).toBeVisible({ timeout: 5000 });
   });
 
   test('should share card with specific users', async ({ page }) => {
     await page.goto('/cards');
 
     const firstCard = page.locator('[data-testid="card-item"]').first();
+    await expect(firstCard).toBeVisible({ timeout: 10000 });
     await firstCard.click();
 
     const shareBtn = page.locator('button:has-text("Share"), [data-testid="share-card-btn"]');
-    const hasButton = await shareBtn.count();
+    await expect(shareBtn).toBeVisible();
+    await shareBtn.click();
 
-    if (hasButton > 0) {
-      await shareBtn.first().click();
+    // Select users to share with
+    const userSelect = page.locator('[data-testid="share-user-select"]');
+    await expect(userSelect).toBeVisible();
+    await userSelect.selectOption('editor@archzero.local');
 
-      // Select users to share with
-      const userSelect = page.locator('[data-testid="share-user-select"]');
-      const hasSelect = await userSelect.count();
+    // Set permission level
+    const permissionSelect = page.locator('[data-testid="share-permission"]');
+    await expect(permissionSelect).toBeVisible();
+    await permissionSelect.selectOption('can_edit');
 
-      if (hasSelect > 0) {
-        await userSelect.selectOption('editor@archzero.local');
+    // Send share
+    const confirmBtn = page.locator('button:has-text("Share"), [data-testid="confirm-share-btn"]');
+    await expect(confirmBtn).toBeVisible();
+    await confirmBtn.click();
 
-        // Set permission level
-        await page.locator('[data-testid="share-permission"]').selectOption('can_edit');
-
-        // Send share
-        await page.locator('button:has-text("Share"), [data-testid="confirm-share-btn"]').click();
-
-        await expect(page.locator('text=Card shared')).toBeVisible({ timeout: 5000 });
-      }
-    }
+    await expect(page.locator('text=Card shared')).toBeVisible({ timeout: 5000 });
   });
 });
 
@@ -250,10 +241,11 @@ test.describe('Concurrent User Editing', () => {
 
     // User 1 saves
     await page1.locator('button:has-text("Save")').click();
-    await page1.waitForTimeout(500);
+    await page1.waitForLoadState('networkidle');
 
     // User 2 saves (should win with last-write-wins)
     await page2.locator('button:has-text("Save")').click();
+    await page2.waitForLoadState('networkidle');
 
     // Verify final state
     await page1.reload();
@@ -285,22 +277,18 @@ test.describe('Concurrent User Editing', () => {
 
     // User 1 starts editing
     await page1.locator('[data-testid="card-description"]').fill('Edit 1');
-    await page1.waitForTimeout(1000);
+    await page1.waitForLoadState('networkidle');
 
     // User 2 saves
     await page2.locator('[data-testid="card-description"]').fill('Edit 2');
     await page2.locator('button:has-text("Save")').click();
-    await page2.waitForTimeout(500);
+    await page2.waitForLoadState('networkidle');
 
     // User 1 tries to save - should see conflict warning
     await page1.locator('button:has-text("Save")').click();
 
     const conflictWarning = page1.locator('text=conflict, text=modified by another user, text=changes were made');
-    const hasWarning = await conflictWarning.count();
-
-    if (hasWarning > 0) {
-      await expect(conflictWarning.first()).toBeVisible();
-    }
+    await expect(conflictWarning).toBeVisible({ timeout: 5000 });
 
     await context1.close();
     await context2.close();
@@ -326,14 +314,10 @@ test.describe('Concurrent User Editing', () => {
     await page2.locator('[data-testid="card-item"]').first().click();
 
     // Look for "viewing" indicator
-    await page1.waitForTimeout(1000);
+    await page1.waitForLoadState('networkidle');
 
     const activeUsers = page1.locator('[data-testid="active-users"], .viewing-indicator');
-    const hasIndicator = await activeUsers.count();
-
-    if (hasIndicator > 0) {
-      await expect(activeUsers.first()).toBeVisible();
-    }
+    await expect(activeUsers).toBeVisible({ timeout: 10000 });
 
     await context1.close();
     await context2.close();
@@ -364,11 +348,7 @@ test.describe('Session Isolation', () => {
 
     // Page2 (viewer) should be denied
     const denied = page2.locator('text=Permission denied, text=Unauthorized');
-    const hasDenied = await denied.count();
-
-    if (hasDenied > 0) {
-      await expect(denied.first()).toBeVisible();
-    }
+    await expect(denied).toBeVisible({ timeout: 10000 });
 
     await context1.close();
     await context2.close();
@@ -436,56 +416,65 @@ test.describe('User Profile Management', () => {
     await page.goto('/profile');
 
     const changePwdBtn = page.locator('button:has-text("Change Password"), [data-testid="change-password-btn"]');
-    const hasButton = await changePwdBtn.count();
+    await expect(changePwdBtn).toBeVisible({ timeout: 10000 });
+    await changePwdBtn.click();
 
-    if (hasButton > 0) {
-      await changePwdBtn.click();
+    // Fill password form
+    const currentPwd = page.locator('[data-testid="current-password"]');
+    const newPwd = page.locator('[data-testid="new-password"]');
+    const confirmPwd = page.locator('[data-testid="confirm-password"]');
 
-      // Fill password form
-      await page.locator('[data-testid="current-password"]').fill('changeme123');
-      await page.locator('[data-testid="new-password"]').fill('newchangeme123');
-      await page.locator('[data-testid="confirm-password"]').fill('newchangeme123');
+    await expect(currentPwd).toBeVisible();
+    await expect(newPwd).toBeVisible();
+    await expect(confirmPwd).toBeVisible();
 
-      // Submit
-      await page.locator('button:has-text("Update Password")').click();
+    await currentPwd.fill('changeme123');
+    await newPwd.fill('newchangeme123');
+    await confirmPwd.fill('newchangeme123');
 
-      await expect(page.locator('text=Password updated')).toBeVisible({ timeout: 5000 });
-    }
+    // Submit
+    const updateBtn = page.locator('button:has-text("Update Password")');
+    await expect(updateBtn).toBeVisible();
+    await updateBtn.click();
+
+    await expect(page.locator('text=Password updated')).toBeVisible({ timeout: 5000 });
   });
 
   test('should validate password strength', async ({ page }) => {
     await page.goto('/profile');
 
     const changePwdBtn = page.locator('button:has-text("Change Password"), [data-testid="change-password-btn"]');
-    const hasButton = await changePwdBtn.count();
+    await expect(changePwdBtn).toBeVisible({ timeout: 10000 });
+    await changePwdBtn.click();
 
-    if (hasButton > 0) {
-      await changePwdBtn.click();
+    // Enter weak password
+    const newPwd = page.locator('[data-testid="new-password"]');
+    const confirmPwd = page.locator('[data-testid="confirm-password"]');
 
-      // Enter weak password
-      await page.locator('[data-testid="new-password"]').fill('weak');
-      await page.locator('[data-testid="confirm-password"]').fill('weak');
+    await expect(newPwd).toBeVisible();
+    await expect(confirmPwd).toBeVisible();
 
-      // Should show validation error
-      await page.locator('button:has-text("Update Password")').click();
+    await newPwd.fill('weak');
+    await confirmPwd.fill('weak');
 
-      const strengthError = page.locator('text=Password too weak, text=at least 8 characters');
-      await expect(strengthError.first()).toBeVisible({ timeout: 5000 });
-    }
+    // Should show validation error
+    const updateBtn = page.locator('button:has-text("Update Password")');
+    await expect(updateBtn).toBeVisible();
+    await updateBtn.click();
+
+    const strengthError = page.locator('text=Password too weak, text=at least 8 characters');
+    await expect(strengthError).toBeVisible({ timeout: 5000 });
   });
 
   test('should show user activity history', async ({ page }) => {
     await page.goto('/profile');
 
     const activityTab = page.locator('[data-testid="activity-tab"], button:has-text("Activity")');
-    const hasTab = await activityTab.count();
+    await expect(activityTab).toBeVisible({ timeout: 10000 });
+    await activityTab.click();
 
-    if (hasTab > 0) {
-      await activityTab.click();
-
-      const activityList = page.locator('[data-testid="activity-list"]');
-      await expect(activityList).toBeVisible();
-    }
+    const activityList = page.locator('[data-testid="activity-list"]');
+    await expect(activityList).toBeVisible({ timeout: 10000 });
   });
 });
 
@@ -501,67 +490,67 @@ test.describe('User Invitation Flow', () => {
     await page.goto('/admin/users');
 
     const inviteBtn = page.locator('button:has-text("Invite User"), [data-testid="invite-user-btn"]');
-    const hasButton = await inviteBtn.count();
+    await expect(inviteBtn).toBeVisible({ timeout: 10000 });
+    await inviteBtn.click();
 
-    if (hasButton > 0) {
-      await inviteBtn.click();
+    // Fill invitation form
+    const emailInput = page.locator('[data-testid="invite-email"]');
+    const roleSelect = page.locator('[data-testid="invite-role"]');
+    const messageInput = page.locator('[data-testid="invite-message"]');
 
-      // Fill invitation form
-      await page.locator('[data-testid="invite-email"]').fill(`test-${Date.now()}@archzero.local`);
-      await page.locator('[data-testid="invite-role"]').selectOption('editor');
-      await page.locator('[data-testid="invite-message"]').fill('Welcome to the team!');
+    await expect(emailInput).toBeVisible();
+    await expect(roleSelect).toBeVisible();
+    await expect(messageInput).toBeVisible();
 
-      // Send invite
-      await page.locator('button:has-text("Send Invite")').click();
+    await emailInput.fill(`test-${Date.now()}@archzero.local`);
+    await roleSelect.selectOption('editor');
+    await messageInput.fill('Welcome to the team!');
 
-      await expect(page.locator('text=Invitation sent, text=Invite created')).toBeVisible({ timeout: 5000 });
-    }
+    // Send invite
+    const sendBtn = page.locator('button:has-text("Send Invite")');
+    await expect(sendBtn).toBeVisible();
+    await sendBtn.click();
+
+    await expect(page.locator('text=Invitation sent, text=Invite created')).toBeVisible({ timeout: 5000 });
   });
 
   test('should show pending invitations', async ({ page }) => {
     await page.goto('/admin/users');
 
     const pendingTab = page.locator('[data-testid="pending-invites-tab"], button:has-text("Pending")');
-    const hasTab = await pendingTab.count();
+    await expect(pendingTab).toBeVisible({ timeout: 10000 });
+    await pendingTab.click();
 
-    if (hasTab > 0) {
-      await pendingTab.click();
-
-      const inviteList = page.locator('[data-testid="pending-invites"]');
-      await expect(inviteList).toBeVisible();
-    }
+    const inviteList = page.locator('[data-testid="pending-invites"]');
+    await expect(inviteList).toBeVisible({ timeout: 10000 });
   });
 
   test('should allow resending invitation', async ({ page }) => {
     await page.goto('/admin/users');
 
     const pendingInvite = page.locator('[data-testid="pending-invite"]').first();
-    const count = await pendingInvite.count();
+    await expect(pendingInvite).toBeVisible({ timeout: 10000 });
+    await pendingInvite.click();
 
-    if (count > 0) {
-      await pendingInvite.click();
+    const resendBtn = page.locator('button:has-text("Resend"), [data-testid="resend-invite-btn"]');
+    await expect(resendBtn).toBeVisible();
+    await resendBtn.click();
 
-      const resendBtn = page.locator('button:has-text("Resend"), [data-testid="resend-invite-btn"]');
-      await resendBtn.click();
-
-      await expect(page.locator('text=Invitation resent')).toBeVisible({ timeout: 5000 });
-    }
+    await expect(page.locator('text=Invitation resent')).toBeVisible({ timeout: 5000 });
   });
 
   test('should allow cancelling invitation', async ({ page }) => {
     await page.goto('/admin/users');
 
     const pendingInvite = page.locator('[data-testid="pending-invite"]').first();
-    const count = await pendingInvite.count();
+    await expect(pendingInvite).toBeVisible({ timeout: 10000 });
+    await pendingInvite.click();
 
-    if (count > 0) {
-      await pendingInvite.click();
+    const cancelBtn = page.locator('button:has-text("Cancel"), [data-testid="cancel-invite-btn"]');
+    await expect(cancelBtn).toBeVisible();
+    await cancelBtn.click();
 
-      const cancelBtn = page.locator('button:has-text("Cancel"), [data-testid="cancel-invite-btn"]');
-      await cancelBtn.click();
-
-      await expect(page.locator('text=Invitation cancelled')).toBeVisible({ timeout: 5000 });
-    }
+    await expect(page.locator('text=Invitation cancelled')).toBeVisible({ timeout: 5000 });
   });
 });
 
@@ -578,14 +567,11 @@ test.describe('Active Session Management', () => {
     await page.goto('/profile');
 
     const sessionsTab = page.locator('[data-testid="sessions-tab"], button:has-text("Sessions")');
-    const hasTab = await sessionsTab.count();
+    await expect(sessionsTab).toBeVisible({ timeout: 10000 });
+    await sessionsTab.click();
 
-    if (hasTab > 0) {
-      await sessionsTab.click();
-
-      const sessionsList = page.locator('[data-testid="active-sessions"]');
-      await expect(sessionsList).toBeVisible();
-    }
+    const sessionsList = page.locator('[data-testid="active-sessions"]');
+    await expect(sessionsList).toBeVisible({ timeout: 10000 });
   });
 
   test('should allow user to revoke session', async ({ page }) => {
@@ -594,21 +580,15 @@ test.describe('Active Session Management', () => {
     await page.goto('/profile');
 
     const sessionsTab = page.locator('[data-testid="sessions-tab"], button:has-text("Sessions")');
-    const hasTab = await sessionsTab.count();
+    await expect(sessionsTab).toBeVisible({ timeout: 10000 });
+    await sessionsTab.click();
 
-    if (hasTab > 0) {
-      await sessionsTab.click();
+    // Revoke first session (not current)
+    const revokeBtn = page.locator('[data-testid="revoke-session-btn"]').first();
+    await expect(revokeBtn).toBeVisible({ timeout: 10000 });
+    await revokeBtn.click();
 
-      // Revoke first session (not current)
-      const revokeBtn = page.locator('[data-testid="revoke-session-btn"]').first();
-      const hasRevoke = await revokeBtn.count();
-
-      if (hasRevoke > 0) {
-        await revokeBtn.click();
-
-        await expect(page.locator('text=Session revoked')).toBeVisible({ timeout: 5000 });
-      }
-    }
+    await expect(page.locator('text=Session revoked')).toBeVisible({ timeout: 5000 });
   });
 
   test('should allow admin to force logout user', async ({ page }) => {
@@ -617,23 +597,19 @@ test.describe('Active Session Management', () => {
     await page.goto('/admin/users');
 
     const firstUser = page.locator('[data-testid="user-item"]').first();
-    const count = await firstUser.count();
+    await expect(firstUser).toBeVisible({ timeout: 10000 });
+    await firstUser.click();
 
-    if (count > 0) {
-      await firstUser.click();
+    const forceLogoutBtn = page.locator('button:has-text("Force Logout"), [data-testid="force-logout-btn"]');
+    await expect(forceLogoutBtn).toBeVisible({ timeout: 10000 });
+    await forceLogoutBtn.click();
 
-      const forceLogoutBtn = page.locator('button:has-text("Force Logout"), [data-testid="force-logout-btn"]');
-      const hasButton = await forceLogoutBtn.count();
+    // Confirm
+    const confirmBtn = page.locator('button:has-text("Confirm")');
+    await expect(confirmBtn).toBeVisible();
+    await confirmBtn.click();
 
-      if (hasButton > 0) {
-        await forceLogoutBtn.click();
-
-        // Confirm
-        await page.locator('button:has-text("Confirm")').click();
-
-        await expect(page.locator('text=User logged out')).toBeVisible({ timeout: 5000 });
-      }
-    }
+    await expect(page.locator('text=User logged out')).toBeVisible({ timeout: 5000 });
   });
 
   test('should enforce session timeout', async ({ page }) => {
@@ -641,9 +617,9 @@ test.describe('Active Session Management', () => {
 
     await page.goto('/cards');
 
-    // Wait for session timeout (configured as 30 min in real app, using short wait for test)
+    // Wait for network activity (configured as 30 min in real app, using short wait for test)
     // In real scenario, this would test actual timeout behavior
-    await page.waitForTimeout(1000);
+    await page.waitForLoadState('networkidle');
 
     // Try to perform action - session should still be valid
     const cards = page.locator('[data-testid="card-item"]');
@@ -672,16 +648,13 @@ test.describe('Auditor Role', () => {
     await page.goto('/audit');
 
     const exportBtn = page.locator('button:has-text("Export"), [data-testid="export-audit-btn"]');
-    const hasButton = await exportBtn.count();
+    await expect(exportBtn).toBeVisible({ timeout: 10000 });
 
-    if (hasButton > 0) {
-      const downloadPromise = page.waitForEvent('download');
+    const downloadPromise = page.waitForEvent('download');
+    await exportBtn.click();
 
-      await exportBtn.click();
-
-      const download = await downloadPromise;
-      expect(download.suggestedFilename()).toMatch(/\.(csv|json)$/);
-    }
+    const download = await downloadPromise;
+    expect(download.suggestedFilename()).toMatch(/\.(csv|json)$/);
   });
 
   test('should allow auditor to filter audit logs', async ({ page }) => {
@@ -691,14 +664,12 @@ test.describe('Auditor Role', () => {
 
     // Filter by action
     const actionFilter = page.locator('[data-testid="audit-action-filter"]');
-    const hasFilter = await actionFilter.count();
+    await expect(actionFilter).toBeVisible({ timeout: 10000 });
 
-    if (hasFilter > 0) {
-      await actionFilter.selectOption('card_update');
+    await actionFilter.selectOption('card_update');
 
-      // Verify filtered results
-      await page.waitForTimeout(500);
-    }
+    // Verify filtered results
+    await page.waitForLoadState('networkidle');
   });
 
   test('should not allow auditor to modify data', async ({ page }) => {
@@ -708,12 +679,10 @@ test.describe('Auditor Role', () => {
 
     // Create button should not be visible or enabled
     const createBtn = page.locator('button:has-text("Add Card"), [data-testid="add-card-btn"]');
-    const hasButton = await createBtn.count();
+    await expect(createBtn).toBeVisible({ timeout: 10000 });
 
-    if (hasButton > 0) {
-      const isEnabled = await createBtn.first().isEnabled();
-      expect(isEnabled).toBe(false);
-    }
+    const isEnabled = await createBtn.isEnabled();
+    expect(isEnabled).toBe(false);
   });
 
   test('should show compliance status to auditor', async ({ page }) => {
@@ -737,61 +706,61 @@ test.describe('Permission Escalation and Demotion', () => {
     await page.goto('/admin/users');
 
     const editorUser = page.locator('[data-testid="user-item"][data-role="editor"]').first();
-    const count = await editorUser.count();
+    await expect(editorUser).toBeVisible({ timeout: 10000 });
+    await editorUser.click();
 
-    if (count > 0) {
-      await editorUser.click();
+    const roleSelect = page.locator('[data-testid="user-role-select"]');
+    await expect(roleSelect).toBeVisible();
 
-      const roleSelect = page.locator('[data-testid="user-role-select"]');
-      const hasSelect = await roleSelect.count();
+    await roleSelect.selectOption('admin');
 
-      if (hasSelect > 0) {
-        await roleSelect.selectOption('admin');
-        await page.locator('button:has-text("Save")').click();
+    const saveBtn = page.locator('button:has-text("Save")');
+    await expect(saveBtn).toBeVisible();
+    await saveBtn.click();
 
-        await expect(page.locator('text=User promoted')).toBeVisible({ timeout: 5000 });
-      }
-    }
+    await expect(page.locator('text=User promoted')).toBeVisible({ timeout: 5000 });
   });
 
   test('should allow admin to demote user', async ({ page }) => {
     await page.goto('/admin/users');
 
     const editorUser = page.locator('[data-testid="user-item"]').first();
+    await expect(editorUser).toBeVisible({ timeout: 10000 });
     await editorUser.click();
 
     const roleSelect = page.locator('[data-testid="user-role-select"]');
-    const hasSelect = await roleSelect.count();
+    await expect(roleSelect).toBeVisible();
 
-    if (hasSelect > 0) {
-      await roleSelect.selectOption('viewer');
-      await page.locator('button:has-text("Save")').click();
+    await roleSelect.selectOption('viewer');
 
-      await expect(page.locator('text=User role updated')).toBeVisible({ timeout: 5000 });
-    }
+    const saveBtn = page.locator('button:has-text("Save")');
+    await expect(saveBtn).toBeVisible();
+    await saveBtn.click();
+
+    await expect(page.locator('text=User role updated')).toBeVisible({ timeout: 5000 });
   });
 
   test('should log permission changes in audit trail', async ({ page }) => {
     await page.goto('/admin/users');
 
     const firstUser = page.locator('[data-testid="user-item"]').first();
+    await expect(firstUser).toBeVisible({ timeout: 10000 });
     await firstUser.click();
 
     const roleSelect = page.locator('[data-testid="user-role-select"]');
-    const hasSelect = await roleSelect.count();
+    await expect(roleSelect).toBeVisible();
 
-    if (hasSelect > 0) {
-      await roleSelect.selectOption('viewer');
-      await page.locator('button:has-text("Save")').click();
+    await roleSelect.selectOption('viewer');
 
-      // Check audit trail
-      await page.goto('/audit');
+    const saveBtn = page.locator('button:has-text("Save")');
+    await expect(saveBtn).toBeVisible();
+    await saveBtn.click();
 
-      const auditEntry = page.locator('[data-testid="audit-entry"]').filter({ hasText: 'role changed' });
-      const count = await auditEntry.count();
+    // Check audit trail
+    await page.goto('/audit');
 
-      expect(count).toBeGreaterThan(0);
-    }
+    const auditEntry = page.locator('[data-testid="audit-entry"]').filter({ hasText: 'role changed' });
+    await expect(auditEntry.first()).toBeVisible({ timeout: 10000 });
   });
 });
 
@@ -801,14 +770,11 @@ test.describe('SSO and JIT Provisioning', () => {
     await page.goto('/login');
 
     const ssoBtn = page.locator('button:has-text("SSO"), [data-testid="sso-login-btn"]');
-    const hasButton = await ssoBtn.count();
+    await expect(ssoBtn).toBeVisible({ timeout: 10000 });
+    await ssoBtn.click();
 
-    if (hasButton > 0) {
-      await ssoBtn.click();
-
-      // Should redirect to IdP or show SSO options
-      await expect(page.locator('[data-testid="sso-provider"], text=Single Sign-On')).toBeVisible({ timeout: 5000 });
-    }
+    // Should redirect to IdP or show SSO options
+    await expect(page.locator('[data-testid="sso-provider"], text=Single Sign-On')).toBeVisible({ timeout: 5000 });
   });
 
   test('should auto-provision JIT users', async ({ page }) => {
@@ -828,12 +794,10 @@ test.describe('SSO and JIT Provisioning', () => {
     await page.goto('/profile');
 
     const userRole = page.locator('[data-testid="user-role"]');
-    const hasRole = await userRole.count();
+    await expect(userRole).toBeVisible({ timeout: 10000 });
 
-    if (hasRole > 0) {
-      const role = await userRole.textContent();
-      expect(['architect', 'editor', 'admin']).toContain(role?.toLowerCase());
-    }
+    const role = await userRole.textContent();
+    expect(['architect', 'editor', 'admin']).toContain(role?.toLowerCase());
   });
 });
 
@@ -862,10 +826,10 @@ test.describe('Multi-User Workflows', () => {
     await page1.locator('[data-testid="add-comment-btn"]').click();
 
     // User 2 should see comment
-    await page1.waitForTimeout(1000);
+    await page1.waitForLoadState('networkidle');
 
     const comment = page2.locator('text=Please review this card');
-    await expect(comment).toBeVisible();
+    await expect(comment).toBeVisible({ timeout: 10000 });
 
     await context1.close();
     await context2.close();
@@ -878,24 +842,21 @@ test.describe('Multi-User Workflows', () => {
     await firstCard.click();
 
     const assignBtn = page.locator('button:has-text("Assign"), [data-testid="assign-card-btn"]');
-    const hasButton = await assignBtn.count();
+    await expect(assignBtn).toBeVisible({ timeout: 10000 });
+    await assignBtn.click();
 
-    if (hasButton > 0) {
-      await assignBtn.click();
+    // Assign to user
+    const assigneeSelect = page.locator('[data-testid="assignee-select"]');
+    await expect(assigneeSelect).toBeVisible();
+    await assigneeSelect.selectOption('editor@archzero.local');
 
-      // Assign to user
-      await page.locator('[data-testid="assignee-select"]').selectOption('editor@archzero.local');
+    // Should show notification will be sent
+    const notificationMsg = page.locator('text=notification will be sent, text=User will be notified');
+    await expect(notificationMsg).toBeVisible({ timeout: 5000 });
 
-      // Should show notification will be sent
-      const notificationMsg = page.locator('text=notification will be sent, text=User will be notified');
-      const hasMsg = await notificationMsg.count();
-
-      if (hasMsg > 0) {
-        await expect(notificationMsg.first()).toBeVisible();
-      }
-
-      await page.locator('button:has-text("Assign")').click();
-    }
+    const assignConfirmBtn = page.locator('button:has-text("Assign")');
+    await expect(assignConfirmBtn).toBeVisible();
+    await assignConfirmBtn.click();
   });
 });
 

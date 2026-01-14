@@ -3,39 +3,34 @@ import { CardListPage, CardDetailPage, NewCardPage } from '../pages/index';
 import { CardFactory } from '../factories/index';
 import { CARD_TYPES, API_URL } from '../helpers/index';
 import { LoginPage } from '../pages/index';
+import { cleanupTestData, CreatedResource, TestContext } from '../helpers/test-cleanup';
 
-// Authenticate via API before all tests
-test.beforeAll(async ({ request }) => {
-  try {
-    const response = await request.post(`${API_URL}/api/v1/auth/login`, {
-      data: {
-        email: 'admin@archzero.local',
-        password: 'changeme123'
-      }
-    });
-    if (!response.ok()) {
-      console.warn('Failed to authenticate for card tests');
-    }
-  } catch (error) {
-    console.warn('Auth setup failed:', error);
-  }
-});
+// Note: Authentication is now handled via storageState (auth.setup.ts)
+// Tests are automatically authenticated when they start
 
-test.describe('Card Management', () => {
+test.describe('@critical Card Management', () => {
   let cardListPage: CardListPage;
   let newCardPage: NewCardPage;
   let loginPage: LoginPage;
+  let testContext: TestContext;
 
   test.beforeEach(async ({ page }) => {
+    // Initialize test context for cleanup tracking
+    testContext = { cleanupIds: [] };
+
     loginPage = new LoginPage(page);
     cardListPage = new CardListPage(page);
     newCardPage = new NewCardPage(page);
 
-    // Login via API before each test
-    await loginPage.loginViaApi('admin@archzero.local', 'changeme123');
+    // Note: No need to login - storageState handles authentication
   });
 
-  test('should display card list', async ({ page }) => {
+  test.afterEach(async ({ request }) => {
+    // Cleanup any test data created during the test
+    await cleanupTestData(request, testContext.cleanupIds);
+  });
+
+  test('@smoke should display card list', async ({ page }) => {
     await cardListPage.goto();
     await cardListPage.verifyListLoaded();
 

@@ -55,7 +55,7 @@ export function PrincipleForm({ principle, onSuccess, onCancel }: PrincipleFormP
   };
 
   return (
-    <div className="bg-white rounded-lg shadow p-6">
+    <div className="bg-white rounded-lg shadow p-6" data-testid="principle-form">
       <h2 className="text-xl font-bold text-slate-900 mb-4">
         {principle ? 'Edit Principle' : 'New Architecture Principle'}
       </h2>
@@ -72,6 +72,7 @@ export function PrincipleForm({ principle, onSuccess, onCancel }: PrincipleFormP
             className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
             placeholder="e.g., Cloud-First Architecture"
             required
+            data-testid="principle-name-input"
           />
         </div>
 
@@ -86,6 +87,7 @@ export function PrincipleForm({ principle, onSuccess, onCancel }: PrincipleFormP
             className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
             placeholder="Brief principle statement..."
             required
+            data-testid="principle-statement-input"
           />
         </div>
 
@@ -98,6 +100,7 @@ export function PrincipleForm({ principle, onSuccess, onCancel }: PrincipleFormP
             onChange={(e) => setCategory(e.target.value as PrincipleCategory)}
             className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
             required
+            data-testid="principle-category-select"
           >
             {Object.values(PrincipleCategory).map((cat) => (
               <option key={cat} value={cat}>{cat}</option>
@@ -116,6 +119,7 @@ export function PrincipleForm({ principle, onSuccess, onCancel }: PrincipleFormP
             className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
             placeholder="Explain why this principle exists..."
             required
+            data-testid="principle-rationale-input"
           />
         </div>
 
@@ -130,6 +134,7 @@ export function PrincipleForm({ principle, onSuccess, onCancel }: PrincipleFormP
             className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
             placeholder="One implication per line..."
             required
+            data-testid="principle-implications-input"
           />
           <p className="text-xs text-slate-500 mt-1">Enter one implication per line</p>
         </div>
@@ -145,6 +150,7 @@ export function PrincipleForm({ principle, onSuccess, onCancel }: PrincipleFormP
             className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
             placeholder="e.g., Enterprise Architecture Team"
             required
+            data-testid="principle-owner-input"
           />
         </div>
 
@@ -153,6 +159,7 @@ export function PrincipleForm({ principle, onSuccess, onCancel }: PrincipleFormP
             type="submit"
             disabled={createMutation.isPending || updateMutation.isPending}
             className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors font-medium disabled:opacity-50"
+            data-testid="principle-save-button"
           >
             {createMutation.isPending || updateMutation.isPending
               ? 'Saving...'
@@ -164,6 +171,7 @@ export function PrincipleForm({ principle, onSuccess, onCancel }: PrincipleFormP
             type="button"
             onClick={onCancel}
             className="px-4 py-2 bg-slate-100 text-slate-700 rounded-lg hover:bg-slate-200 transition-colors"
+            data-testid="principle-cancel-button"
           >
             Cancel
           </button>

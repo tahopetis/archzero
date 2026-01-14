@@ -53,7 +53,7 @@ export function StandardForm({ standard, onSuccess, onCancel }: StandardFormProp
   };
 
   return (
-    <div className="bg-white rounded-lg shadow p-6">
+    <div className="bg-white rounded-lg shadow p-6" data-testid="standard-form">
       <h2 className="text-xl font-bold text-slate-900 mb-4">
         {standard ? 'Edit Standard' : 'New Technology Standard'}
       </h2>
@@ -70,6 +70,7 @@ export function StandardForm({ standard, onSuccess, onCancel }: StandardFormProp
             className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
             placeholder="e.g., React, PostgreSQL, Docker"
             required
+            data-testid="standard-name-input"
           />
         </div>
 
@@ -84,6 +85,7 @@ export function StandardForm({ standard, onSuccess, onCancel }: StandardFormProp
             className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
             placeholder="e.g., Frontend Framework, Database, Container"
             required
+            data-testid="standard-category-input"
           />
         </div>
 
@@ -97,6 +99,7 @@ export function StandardForm({ standard, onSuccess, onCancel }: StandardFormProp
               onChange={(e) => setStatus(e.target.value as TechnologyStatus)}
               className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
               required
+              data-testid="standard-status-select"
             >
               {Object.values(TechnologyStatus).map((s) => (
                 <option key={s} value={s}>{s}</option>
@@ -112,6 +115,7 @@ export function StandardForm({ standard, onSuccess, onCancel }: StandardFormProp
               value={quadrant || ''}
               onChange={(e) => setQuadrant(e.target.value as RadarQuadrant | undefined)}
               className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+              data-testid="standard-quadrant-select"
             >
               <option value="">None</option>
               {Object.values(RadarQuadrant).map((q) => (
@@ -131,6 +135,7 @@ export function StandardForm({ standard, onSuccess, onCancel }: StandardFormProp
               onChange={(e) => setRing(e.target.value as RadarRing | undefined)}
               className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
               required
+              data-testid="standard-ring-select"
             >
               {Object.values(RadarRing).map((r) => (
                 <option key={r} value={r}>{r}</option>
@@ -149,6 +154,7 @@ export function StandardForm({ standard, onSuccess, onCancel }: StandardFormProp
             rows={4}
             className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
             placeholder="Explain the technology choice and its fit..."
+            data-testid="standard-rationale-input"
           />
         </div>
 
@@ -157,6 +163,7 @@ export function StandardForm({ standard, onSuccess, onCancel }: StandardFormProp
             type="submit"
             disabled={createMutation.isPending || updateMutation.isPending}
             className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors font-medium disabled:opacity-50"
+            data-testid="standard-save-button"
           >
             {createMutation.isPending || updateMutation.isPending
               ? 'Saving...'
@@ -168,6 +175,7 @@ export function StandardForm({ standard, onSuccess, onCancel }: StandardFormProp
             type="button"
             onClick={onCancel}
             className="px-4 py-2 bg-slate-100 text-slate-700 rounded-lg hover:bg-slate-200 transition-colors"
+            data-testid="standard-cancel-button"
           >
             Cancel
           </button>

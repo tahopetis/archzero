@@ -58,7 +58,7 @@ export function ExceptionCard({ exception, onApprove, onReject, onDelete }: Exce
     <Card variant="bordered" className={cn(
       'group hover:shadow-lg transition-all',
       isExpiringSoon && exception.status === 'Approved' && 'border-amber-300 bg-amber-50/30'
-    )}>
+    )} data-testid={`exception-item-${exception.id}`}>
       <div className="flex items-start justify-between mb-3">
         <div className="flex-1">
           <div className="flex items-center gap-2 mb-2 flex-wrap">
@@ -188,7 +188,7 @@ export function ExceptionsList({ status, onApprove, onReject, onDelete }: Except
   }
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4" data-testid="exceptions-list">
       {exceptions.data.map((exception) => (
         <ExceptionCard
           key={exception.id}
