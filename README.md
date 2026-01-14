@@ -77,7 +77,7 @@ cargo run --bin seed
 cargo run --bin server
 
 # 6. Start the frontend (in a new terminal)
-cd frontend
+cd archzero-ui
 npm install
 npm run dev
 
@@ -96,6 +96,7 @@ npm run dev
 
 | Document | Description |
 |----------|-------------|
+| [Codebase Map](docs/CODEBASE_MAP.md) | Comprehensive codebase structure and navigation guide |
 | [Product Requirements](docs/00-prd.md) | Product vision, architecture, and roadmap |
 | [Metamodel Specification](docs/01-metamodel-spec.md) | Card types (Layers A-D), attributes, and validation rules |
 | [Relationship Specification](docs/02-relationship-spec.md) | Graph ontology and connection rules (including governance layer) |
@@ -441,7 +442,7 @@ cargo test --lib
 cargo test --test integration_tests
 
 # Run frontend tests
-cd frontend
+cd archzero-ui
 npm test
 
 # Run with coverage
