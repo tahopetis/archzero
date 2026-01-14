@@ -18,6 +18,7 @@ pub mod relationships;
 pub mod risks;
 pub mod standards;
 pub mod tco;
+pub mod test_reset;
 
 pub use arb::*;
 pub use auth::*;
@@ -39,3 +40,4 @@ pub use relationships::*;
 pub use risks::*;
 pub use standards::*;
 pub use tco::*;
+pub use test_reset::*;

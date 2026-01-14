@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import type { User } from '@/types/api';
+import api from '@/lib/api';
 
 interface AuthStore {
   user: User | null;
@@ -21,19 +22,9 @@ export const useAuthStore = create<AuthStore>()(
 
       login: async (email: string, password: string) => {
         try {
-          const response = await fetch('/api/v1/auth/login', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ email, password }),
-          });
+          const response = await api.post('/auth/login', { email, password });
+          const data = response.data;
 
-          if (!response.ok) {
-            throw new Error('Login failed');
-          }
-
-          const data = await response.json();
           set({
             user: data.user,
             token: data.token,
@@ -44,7 +35,23 @@ export const useAuthStore = create<AuthStore>()(
           localStorage.setItem('auth_token', data.token);
         } catch (error) {
           console.error('Login error:', error);
-          throw error;
+
+          // Extract error message from axios error
+          let errorMessage = 'Login failed';
+          if (error && typeof error === 'object') {
+            const err = error as any;
+
+            // Axios HTTP error with response
+            if (err.response?.data?.error) {
+              errorMessage = err.response.data.error;
+            }
+            // Network error (no response)
+            else if (err.message) {
+              errorMessage = err.message;
+            }
+          }
+
+          throw new Error(errorMessage);
         }
       },
 

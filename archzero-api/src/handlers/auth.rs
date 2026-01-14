@@ -1,27 +1,17 @@
-use axum::Json;
+use axum::{Json, extract::State};
 use uuid::Uuid;
 use crate::models::user::{LoginRequest, LoginResponse, UserRole};
 use crate::Result;
+use crate::state::AppState;
 
 pub async fn login(
+    State(state): State<AppState>,
     Json(req): Json<LoginRequest>,
 ) -> Result<Json<LoginResponse>> {
-    // TODO: Implement proper authentication when database is available
-    // For now, return a dummy response
-    let user_id = Uuid::new_v4();
-    let user = crate::models::user::User {
-        id: user_id,
-        email: req.email.clone(),
-        full_name: None,
-        role: UserRole::Admin,
-        created_at: chrono::Utc::now(),
-        updated_at: chrono::Utc::now(),
-    };
+    // Call auth service to authenticate
+    let response = state.auth_service.login(req).await?;
 
-    // Generate a dummy token
-    let token = format!("dummy_token_{}", user_id);
-
-    Ok(Json(LoginResponse { token, user }))
+    Ok(Json(response))
 }
 
 pub async fn logout() -> &'static str {
