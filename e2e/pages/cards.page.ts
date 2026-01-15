@@ -128,6 +128,8 @@ export class CardListPage extends BasePage {
    */
   async selectAll() {
     await this.page.click('[data-testid="select-all-cards"]');
+    // Wait for bulk actions to appear after selection
+    await expect(this.page.locator('[data-testid="bulk-actions"]')).toBeVisible({ timeout: 5000 });
   }
 
   /**

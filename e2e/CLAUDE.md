@@ -15,5 +15,6 @@
 | ID | Time | T | Title | Read |
 |----|------|---|-------|------|
 | #2617 | 4:48 AM | ✅ | Fixed TestDataSeeder instantiation in global setup | ~183 |
+| #2609 | 4:30 AM | 🔄 | Global test setup modified to always refresh test data | ~270 |
 | #2585 | 3:39 AM | 🔄 | Removed duplicate test data seeding from global setup | ~208 |
 </claude-mem-context>
