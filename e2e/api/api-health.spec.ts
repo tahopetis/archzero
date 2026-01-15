@@ -23,7 +23,7 @@ test.describe('@smoke API Health Check', () => {
 
   for (const endpoint of endpoints) {
     test(`${endpoint.name} endpoint should be accessible`, async ({ request }) => {
-      const response = await request.get(endpoint.path);
+      const response = await request.get(`${API_URL}${endpoint.path}`);
 
       // Accept 200 (OK) or 401 (Unauthorized) - means endpoint exists
       // Reject 500 (Server Error) or 404 (Not Found)
@@ -39,7 +39,7 @@ test.describe('@smoke API Health Check', () => {
   }
 
   test('Health check should return service info', async ({ request }) => {
-    const response = await request.get('/api/v1/health');
+    const response = await request.get(`${API_URL}/api/v1/health`);
     expect(response.ok()).toBeTruthy();
 
     const health = await response.json();
