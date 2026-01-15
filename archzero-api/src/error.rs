@@ -41,6 +41,17 @@ impl IntoResponse for AppError {
     fn into_response(self) -> Response {
         let (status, error_message) = match self {
             AppError::Database(e) => {
+                // Check for unique constraint violation
+                if let Some(db_error) = e.as_database_error() {
+                    if db_error.code().as_deref() == Some("23505") {
+                        // Unique violation - return 409 Conflict
+                        tracing::warn!("Duplicate key constraint violation: {:?}", e);
+                        return (
+                            StatusCode::CONFLICT,
+                            Json(json!({"error": "Resource already exists"}))
+                        ).into_response();
+                    }
+                }
                 tracing::error!("Database error: {:?}", e);
                 (StatusCode::INTERNAL_SERVER_ERROR, "Database error".to_string())
             }

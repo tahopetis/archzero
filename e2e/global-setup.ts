@@ -1,4 +1,5 @@
 import { FullConfig, request } from '@playwright/test';
+import { TestDataSeeder } from './helpers/test-data-seeder';
 
 async function globalSetup(config: FullConfig) {
   console.log('🚀 Arc Zero E2E Test Suite - Global Setup');
@@ -44,6 +45,23 @@ async function globalSetup(config: FullConfig) {
       console.log('✅ Test admin user verified and can authenticate');
       if (loginData.token) {
         console.log('✅ Authentication token obtained');
+        // Store token for use in data seeding
+        process.env.TEST_AUTH_TOKEN = loginData.token;
+
+        // 4. Seed test data
+        console.log('🌱 Seeding test data...');
+        const seeder = new TestDataSeeder(requestContext, loginData.token);
+
+        // Check if test data already exists
+        const testDataExists = await seeder.testDataExists();
+
+        if (testDataExists) {
+          console.log('✅ Test data already exists, skipping seeding');
+        } else {
+          // Seed all test data
+          await seeder.seedAll();
+          console.log('✅ Test data seeding complete');
+        }
       }
     } else {
       const errorText = await loginResponse.text();
@@ -51,7 +69,7 @@ async function globalSetup(config: FullConfig) {
       throw new Error(`Cannot verify test admin user: ${loginResponse.status()}`);
     }
 
-    // 3. Clear any stale test data (call test reset endpoint if available)
+    // 3. Clear any stale authentication state (call test reset endpoint if available)
     console.log('🧹 Clearing stale authentication state...');
     const resetResponse = await requestContext.post('/api/v1/test/reset-auth');
     if (resetResponse.ok()) {
@@ -60,7 +78,7 @@ async function globalSetup(config: FullConfig) {
       console.warn('⚠️  Auth reset endpoint not available (may not be implemented yet)');
     }
 
-    // 4. Store API URL for tests to use
+    // 5. Store API URL for tests to use
     process.env.API_URL = apiURL;
     process.env.BASE_URL = baseURL;
 

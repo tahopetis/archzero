@@ -40,13 +40,13 @@ test.describe('@critical Card Management', () => {
 
   test('should search cards by name', async ({ page }) => {
     await cardListPage.goto();
-    await cardListPage.search('Test Application');
+    await cardListPage.search('Test-Application');
 
     await cardListPage.verifyListLoaded();
     const names = await cardListPage.getCardNames();
 
     names.forEach((name) => {
-      expect(name.toLowerCase()).toContain('test application');
+      expect(name.toLowerCase()).toContain('test-application');
     });
   });
 
@@ -70,7 +70,7 @@ test.describe('@critical Card Management', () => {
     await cardListPage.goto();
 
     // Assumes there's at least one card
-    const cardName = 'Test Application';
+    const cardName = 'Test-Application';
     await cardListPage.openCard(cardName);
 
     const cardDetail = new CardDetailPage(page);
