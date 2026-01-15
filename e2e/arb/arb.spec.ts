@@ -24,7 +24,7 @@ test.describe('ARB Review Requests', () => {
   test('should display ARB dashboard', async ({ page }) => {
     await page.goto('/arb');
 
-    await expect(page.locator('[data-testid="arb-dashboard"], h1:has-text("Architecture Review")')).toBeVisible({ timeout: 10000 });
+    await expect(page.locator('[data-testid="arb-dashboard"], h1:has-text("Architecture Review")').first()).toBeVisible({ timeout: 10000 });
   });
 
   test('should show pending reviews count', async ({ page }) => {

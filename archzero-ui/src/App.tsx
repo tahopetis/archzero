@@ -126,6 +126,68 @@ function App() {
           }
         />
 
+        {/* ARB Routes */}
+        <Route
+          path="/arb"
+          element={
+            <ProtectedRoute>
+              <Layout>
+                <ARBPage />
+              </Layout>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/arb/requests"
+          element={
+            <ProtectedRoute>
+              <Layout>
+                <ARBPage />
+              </Layout>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/arb/requests/new"
+          element={
+            <ProtectedRoute>
+              <Layout>
+                <ARBPage />
+              </Layout>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/arb/meetings"
+          element={
+            <ProtectedRoute>
+              <Layout>
+                <ARBPage />
+              </Layout>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/arb/meetings/:id"
+          element={
+            <ProtectedRoute>
+              <Layout>
+                <ARBPage />
+              </Layout>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/arb/submissions/:id"
+          element={
+            <ProtectedRoute>
+              <Layout>
+                <ARBPage />
+              </Layout>
+            </ProtectedRoute>
+          }
+        />
+
         {/* Governance Routes */}
         <Route
           path="/governance/principles"

@@ -1,0 +1,131 @@
+# Page snapshot
+
+```yaml
+- generic [ref=e3]:
+  - navigation [ref=e4]:
+    - generic [ref=e6]:
+      - link "AZ Arc Zero" [ref=e8] [cursor=pointer]:
+        - /url: /cards
+        - generic [ref=e10]: AZ
+        - generic [ref=e11]: Arc Zero
+      - generic [ref=e12]:
+        - link "Dashboard" [ref=e13] [cursor=pointer]:
+          - /url: /dashboard
+          - img [ref=e14]
+          - text: Dashboard
+        - link "Cards" [ref=e19] [cursor=pointer]:
+          - /url: /cards
+          - img [ref=e20]
+          - text: Cards
+        - link "Intelligence" [ref=e24] [cursor=pointer]:
+          - /url: /cards/intelligence
+          - img [ref=e25]
+          - text: Intelligence
+        - link "Reports" [ref=e33] [cursor=pointer]:
+          - /url: /reports
+          - img [ref=e34]
+          - text: Reports
+        - button "Governance" [ref=e37] [cursor=pointer]:
+          - img [ref=e38]
+          - text: Governance
+          - img [ref=e42]
+  - generic [ref=e45]:
+    - generic [ref=e46]: admin@archzero.local
+    - button "Sign Out" [ref=e47] [cursor=pointer]
+  - generic [ref=e48]:
+    - generic [ref=e49]:
+      - generic [ref=e50]:
+        - heading "Cards" [level=1] [ref=e51]
+        - button "Create Card" [ref=e52] [cursor=pointer]:
+          - img [ref=e53]
+          - text: Create Card
+      - generic [ref=e55]:
+        - textbox "Search cards..." [ref=e57]
+        - combobox [ref=e58]:
+          - option "All Types" [selected]
+          - option "Business Capability"
+          - option "Objective"
+          - option "Application"
+          - option "Interface"
+          - option "IT Component"
+          - option "Platform"
+        - combobox [ref=e59]:
+          - option "All Phases" [selected]
+          - option "Discovery"
+          - option "Strategy"
+          - option "Planning"
+          - option "Development"
+          - option "Testing"
+          - option "Active"
+          - option "Decommissioned"
+          - option "Retired"
+    - generic [ref=e60]:
+      - generic [ref=e61]: Showing 10 of 10 cards
+      - generic [ref=e62]:
+        - generic [ref=e63] [cursor=pointer]:
+          - heading "Updated Smoke Test 1768276867" [level=3] [ref=e65]
+          - generic [ref=e69]:
+            - generic [ref=e70]: Application
+            - generic [ref=e71]: Active
+          - generic [ref=e73]: "Updated: 1/13/2026"
+        - generic [ref=e74] [cursor=pointer]:
+          - heading "Updated Smoke Test 1768276494" [level=3] [ref=e76]
+          - generic [ref=e80]:
+            - generic [ref=e81]: Application
+            - generic [ref=e82]: Active
+          - generic [ref=e84]: "Updated: 1/13/2026"
+        - generic [ref=e85] [cursor=pointer]:
+          - heading "Updated Smoke Test 1768276480" [level=3] [ref=e87]
+          - generic [ref=e91]:
+            - generic [ref=e92]: Application
+            - generic [ref=e93]: Active
+          - generic [ref=e95]: "Updated: 1/13/2026"
+        - generic [ref=e96] [cursor=pointer]:
+          - heading "Updated Smoke Test 1768276458" [level=3] [ref=e98]
+          - generic [ref=e102]:
+            - generic [ref=e103]: Application
+            - generic [ref=e104]: Active
+          - generic [ref=e106]: "Updated: 1/13/2026"
+        - generic [ref=e107] [cursor=pointer]:
+          - heading "Smoke Test Card 1768276239" [level=3] [ref=e109]
+          - generic [ref=e113]:
+            - generic [ref=e114]: Application
+            - generic [ref=e115]: Active
+          - generic [ref=e117]: "Updated: 1/13/2026"
+        - generic [ref=e118] [cursor=pointer]:
+          - heading "Smoke Test Card 1768276083" [level=3] [ref=e120]
+          - generic [ref=e124]:
+            - generic [ref=e125]: Application
+            - generic [ref=e126]: Active
+          - generic [ref=e128]: "Updated: 1/13/2026"
+        - generic [ref=e129] [cursor=pointer]:
+          - heading "Smoke Test Card" [level=3] [ref=e131]
+          - generic [ref=e135]:
+            - generic [ref=e136]: Application
+            - generic [ref=e137]: Active
+          - generic [ref=e139]: "Updated: 1/13/2026"
+        - generic [ref=e140] [cursor=pointer]:
+          - heading "API Application" [level=3] [ref=e142]
+          - generic [ref=e146]:
+            - generic [ref=e147]: Application
+            - generic [ref=e148]: Active
+          - generic [ref=e150]: "Updated: 1/12/2026"
+        - generic [ref=e151] [cursor=pointer]:
+          - heading "Database Service" [level=3] [ref=e153]
+          - generic [ref=e157]:
+            - generic [ref=e158]: ITComponent
+            - generic [ref=e159]: Active
+          - generic [ref=e161]: "Updated: 1/12/2026"
+        - generic [ref=e162] [cursor=pointer]:
+          - generic [ref=e163]:
+            - heading "Test Application" [level=3] [ref=e164]
+            - generic [ref=e168]: "85"
+          - generic [ref=e169]:
+            - generic [ref=e170]: Application
+            - generic [ref=e171]: Active
+          - paragraph [ref=e172]: Updated description
+          - generic [ref=e173]:
+            - generic [ref=e174]: test
+            - generic [ref=e175]: demo
+          - generic [ref=e177]: "Updated: 1/12/2026"
+```

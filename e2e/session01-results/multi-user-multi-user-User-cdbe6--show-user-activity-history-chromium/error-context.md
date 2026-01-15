@@ -1,0 +1,93 @@
+# Page snapshot
+
+```yaml
+- generic [ref=e3]:
+  - navigation [ref=e4]:
+    - generic [ref=e6]:
+      - link "AZ Arc Zero" [ref=e8] [cursor=pointer]:
+        - /url: /cards
+        - generic [ref=e10]: AZ
+        - generic [ref=e11]: Arc Zero
+      - generic [ref=e12]:
+        - link "Dashboard" [ref=e13] [cursor=pointer]:
+          - /url: /dashboard
+          - img [ref=e14]
+          - text: Dashboard
+        - link "Cards" [ref=e19] [cursor=pointer]:
+          - /url: /cards
+          - img [ref=e20]
+          - text: Cards
+        - link "Intelligence" [ref=e24] [cursor=pointer]:
+          - /url: /cards/intelligence
+          - img [ref=e25]
+          - text: Intelligence
+        - link "Reports" [ref=e33] [cursor=pointer]:
+          - /url: /reports
+          - img [ref=e34]
+          - text: Reports
+        - button "Governance" [ref=e37] [cursor=pointer]:
+          - img [ref=e38]
+          - text: Governance
+          - img [ref=e42]
+  - generic [ref=e45]:
+    - generic [ref=e46]: admin@archzero.local
+    - button "Sign Out" [ref=e47] [cursor=pointer]
+  - generic [ref=e48]:
+    - generic [ref=e50]:
+      - heading "User Profile" [level=1] [ref=e51]
+      - paragraph [ref=e52]: Manage your account settings and preferences
+    - generic [ref=e53]:
+      - generic [ref=e55]:
+        - img [ref=e58]
+        - generic [ref=e61]:
+          - heading "Not set" [level=2] [ref=e62]
+          - paragraph [ref=e63]: admin@archzero.local
+          - generic [ref=e65]:
+            - img [ref=e66]
+            - text: admin
+      - generic [ref=e68]:
+        - navigation "Tabs" [ref=e70]:
+          - button "Profile" [ref=e71] [cursor=pointer]:
+            - img [ref=e72]
+            - generic [ref=e75]: Profile
+          - button "Security" [ref=e76] [cursor=pointer]:
+            - img [ref=e77]
+            - generic [ref=e81]: Security
+          - button "Preferences" [ref=e82] [cursor=pointer]:
+            - img [ref=e83]
+            - generic [ref=e89]: Preferences
+          - button "Activity" [active] [ref=e90] [cursor=pointer]:
+            - img [ref=e91]
+            - generic [ref=e94]: Activity
+        - generic [ref=e96]:
+          - heading "Activity History" [level=3] [ref=e97]
+          - generic [ref=e98]:
+            - generic [ref=e100]:
+              - generic [ref=e101]:
+                - generic [ref=e102]:
+                  - heading "Login" [level=4] [ref=e103]
+                  - generic [ref=e104]: 2026-01-14T17:53:01.304Z
+                - paragraph [ref=e105]: Logged in from Chrome on Windows
+              - generic [ref=e106]: Jan 14, 2026, 05:53 PM
+            - generic [ref=e108]:
+              - generic [ref=e109]:
+                - generic [ref=e110]:
+                  - heading "Password Updated" [level=4] [ref=e111]
+                  - generic [ref=e112]: 2026-01-13T17:58:01.304Z
+                - paragraph [ref=e113]: Password changed successfully
+              - generic [ref=e114]: Jan 13, 2026, 05:58 PM
+            - generic [ref=e116]:
+              - generic [ref=e117]:
+                - generic [ref=e118]:
+                  - heading "Profile Updated" [level=4] [ref=e119]
+                  - generic [ref=e120]: 2026-01-12T17:58:01.304Z
+                - paragraph [ref=e121]: Updated user information
+              - generic [ref=e122]: Jan 12, 2026, 05:58 PM
+            - generic [ref=e124]:
+              - generic [ref=e125]:
+                - generic [ref=e126]:
+                  - heading "Login" [level=4] [ref=e127]
+                  - generic [ref=e128]: 2026-01-11T17:58:01.304Z
+                - paragraph [ref=e129]: Logged in from Firefox on MacOS
+              - generic [ref=e130]: Jan 11, 2026, 05:58 PM
+```

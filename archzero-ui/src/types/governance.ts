@@ -802,6 +802,7 @@ export interface ARBMeetingListResponse {
 
 export interface ARBSubmission {
   id: string;
+  title: string;
   meetingId?: string;
   cardId: string;
   submissionType: ARBSubmissionType;
@@ -813,14 +814,24 @@ export interface ARBSubmission {
   relatedPolicyId?: string;
   createdAt: string;
   updatedAt: string;
+  attachments?: Array<{
+    id: string;
+    filename: string;
+    fileUrl: string;
+  }>;
 }
 
 export interface CreateARBSubmissionRequest {
-  cardId: string;
+  cardId?: string;
+  title?: string;
   submissionType: ARBSubmissionType;
   rationale: string;
   priority: ARBPriority;
   relatedPolicyId?: string;
+  businessJustification?: string;
+  impact?: string;
+  conditions?: string;
+  validUntil?: string;
 }
 
 export interface UpdateARBSubmissionRequest {
