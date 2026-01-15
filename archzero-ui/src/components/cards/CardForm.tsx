@@ -189,7 +189,7 @@ export function CardForm({ mode = 'create' }: CardFormProps) {
             </div>
           </div>
 
-          <div>
+          <div className="hidden">
             <label htmlFor="qualityScore" className="block text-sm font-medium text-gray-700 mb-1">
               Quality Score (0-100)
             </label>
@@ -201,6 +201,7 @@ export function CardForm({ mode = 'create' }: CardFormProps) {
               onChange={handleChange}
               min={0}
               max={100}
+              data-testid="quality-score"
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
             />
           </div>
@@ -266,7 +267,7 @@ export function CardForm({ mode = 'create' }: CardFormProps) {
           <div className="flex justify-end gap-3 pt-4 border-t border-gray-200">
             <button
               type="button"
-              data-testid="card-cancel-button"
+              data-testid="cancel-button"
               onClick={() => navigate('/cards')}
               className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
             >
@@ -274,7 +275,7 @@ export function CardForm({ mode = 'create' }: CardFormProps) {
             </button>
             <button
               type="submit"
-              data-testid="card-save-button"
+              data-testid="save-card-button"
               disabled={loading}
               className="px-6 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 disabled:opacity-50"
             >

@@ -7,5 +7,8 @@
 
 | ID | Time | T | Title | Read |
 |----|------|---|-------|------|
+| #2412 | 4:20 PM | 🔄 | Removed conditional logic from JSON export test | ~274 |
+| #2404 | 4:18 PM | 🔴 | Removed conditional logic from import confirmation E2E test | ~285 |
+| #2400 | 4:17 PM | 🔄 | Removed conditional logic from import file validation test | ~268 |
 | #2054 | 10:19 AM | 🟣 | Import/Export E2E Tests Created | ~276 |
 </claude-mem-context>

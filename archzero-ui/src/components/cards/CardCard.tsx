@@ -3,6 +3,9 @@ import type { Card, CardTypeValue, LifecyclePhaseValue } from '@/types/api';
 interface CardCardProps {
   card: Card;
   onClick?: () => void;
+  selected?: boolean;
+  onToggleSelect?: (cardId: string) => void;
+  showCheckbox?: boolean;
 }
 
 const cardTypeColors: Record<CardTypeValue, string> = {
@@ -32,16 +35,34 @@ const lifecyclePhaseColors: Record<LifecyclePhaseValue, string> = {
   Retired: 'bg-gray-50 text-gray-500',
 };
 
-export function CardCard({ card, onClick }: CardCardProps) {
+export function CardCard({ card, onClick, selected = false, onToggleSelect, showCheckbox = false }: CardCardProps) {
   const typeColor = cardTypeColors[card.type] || 'bg-gray-100 text-gray-800';
   const phaseColor = lifecyclePhaseColors[card.lifecyclePhase] || 'bg-gray-100 text-gray-600';
 
+  const handleCheckboxChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    e.stopPropagation();
+    onToggleSelect?.(card.id);
+  };
+
   return (
     <div
-      data-testid={`card-item-${card.id}`}
+      data-testid={`card-${card.id}`}
+      data-card-name={card.name}
       onClick={onClick}
-      className="bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow duration-200 p-6 border border-gray-200 cursor-pointer"
+      className={`bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow duration-200 p-6 border border-gray-200 cursor-pointer relative ${
+        selected ? 'ring-2 ring-indigo-500' : ''
+      }`}
     >
+      {showCheckbox && (
+        <div className="absolute top-4 left-4 z-10" onClick={(e) => e.stopPropagation()}>
+          <input
+            type="checkbox"
+            checked={selected}
+            onChange={handleCheckboxChange}
+            className="w-5 h-5 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500 cursor-pointer"
+          />
+        </div>
+      )}
       <div className="flex items-start justify-between mb-3">
         <h3 className="text-lg font-semibold text-gray-900 flex-1">{card.name}</h3>
         {card.qualityScore !== undefined && (
@@ -104,9 +125,12 @@ export function CardCard({ card, onClick }: CardCardProps) {
 interface CardGridProps {
   cards: Card[];
   onCardClick?: (card: Card) => void;
+  selectedCardIds?: Set<string>;
+  onToggleSelect?: (cardId: string) => void;
+  showCheckboxes?: boolean;
 }
 
-export function CardGrid({ cards, onCardClick }: CardGridProps) {
+export function CardGrid({ cards, onCardClick, selectedCardIds, onToggleSelect, showCheckboxes = false }: CardGridProps) {
   if (cards.length === 0) {
     return (
       <div className="text-center py-12">
@@ -136,6 +160,9 @@ export function CardGrid({ cards, onCardClick }: CardGridProps) {
           key={card.id}
           card={card}
           onClick={() => onCardClick?.(card)}
+          selected={selectedCardIds?.has(card.id)}
+          onToggleSelect={onToggleSelect}
+          showCheckbox={showCheckboxes}
         />
       ))}
     </div>

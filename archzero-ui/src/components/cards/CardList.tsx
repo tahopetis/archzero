@@ -9,6 +9,10 @@ interface CardListProps {
   searchQuery?: string;
   tagsFilter?: string[];
   onCardClick?: (card: Card) => void;
+  selectedCardIds?: Set<string>;
+  onToggleSelect?: (cardId: string) => void;
+  showCheckboxes?: boolean;
+  onCardIdsLoaded?: (cardIds: string[]) => void;
 }
 
 export function CardList({
@@ -17,6 +21,10 @@ export function CardList({
   searchQuery,
   tagsFilter,
   onCardClick,
+  selectedCardIds,
+  onToggleSelect,
+  showCheckboxes = false,
+  onCardIdsLoaded,
 }: CardListProps) {
   const [cards, setCards] = useState<Card[]>([]);
   const [loading, setLoading] = useState(true);
@@ -54,6 +62,13 @@ export function CardList({
     fetchCards();
   }, [page, cardTypeFilter, lifecyclePhaseFilter, searchQuery, tagsFilter]);
 
+  // Notify parent of loaded card IDs for "select all" functionality
+  useEffect(() => {
+    if (onCardIdsLoaded && cards.length > 0) {
+      onCardIdsLoaded(cards.map(c => c.id));
+    }
+  }, [cards, onCardIdsLoaded]);
+
   const totalPages = Math.ceil(total / pageSize);
 
   if (loading) {
@@ -66,22 +81,24 @@ export function CardList({
 
   if (error) {
     return (
-      <div className="text-center py-12">
-        <svg
-          className="mx-auto h-12 w-12 text-red-400"
-          fill="none"
-          viewBox="0 0 24 24"
-          stroke="currentColor"
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={2}
-            d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-          />
-        </svg>
-        <h3 className="mt-2 text-sm font-medium text-gray-900">Error</h3>
-        <p className="mt-1 text-sm text-gray-500">{error}</p>
+      <div data-testid="card-list">
+        <div className="text-center py-12">
+          <svg
+            className="mx-auto h-12 w-12 text-red-400"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+            />
+          </svg>
+          <h3 className="mt-2 text-sm font-medium text-gray-900">Error</h3>
+          <p className="mt-1 text-sm text-gray-500">{error}</p>
+        </div>
       </div>
     );
   }
@@ -92,16 +109,22 @@ export function CardList({
         Showing {cards.length} of {total} cards
       </div>
 
-      <CardGrid cards={cards} onCardClick={onCardClick} />
+      <CardGrid
+        cards={cards}
+        onCardClick={onCardClick}
+        selectedCardIds={selectedCardIds}
+        onToggleSelect={onToggleSelect}
+        showCheckboxes={showCheckboxes}
+      />
 
       {totalPages > 1 && (
-        <div data-testid="cards-pagination" className="mt-6 flex items-center justify-between">
+        <div data-testid="pagination" className="mt-6 flex items-center justify-between">
           <div className="text-sm text-gray-600">
             Page {page} of {totalPages}
           </div>
           <div className="flex gap-2">
             <button
-              data-testid="cards-pagination-prev"
+              data-testid="previous-page"
               onClick={() => setPage(p => Math.max(1, p - 1))}
               disabled={page === 1}
               className="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
@@ -109,7 +132,7 @@ export function CardList({
               Previous
             </button>
             <button
-              data-testid="cards-pagination-next"
+              data-testid="next-page"
               onClick={() => setPage(p => Math.min(totalPages, p + 1))}
               disabled={page === totalPages}
               className="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"

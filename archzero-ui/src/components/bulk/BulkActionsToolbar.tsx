@@ -27,7 +27,7 @@ export function BulkActionsToolbar({
   if (selectedCount === 0) return null;
 
   return (
-    <div className="bg-indigo-50 border border-indigo-200 rounded-lg px-4 py-3 mb-4">
+    <div data-testid="bulk-actions" className="bg-indigo-50 border border-indigo-200 rounded-lg px-4 py-3 mb-4">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
           <span className="text-sm font-semibold text-indigo-900">
@@ -77,6 +77,7 @@ export function BulkActionsToolbar({
           </button>
 
           <button
+            data-testid="bulk-delete-button"
             onClick={onBulkDelete}
             className={cn(
               'flex items-center gap-2 px-3 py-2 rounded-lg transition-colors',

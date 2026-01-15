@@ -114,11 +114,22 @@ export function CardDetail() {
             <h1 className="text-2xl font-bold text-gray-900 mb-3" data-testid="card-name">{card.name}</h1>
             <div className="flex items-center gap-3">
               <button
-                data-testid="card-detail-edit-button"
+                data-testid="edit-card-button"
                 onClick={() => navigate(`/cards/${card.id}/edit`)}
                 className="px-3 py-1 bg-indigo-600 text-white text-sm rounded-md hover:bg-indigo-700"
               >
                 Edit
+              </button>
+              <button
+                data-testid="delete-card-button"
+                onClick={() => {
+                  if (window.confirm('Are you sure you want to delete this card?')) {
+                    cardApi.delete(card.id).then(() => navigate('/cards'));
+                  }
+                }}
+                className="px-3 py-1 bg-red-600 text-white text-sm rounded-md hover:bg-red-700"
+              >
+                Delete
               </button>
               <button
                 data-testid="card-detail-intelligence-button"

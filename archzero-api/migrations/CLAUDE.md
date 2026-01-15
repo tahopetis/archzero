@@ -8,4 +8,12 @@
 | ID | Time | T | Title | Read |
 |----|------|---|-------|------|
 | #1471 | 2:15 AM | 🟣 | Search and Filtering Implemented with pg_trgm | ~313 |
+
+### Jan 14, 2026
+
+| ID | Time | T | Title | Read |
+|----|------|---|-------|------|
+| #1688 | 4:16 AM | 🔴 | Migration updated with corrected bcrypt password hashes | ~385 |
+| #1669 | 4:04 AM | 🟣 | Database migration created for account lockout and test users | ~340 |
+| #1664 | 4:03 AM | 🟣 | Users table migration created with authentication support | ~300 |
 </claude-mem-context>

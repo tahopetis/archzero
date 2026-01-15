@@ -7,8 +7,27 @@
 
 | ID | Time | T | Title | Read |
 |----|------|---|-------|------|
+| #1351 | 4:08 PM | 🔄 | Relationship Confidence Changed to Float | ~59 |
+| #1350 | " | 🟣 | Confidence Column Migration Rollback Created | ~220 |
+| #1341 | 4:05 PM | 🔄 | Relationship Dates Changed to Text | ~196 |
+| #1340 | " | 🟣 | Relationships Date Migration Rollback Created | ~206 |
 | #1306 | 3:55 PM | 🟣 | Card Schema Migration Created | ~231 |
 | #1305 | " | 🟣 | Schema Rollback Migration Created | ~205 |
 | #1197 | 3:23 PM | 🟣 | Initial Database Migration Created | ~332 |
 | #1196 | " | 🟣 | PostgreSQL Migration Rollback Script Created | ~272 |
+
+### Jan 13, 2026
+
+| ID | Time | T | Title | Read |
+|----|------|---|-------|------|
+| #1468 | 2:14 AM | 🟣 | Full-Text Search Migration Rollback Created | ~208 |
+
+### Jan 14, 2026
+
+| ID | Time | T | Title | Read |
+|----|------|---|-------|------|
+| #1918 | 8:58 AM | 🟣 | Search implementation and migration 005 committed to repository | ~203 |
+| #1916 | 8:57 AM | 🟣 | Migration 005 files staged from parent migrations directory | ~96 |
+| #1881 | 8:47 AM | 🔵 | Migration 005 content defines pg_trgm extension and GIN indexes | ~237 |
+| #1824 | 8:31 AM | 🟣 | pg_trgm extension migration applied to PostgreSQL database | ~231 |
 </claude-mem-context>

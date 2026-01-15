@@ -16,4 +16,21 @@
 | ID | Time | T | Title | Read |
 |----|------|---|-------|------|
 | #1360 | 1:42 AM | 🟣 | Card API Client Module Created | ~226 |
+
+### Jan 14, 2026
+
+| ID | Time | T | Title | Read |
+|----|------|---|-------|------|
+| #2149 | 12:13 PM | 🔴 | Fixed missing queryClient hook in useLinkCards governance hook | ~107 |
+| #2148 | " | 🔵 | Governance hooks API integration confirmed for card linking | ~226 |
+| #2147 | " | 🔴 | Fixed missing useQueryClient hook in useValidatePolicy mutation | ~380 |
+| #2146 | 12:12 PM | 🔵 | Examined Governance Hooks Implementation | ~137 |
+| #1953 | 9:24 AM | 🟣 | Complete E2E Testing Infrastructure Implemented | ~405 |
+| #1922 | 8:59 AM | 🔵 | Frontend API Token Key Mismatch Found | ~221 |
+| #1745 | 6:05 AM | 🔴 | Fixed 401 error handler to prevent redirect loop on login page | ~215 |
+| #1637 | 3:28 AM | 🔄 | Removed queryClient from exports in governance-hooks.ts | ~193 |
+| #1635 | 3:27 AM | 🔄 | Automated fix for mutation hooks missing queryClient | ~292 |
+| #1634 | " | 🔴 | Added missing queryClient hook call to useCreatePrinciple | ~228 |
+| #1633 | " | 🔄 | Removed erroneous useQueryClient hook call from governance-hooks.ts | ~238 |
+| #1632 | " | 🔵 | Comprehensive React Query hooks implemented for all governance features | ~420 |
 </claude-mem-context>

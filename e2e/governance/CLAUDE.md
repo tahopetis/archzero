@@ -7,5 +7,9 @@
 
 | ID | Time | T | Title | Read |
 |----|------|---|-------|------|
+| #2383 | 4:11 PM | 🔴 | Removed conditional logic from compliance metrics E2E test | ~242 |
+| #2379 | 4:10 PM | 🔄 | Removed conditional logic from initiative progress tracking test | ~237 |
+| #2377 | " | 🔴 | Removed conditional logic from exception approval E2E test | ~299 |
+| #2371 | 4:08 PM | 🔴 | Removed conditional logic from governance E2E test | ~289 |
 | #2045 | 10:13 AM | 🟣 | Governance E2E test suite implemented with comprehensive coverage | ~505 |
 </claude-mem-context>

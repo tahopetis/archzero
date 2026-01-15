@@ -8,7 +8,4 @@
 | ID | Time | T | Title | Read |
 |----|------|---|-------|------|
 | #1120 | 3:09 PM | 🔵 | Project Documentation Structure Catalogued | ~271 |
-| #943 | 7:35 AM | ✅ | Governance Layer added to relationship specification | ~973 |
-| #938 | 7:32 AM | ✅ | API specification version history updated to v2.0 | ~557 |
-| #935 | 7:31 AM | ✅ | API specification expanded with comprehensive governance and compliance endpoints | ~1219 |
 </claude-mem-context>
