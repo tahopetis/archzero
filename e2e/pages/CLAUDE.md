@@ -7,6 +7,7 @@
 
 | ID | Time | T | Title | Read |
 |----|------|---|-------|------|
+| #2329 | 3:53 PM | 🔄 | Login page authentication methods deprecated in favor of storageState | ~301 |
 | #1927 | 9:05 AM | 🟣 | LoginViaApi Now Sets Zustand Storage | ~203 |
 | #1924 | 9:00 AM | 🟣 | LocalStorage Keys Fixed to Match Frontend | ~166 |
 | #1909 | 8:54 AM | 🟣 | LoginViaApi Method Enhanced for Cross-Browser Compatibility | ~216 |

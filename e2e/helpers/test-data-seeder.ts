@@ -47,8 +47,9 @@ export class TestDataSeeder {
     // Get pagination test cards
     const paginationCards = TestDataFactory.createPaginationCards();
 
-    // Combine all cards
-    const allCards = [...diverseCards, ...paginationCards];
+    // Combine all cards - pagination cards first so diverse cards appear first in list
+    // (sorted by created_at DESC, so last created appears first)
+    const allCards = [...paginationCards, ...diverseCards];
 
     // Create cards via API
     let createdCount = 0;
@@ -205,33 +206,41 @@ export class TestDataSeeder {
     console.log('🧹 Clearing test data...');
 
     try {
-      // Delete cards (this should cascade to relationships)
-      const response = await this.request.get(`${this.baseURL}/api/v1/cards`);
+      // Delete ALL cards - use authenticated request
+      const response = await this.request.get(`${this.baseURL}/api/v1/cards`, {
+        headers: {
+          'Authorization': `Bearer ${this.authToken}`,
+        },
+      });
 
       if (response.ok()) {
         const cardsData = await response.json();
         const cards = cardsData.data || cardsData;
 
         if (Array.isArray(cards)) {
+          console.log(`Found ${cards.length} cards to delete`);
+
+          // Delete ALL cards for clean test state
           for (const card of cards) {
-            // Only delete test cards (those that start with specific test names)
-            if (card.name && (
-              card.name === 'Test-Application' ||
-              card.name.startsWith('Pagination-Test') ||
-              card.name.startsWith('Customer-') ||
-              card.name.startsWith('Inventory-') ||
-              card.name.startsWith('Order-') ||
-              card.name.startsWith('PostgreSQL-') ||
-              card.name.startsWith('Redis-') ||
-              card.name.startsWith('Payment-') ||
-              card.name.startsWith('Shipping-') ||
-              card.name.startsWith('Improve-') ||
-              card.name.startsWith('Cloud-')
-            )) {
-              await this.request.delete(`${this.baseURL}/api/v1/cards/${card.id}`);
+            try {
+              const deleteResponse = await this.request.delete(`${this.baseURL}/api/v1/cards/${card.id}`, {
+                headers: {
+                  'Authorization': `Bearer ${this.authToken}`,
+                },
+              });
+
+              if (deleteResponse.ok()) {
+                console.log(`  ✅ Deleted card: ${card.name}`);
+              } else {
+                console.warn(`  ⚠️  Failed to delete card ${card.name}: ${deleteResponse.status()}`);
+              }
+            } catch (error) {
+              console.warn(`  ⚠️  Error deleting card ${card.name}:`, error);
             }
           }
         }
+      } else {
+        console.warn(`  ⚠️  Could not fetch cards to delete: ${response.status()}`);
       }
 
       console.log('✅ Test data cleared');

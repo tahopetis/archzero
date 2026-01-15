@@ -7,10 +7,7 @@
 
 | ID | Time | T | Title | Read |
 |----|------|---|-------|------|
-| #1985 | 9:32 AM | 🔴 | Fixed SQL Parameter Binding in Card List Method | ~296 |
-| #1960 | 9:25 AM | 🔵 | Card Service List Method Implementation Examined | ~244 |
-| #1959 | " | 🔵 | Card Service Implementation Examined | ~199 |
-| #1815 | 8:29 AM | 🔵 | Auth Service Implementation Found | ~290 |
+| #1959 | 9:25 AM | 🔵 | Card Service Implementation Examined | ~199 |
 | #1693 | 5:08 AM | ✅ | Account locked error message simplified | ~215 |
 | #1674 | 4:07 AM | 🟣 | Authentication service enhanced with sqlx::FromRow trait | ~223 |
 </claude-mem-context>

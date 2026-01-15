@@ -48,6 +48,14 @@ test.describe('@smoke @critical Authentication Flow', () => {
   });
 
   test('should redirect to login when accessing protected route without auth', async ({ page }) => {
+    // Clear any existing auth state from localStorage
+    await page.goto('/login');
+    await page.evaluate(() => {
+      localStorage.clear();
+      sessionStorage.clear();
+    });
+
+    // Now try to access protected route
     await page.goto('/cards');
     await page.waitForLoadState('networkidle');
 
@@ -115,7 +123,27 @@ test.describe('Authentication Errors', () => {
   });
 
   test('should lock account after multiple failed attempts', async ({ page }) => {
-    // Attempt login 5 times with wrong password
+    // Clear any existing auth state before testing account lockout
+    await page.goto('/login');
+    await page.evaluate(() => {
+      localStorage.clear();
+      sessionStorage.clear();
+    });
+
+    // First, do a successful login to reset any existing failed_login_attempts
+    await loginPage.emailInput.fill(TEST_USERS.ADMIN.email);
+    await loginPage.passwordInput.fill(TEST_USERS.ADMIN.password);
+    await loginPage.loginButton.click();
+    await page.waitForURL(/\/dashboard|\/$/, { timeout: 5000 });
+
+    // Clear state again and go back to login for lockout testing
+    await page.goto('/login');
+    await page.evaluate(() => {
+      localStorage.clear();
+      sessionStorage.clear();
+    });
+
+    // Now attempt login 5 times with wrong password to trigger lockout
     for (let i = 0; i < 5; i++) {
       await loginPage.emailInput.fill(TEST_USERS.ADMIN.email);
       await loginPage.passwordInput.fill('wrongpassword');

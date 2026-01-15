@@ -48,20 +48,26 @@ async function globalSetup(config: FullConfig) {
         // Store token for use in data seeding
         process.env.TEST_AUTH_TOKEN = loginData.token;
 
-        // 4. Seed test data
+        // 4. Clean up ALL old test data from database (including soft-deleted)
+        console.log('🧹 Cleaning up ALL old test data from database...');
+        const cleanupResponse = await requestContext.post('/api/v1/test/cleanup-all-cards', {
+          headers: {
+            'Authorization': `Bearer ${loginData.token}`,
+          },
+        });
+
+        if (cleanupResponse.ok()) {
+          const cleanupData = await cleanupResponse.json();
+          console.log(`✅ Database cleanup complete: ${cleanupData.deleted_count} cards removed`);
+        } else {
+          console.warn(`⚠️  Database cleanup failed: ${cleanupResponse.status()}`);
+        }
+
+        // 5. Seed test data
         console.log('🌱 Seeding test data...');
         const seeder = new TestDataSeeder(requestContext, loginData.token);
-
-        // Check if test data already exists
-        const testDataExists = await seeder.testDataExists();
-
-        if (testDataExists) {
-          console.log('✅ Test data already exists, skipping seeding');
-        } else {
-          // Seed all test data
-          await seeder.seedAll();
-          console.log('✅ Test data seeding complete');
-        }
+        await seeder.seedAll();
+        console.log('✅ Test data seeding complete');
       }
     } else {
       const errorText = await loginResponse.text();

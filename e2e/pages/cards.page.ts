@@ -84,7 +84,10 @@ export class CardListPage extends BasePage {
    * Click on card by name
    */
   async openCard(cardName: string) {
-    await this.cardList.locator(`[data-card-name="${cardName}"]`).click();
+    const card = this.cardList.locator(`[data-card-name="${cardName}"]`);
+    // Wait for card to be visible before clicking
+    await expect(card).toBeVisible({ timeout: 10000 });
+    await card.click();
     await this.waitForLoad();
   }
 

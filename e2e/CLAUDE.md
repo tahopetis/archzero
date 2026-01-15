@@ -9,6 +9,11 @@
 |----|------|---|-------|------|
 | #2480 | 5:38 PM | 🔵 | Session 1 test results summary documented in markdown file | ~274 |
 | #1791 | 8:22 AM | 🔵 | E2E Directory Structure Established with Auth, Cards, and Governance Test Suites | ~268 |
-| #1538 | 1:30 AM | 🟣 | E2E testing documentation created with comprehensive guide | ~393 |
-| #1485 | 1:11 AM | 🔵 | Existing e2e test directory found with Playwright configuration | ~202 |
+
+### Jan 15, 2026
+
+| ID | Time | T | Title | Read |
+|----|------|---|-------|------|
+| #2617 | 4:48 AM | ✅ | Fixed TestDataSeeder instantiation in global setup | ~183 |
+| #2585 | 3:39 AM | 🔄 | Removed duplicate test data seeding from global setup | ~208 |
 </claude-mem-context>

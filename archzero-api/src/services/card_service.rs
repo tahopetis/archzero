@@ -269,9 +269,8 @@ impl CardService {
 
     pub async fn delete(&self, id: Uuid) -> Result<(), AppError> {
         let result = sqlx::query(
-            "UPDATE cards SET status = 'deleted', updated_at = $1 WHERE id = $2"
+            "DELETE FROM cards WHERE id = $1"
         )
-        .bind(Utc::now())
         .bind(id)
         .execute(&self.pool)
         .await
@@ -282,6 +281,16 @@ impl CardService {
         }
 
         Ok(())
+    }
+
+    /// Delete ALL cards from the database (for testing/cleanup purposes)
+    pub async fn delete_all(&self) -> Result<u64, AppError> {
+        let result = sqlx::query("DELETE FROM cards")
+            .execute(&self.pool)
+            .await
+            .map_err(|e| AppError::Internal(anyhow::anyhow!("Failed to delete all cards: {}", e)))?;
+
+        Ok(result.rows_affected())
     }
 }
 
