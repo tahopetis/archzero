@@ -104,8 +104,9 @@ fn card_to_arb_submission(card: crate::models::card::Card) -> Result<ARBSubmissi
 
     Ok(ARBSubmission {
         id: card.id,
+        title: attrs.get("title").and_then(|v| v.as_str()).map(String::from),
         meeting_id,
-        card_id,
+        card_id: Some(card_id),
         submission_type,
         rationale,
         submitted_by,
@@ -433,9 +434,12 @@ pub async fn get_meeting_agenda(
     for card in cards {
         if let Ok(submission) = card_to_arb_submission(card) {
             if submission.meeting_id == Some(id) {
-                let card_ref = match state.card_service.get(submission.card_id).await {
-                    Ok(c) => c,
-                    Err(_) => continue,
+                let card_ref = match submission.card_id {
+                    Some(card_id) => match state.card_service.get(card_id).await {
+                        Ok(c) => c,
+                        Err(_) => continue,
+                    },
+                    None => continue,
                 };
 
                 let item = ARBAgendaItem {
@@ -668,19 +672,27 @@ pub async fn create_submission(
     Json(req): Json<CreateARBSubmissionRequest>,
 ) -> Result<Json<ARBSubmission>, StatusCode> {
     // Get the related card to use as name
-    let related_card = match state.card_service.get(req.card_id).await {
-        Ok(c) => c,
-        Err(AppError::NotFound(_)) => return Err(StatusCode::BAD_REQUEST),
-        Err(e) => {
-            tracing::error!("Failed to get related card: {}", e);
-            return Err(StatusCode::INTERNAL_SERVER_ERROR);
-        }
+    let (related_card, submitted_by) = match req.card_id {
+        Some(card_id) => {
+            let card = state.card_service.get(card_id).await
+                .map_err(|e| {
+                    tracing::error!("Failed to get related card: {}", e);
+                    if matches!(e, AppError::NotFound(_)) {
+                        StatusCode::BAD_REQUEST
+                    } else {
+                        StatusCode::INTERNAL_SERVER_ERROR
+                    }
+                })?;
+            let owner = card.owner_id.unwrap_or_else(|| Uuid::new_v4());
+            (Some(card), owner)
+        },
+        None => (None, Uuid::parse_str("0a36bdfe-6c99-4b9f-9558-325d02aac22b").unwrap_or_else(|_| Uuid::new_v4())),
     };
 
-    let submitted_by = related_card.owner_id.unwrap_or_else(|| Uuid::new_v4());
     let submitted_at = Utc::now();
 
     let attributes = serde_json::json!({
+        "title": req.title,
         "meetingId": serde_json::Value::Null,
         "cardId": req.card_id,
         "submissionType": req.submission_type,
@@ -692,7 +704,7 @@ pub async fn create_submission(
     });
 
     let create_req = CreateCardRequest {
-        name: format!("ARB Submission: {}", related_card.name),
+        name: related_card.as_ref().map(|c| c.name.clone()).unwrap_or_else(|| "ARB Submission".to_string()),
         card_type: CardType::ARBSubmission,
         lifecycle_phase: LifecyclePhase::Discovery,
         quality_score: None,

@@ -391,7 +391,7 @@ export function ARBDashboard() {
       {/* Quick Stats */}
       <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-6 gap-4">
         <Card padding="sm">
-          <div className="text-center" data-testid="metric-pending">
+          <div className="text-center pending-count" data-testid="pending-reviews-count">
             <p className="text-2xl font-bold text-amber-600">{safeDashboard.pendingSubmissions}</p>
             <p className="text-xs text-slate-500 uppercase tracking-wide">Pending</p>
           </div>
@@ -622,6 +622,8 @@ export function NewRequestForm() {
   const [selectedCard, setSelectedCard] = useState('');
   const [showCardSelect, setShowCardSelect] = useState(false);
   const [attachments, setAttachments] = useState<File[]>([]);
+  const [submitSuccess, setSubmitSuccess] = useState(false);
+  const [successMessage, setSuccessMessage] = useState('');
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -638,7 +640,7 @@ export function NewRequestForm() {
       title,
       rationale: description,
       cardId: selectedCard || undefined,
-      priority: impact.toUpperCase() as ARBPriority,
+      priority: impact.charAt(0).toUpperCase() + impact.slice(1) as ARBPriority,
       // Add additional fields based on type
       ...(requestType === 'new_application' && { businessJustification }),
       ...(requestType === 'major_change' && { impact: changeImpact }),
@@ -650,12 +652,22 @@ export function NewRequestForm() {
 
     try {
       await createSubmission.mutateAsync(submissionData);
-      // Show success message and redirect
-      alert('Review request submitted successfully!');
-      navigate('/arb/requests');
+
+      // Set success message based on request type
+      const message = requestType === 'exception'
+        ? 'Exception request submitted'
+        : 'Review request submitted';
+      setSuccessMessage(message);
+      setSubmitSuccess(true);
+
+      // Redirect after a short delay to show success message
+      setTimeout(() => {
+        navigate('/arb/requests');
+      }, 3000);
     } catch (error) {
       console.error('Failed to submit request:', error);
-      alert('Failed to submit request. Please try again.');
+      setSuccessMessage('Failed to submit request. Please try again.');
+      setSubmitSuccess(false);
     }
   };
 
@@ -686,6 +698,13 @@ export function NewRequestForm() {
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-6">
+        {/* Success Message */}
+        {submitSuccess && successMessage && (
+          <div className="p-4 bg-emerald-50 border border-emerald-200 rounded-lg">
+            <p className="text-sm font-semibold text-emerald-800">{successMessage}</p>
+          </div>
+        )}
+
         {/* Request Type */}
         <div>
           <label className="block text-sm font-semibold text-slate-700 mb-1">
@@ -880,6 +899,8 @@ export function NewRequestForm() {
           <button
             type="button"
             className="px-4 py-2 bg-slate-100 text-slate-700 rounded-lg hover:bg-slate-200 transition-colors mb-2"
+            data-testid="attach-file-btn"
+            onClick={() => (document.querySelector('input[type="file"]') as HTMLInputElement)?.click()}
           >
             Attach File
           </button>
@@ -887,7 +908,8 @@ export function NewRequestForm() {
             type="file"
             accept=".pdf,.doc,.docx"
             onChange={handleFileChange}
-            className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+            className="hidden"
+            data-testid="file-input"
             multiple
           />
           {attachments.length > 0 && (

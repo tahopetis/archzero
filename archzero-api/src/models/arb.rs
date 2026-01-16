@@ -89,8 +89,9 @@ pub struct ARBMeetingSearchParams {
 #[serde(rename_all = "camelCase")]
 pub struct ARBSubmission {
     pub id: Uuid,
+    pub title: Option<String>,
     pub meeting_id: Option<Uuid>, // Optional until scheduled
-    pub card_id: Uuid,
+    pub card_id: Option<Uuid>,
     #[serde(rename = "type")]
     pub submission_type: ARBSubmissionType,
     pub rationale: String,
@@ -117,9 +118,10 @@ pub enum ARBPriority {
 #[derive(Debug, Deserialize, Clone, ToSchema)]
 #[serde(rename_all = "camelCase")]
 pub struct CreateARBSubmissionRequest {
-    pub card_id: Uuid,
+    pub card_id: Option<Uuid>,
     #[serde(rename = "type")]
     pub submission_type: ARBSubmissionType,
+    pub title: Option<String>,
     pub rationale: String,
     pub priority: ARBPriority,
     pub related_policy_id: Option<Uuid>,
