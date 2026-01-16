@@ -1,5 +1,5 @@
 use axum::{
-    extract::{Path, Query, State},
+    extract::{Path, Query, State, Extension},
     Json,
     http::StatusCode,
 };
@@ -10,6 +10,7 @@ use crate::{
     models::{
         arb::*,
         card::{CardType, LifecyclePhase, CreateCardRequest, UpdateCardRequest},
+        user::Claims,
     },
     state::AppState,
     error::AppError,
@@ -64,10 +65,9 @@ fn card_to_arb_submission(card: crate::models::card::Card) -> Result<ARBSubmissi
         .and_then(|v| v.as_str())
         .and_then(|s| Uuid::parse_str(s).ok());
 
-    let card_id = attrs["cardId"]
-        .as_str()
-        .and_then(|s| Uuid::parse_str(s).ok())
-        .ok_or_else(|| AppError::Internal(anyhow::anyhow!("Missing or invalid cardId")))?;
+    let card_id = attrs.get("cardId")
+        .and_then(|v| v.as_str())
+        .and_then(|s| Uuid::parse_str(s).ok());
 
     let submission_type_str = attrs["submissionType"]
         .as_str()
@@ -106,7 +106,7 @@ fn card_to_arb_submission(card: crate::models::card::Card) -> Result<ARBSubmissi
         id: card.id,
         title: attrs.get("title").and_then(|v| v.as_str()).map(String::from),
         meeting_id,
-        card_id: Some(card_id),
+        card_id,
         submission_type,
         rationale,
         submitted_by,
@@ -253,8 +253,12 @@ pub async fn get_meeting(
 )]
 pub async fn create_meeting(
     State(state): State<AppState>,
+    Extension(claims): Extension<Claims>,
     Json(req): Json<CreateARBMeetingRequest>,
 ) -> Result<Json<ARBMeeting>, StatusCode> {
+    // Extract user ID from JWT claims (injected by auth middleware)
+    let user_id = Uuid::parse_str(&claims.sub).map_err(|_| StatusCode::UNAUTHORIZED)?;
+
     let attributes = serde_json::json!({
         "scheduledDate": req.scheduled_date.to_string(),
         "status": ARBMeetingStatus::Scheduled,
@@ -268,7 +272,7 @@ pub async fn create_meeting(
         lifecycle_phase: LifecyclePhase::Active,
         quality_score: None,
         description: Some("ARB Meeting".to_string()),
-        owner_id: None,
+        owner_id: Some(user_id),
         attributes: Some(attributes),
         tags: Some(vec!["arb".to_string(), "meeting".to_string()]),
     };
@@ -669,10 +673,14 @@ pub async fn get_submission(
 )]
 pub async fn create_submission(
     State(state): State<AppState>,
+    Extension(claims): Extension<Claims>,
     Json(req): Json<CreateARBSubmissionRequest>,
 ) -> Result<Json<ARBSubmission>, StatusCode> {
+    // Extract user ID from JWT claims (injected by auth middleware)
+    let user_id = Uuid::parse_str(&claims.sub).map_err(|_| StatusCode::UNAUTHORIZED)?;
+
     // Get the related card to use as name
-    let (related_card, submitted_by) = match req.card_id {
+    let related_card = match req.card_id {
         Some(card_id) => {
             let card = state.card_service.get(card_id).await
                 .map_err(|e| {
@@ -683,13 +691,27 @@ pub async fn create_submission(
                         StatusCode::INTERNAL_SERVER_ERROR
                     }
                 })?;
-            let owner = card.owner_id.unwrap_or_else(|| Uuid::new_v4());
-            (Some(card), owner)
+            Some(card)
         },
-        None => (None, Uuid::parse_str("0a36bdfe-6c99-4b9f-9558-325d02aac22b").unwrap_or_else(|_| Uuid::new_v4())),
+        None => None,
     };
 
+    // The ARB submission is always owned by the authenticated user creating it
+    let submitted_by = user_id;
     let submitted_at = Utc::now();
+    let unique_id = Uuid::new_v4().to_string();
+    let unique_suffix = unique_id.split('-').next().unwrap_or("xxxx");
+
+    // Generate a unique name for the submission card
+    let submission_name = if let Some(ref title) = req.title {
+        format!("{} - {}", title, unique_suffix)
+    } else {
+        related_card.as_ref().map(|c| {
+            format!("{} - {}", c.name, unique_suffix)
+        }).unwrap_or_else(|| {
+            format!("ARB Submission - {} - {}", submitted_at.format("%Y%m%d%H%M%S"), unique_suffix)
+        })
+    };
 
     let attributes = serde_json::json!({
         "title": req.title,
@@ -704,7 +726,7 @@ pub async fn create_submission(
     });
 
     let create_req = CreateCardRequest {
-        name: related_card.as_ref().map(|c| c.name.clone()).unwrap_or_else(|| "ARB Submission".to_string()),
+        name: submission_name,
         card_type: CardType::ARBSubmission,
         lifecycle_phase: LifecyclePhase::Discovery,
         quality_score: None,
@@ -851,9 +873,13 @@ pub async fn delete_submission(
 )]
 pub async fn record_decision(
     State(state): State<AppState>,
+    Extension(claims): Extension<Claims>,
     Path(submission_id): Path<Uuid>,
     Json(req): Json<CreateARBDecisionRequest>,
 ) -> Result<Json<ARBDecision>, StatusCode> {
+    // Extract user ID from JWT claims (injected by auth middleware)
+    let user_id = Uuid::parse_str(&claims.sub).map_err(|_| StatusCode::UNAUTHORIZED)?;
+
     // Verify submission exists
     let submission = match state.card_service.get(submission_id).await {
         Ok(s) => s,
@@ -870,7 +896,7 @@ pub async fn record_decision(
 
     // Create decision
     let decision_id = Uuid::new_v4();
-    let decided_by = submission.owner_id.unwrap_or(Uuid::new_v4());
+    let decided_by = user_id; // Use the authenticated user who made the decision
     let decided_at = Utc::now();
 
     let decision = ARBDecision {

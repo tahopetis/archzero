@@ -45,16 +45,11 @@ test.describe('ARB Review Requests', () => {
     await page.locator('[data-testid="request-description"]').fill('New payment system for e-commerce platform');
     await page.locator('[data-testid="request-business-justification"]').fill('Required to support new payment methods and improve checkout conversion');
 
-    // Attach card
-    await page.locator('[data-testid="attach-card-btn"]').click();
-    const cardSelect = page.locator('[data-testid="card-select"]');
-    await expect(cardSelect).toBeVisible();
-    await cardSelect.selectOption({ index: 1 });
-
-    // Submit request
+    // Submit request (cardId is optional)
     await page.locator('button:has-text("Submit Request"), [data-testid="submit-request-btn"]').click();
 
-    await expect(page.locator('text=Review request submitted, text=Request created')).toBeVisible({ timeout: 5000 });
+    // Verify success by checking for redirect to requests page or success message
+    await page.waitForURL('**/arb/requests', { timeout: 5000 });
   });
 
   test('should create major change review request', async ({ page }) => {

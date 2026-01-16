@@ -376,76 +376,76 @@ export const complianceApi = {
 export const arbApi = {
   // Meetings
   listMeetings: async (params?: ARBMeetingSearchParams) => {
-    const response = await api.get<ARBMeetingListResponse>('/api/v1/arb/meetings', { params });
+    const response = await api.get<ARBMeetingListResponse>('/arb/meetings', { params });
     return response.data;
   },
 
   getMeeting: async (id: string) => {
-    const response = await api.get<ARBMeeting>(`/api/v1/arb/meetings/${id}`);
+    const response = await api.get<ARBMeeting>(`/arb/meetings/${id}`);
     return response.data;
   },
 
   createMeeting: async (data: CreateARBMeetingRequest) => {
-    const response = await api.post<ARBMeeting>('/api/v1/arb/meetings', data);
+    const response = await api.post<ARBMeeting>('/arb/meetings', data);
     return response.data;
   },
 
   updateMeeting: async (id: string, data: UpdateARBMeetingRequest) => {
-    const response = await api.put<ARBMeeting>(`/api/v1/arb/meetings/${id}`, data);
+    const response = await api.put<ARBMeeting>(`/arb/meetings/${id}`, data);
     return response.data;
   },
 
   deleteMeeting: async (id: string) => {
-    await api.delete(`/api/v1/arb/meetings/${id}`);
+    await api.delete(`/arb/meetings/${id}`);
   },
 
   getMeetingAgenda: async (id: string) => {
-    const response = await api.get<ARBAgendaItem[]>(`/api/v1/arb/meetings/${id}/agenda`);
+    const response = await api.get<ARBAgendaItem[]>(`/arb/meetings/${id}/agenda`);
     return response.data;
   },
 
   addSubmissionToAgenda: async (id: string, data: AddSubmissionToMeetingRequest) => {
-    await api.post(`/api/v1/arb/meetings/${id}/agenda`, data);
+    await api.post(`/arb/meetings/${id}/agenda`, data);
   },
 
   // Submissions
   listSubmissions: async (params?: ARBSubmissionSearchParams) => {
-    const response = await api.get<ARBSubmissionListResponse>('/api/v1/arb/submissions', { params });
+    const response = await api.get<ARBSubmissionListResponse>('/arb/submissions', { params });
     return response.data;
   },
 
   getSubmission: async (id: string) => {
-    const response = await api.get<ARBSubmission>(`/api/v1/arb/submissions/${id}`);
+    const response = await api.get<ARBSubmission>(`/arb/submissions/${id}`);
     return response.data;
   },
 
   createSubmission: async (data: CreateARBSubmissionRequest) => {
-    const response = await api.post<ARBSubmission>('/api/v1/arb/submissions', data);
+    const response = await api.post<ARBSubmission>('/arb/submissions', data);
     return response.data;
   },
 
   updateSubmission: async (id: string, data: UpdateARBSubmissionRequest) => {
-    const response = await api.put<ARBSubmission>(`/api/v1/arb/submissions/${id}`, data);
+    const response = await api.put<ARBSubmission>(`/arb/submissions/${id}`, data);
     return response.data;
   },
 
   deleteSubmission: async (id: string) => {
-    await api.delete(`/api/v1/arb/submissions/${id}`);
+    await api.delete(`/arb/submissions/${id}`);
   },
 
   recordDecision: async (id: string, data: CreateARBDecisionRequest) => {
-    const response = await api.post<ARBDecision>(`/api/v1/arb/submissions/${id}/decision`, data);
+    const response = await api.post<ARBDecision>(`/arb/submissions/${id}/decision`, data);
     return response.data;
   },
 
   // Dashboard & Statistics
   getDashboard: async () => {
-    const response = await api.get<ARBDashboard>('/api/v1/arb/dashboard');
+    const response = await api.get<ARBDashboard>('/arb/dashboard');
     return response.data;
   },
 
   getStatistics: async () => {
-    const response = await api.get<ARBStatistics>('/api/v1/arb/statistics');
+    const response = await api.get<ARBStatistics>('/arb/statistics');
     return response.data;
   },
 };

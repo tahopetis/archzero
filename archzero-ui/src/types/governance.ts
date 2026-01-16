@@ -824,7 +824,7 @@ export interface ARBSubmission {
 export interface CreateARBSubmissionRequest {
   cardId?: string;
   title?: string;
-  submissionType: ARBSubmissionType;
+  type: ARBSubmissionType;
   rationale: string;
   priority: ARBPriority;
   relatedPolicyId?: string;

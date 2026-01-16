@@ -635,23 +635,26 @@ export function NewRequestForm() {
       exception: ARBSubmissionType.ExceptionRequest,
     };
 
-    const submissionData: CreateARBSubmissionRequest = {
-      submissionType: submissionTypeMap[requestType] || ARBSubmissionType.NewTechnologyProposal,
-      title,
-      rationale: description,
-      cardId: selectedCard || undefined,
-      priority: impact.charAt(0).toUpperCase() + impact.slice(1) as ARBPriority,
-      // Add additional fields based on type
-      ...(requestType === 'new_application' && { businessJustification }),
-      ...(requestType === 'major_change' && { impact: changeImpact }),
-      ...(requestType === 'exception' && {
-        conditions: exceptionReason,
-        validUntil: exceptionTimeline
-      }),
+    // Map lowercase impact values to PascalCase string values (backend expects PascalCase)
+    const priorityMap: Record<string, "Low" | "Medium" | "High" | "Critical"> = {
+      low: "Low",
+      medium: "Medium",
+      high: "High",
     };
 
+    const submissionData: CreateARBSubmissionRequest = {
+      type: submissionTypeMap[requestType] || ARBSubmissionType.NewTechnologyProposal,
+      title,
+      rationale: description,
+      priority: priorityMap[impact] || "Medium",
+      ...(selectedCard && { cardId: selectedCard }),
+    };
+
+    console.log('[ARB] Submitting request:', JSON.stringify(submissionData, null, 2));
+
     try {
-      await createSubmission.mutateAsync(submissionData);
+      const result = await createSubmission.mutateAsync(submissionData);
+      console.log('[ARB] Submission successful:', result);
 
       // Set success message based on request type
       const message = requestType === 'exception'
@@ -660,7 +663,10 @@ export function NewRequestForm() {
       setSuccessMessage(message);
       setSubmitSuccess(true);
 
-      // Redirect after a short delay to show success message
+      // Wait a tick for React to render the success message, then redirect
+      await new Promise(resolve => setTimeout(resolve, 100));
+
+      // Redirect after showing success message
       setTimeout(() => {
         navigate('/arb/requests');
       }, 3000);
@@ -886,9 +892,7 @@ export function NewRequestForm() {
                 data-testid="card-select"
               >
                 <option value="">Select a card...</option>
-                <option value="card1">Test-Application</option>
-                <option value="card2">Customer-Portal</option>
-                <option value="card3">Payment-Gateway-API</option>
+                {/* Note: Card options should be dynamically loaded from API */}
               </select>
             </div>
           )}
