@@ -3,15 +3,17 @@
  */
 
 import { useState } from 'react';
-import { useParams, useLocation, Link } from 'react-router-dom';
-import { ARBDashboard, MeetingsList, SubmissionsQueue, DecisionForm, NewRequestForm, RequestDetail, type ARBMeeting, type ARBSubmission } from '@/components/governance/arb';
+import { useParams, useLocation, useNavigate, Link } from 'react-router-dom';
+import { ARBDashboard, MeetingsList, SubmissionsQueue, DecisionForm, NewRequestForm, RequestDetail, ScheduleMeetingForm, MeetingDetail, type ARBMeeting, type ARBSubmission } from '@/components/governance/arb';
 
 export function ARBPage() {
   const { id } = useParams<'id'>();
   const location = useLocation();
+  const navigate = useNavigate();
   const [selectedMeeting, setSelectedMeeting] = useState<ARBMeeting | null>(null);
   const [selectedSubmission, setSelectedSubmission] = useState<ARBSubmission | null>(null);
   const [isDecisionFormOpen, setIsDecisionFormOpen] = useState(false);
+  const [isScheduleMeetingOpen, setIsScheduleMeetingOpen] = useState(false);
 
   // Determine view based on route
   const isRequestsRoute = location.pathname.includes('/requests');
@@ -25,11 +27,12 @@ export function ARBPage() {
     return (
       <div className="min-h-screen bg-slate-50" data-testid="meeting-detail">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          <div className="space-y-6">
-            <div className="bg-white rounded-lg p-6">
-              <p className="text-slate-500">Meeting detail view for {id}</p>
-            </div>
+          <div className="mb-6">
+            <Link to="/arb/meetings" className="text-indigo-600 hover:text-indigo-700">
+              ← Back to Meetings
+            </Link>
           </div>
+          <MeetingDetail meetingId={id} />
         </div>
       </div>
     );
@@ -121,10 +124,11 @@ export function ARBPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <div className="flex items-center justify-between mb-6">
             <div>
-              <h1 className="text-3xl font-bold text-slate-900" data-testid="meetings-list">ARB Meetings</h1>
+              <h1 className="text-3xl font-bold text-slate-900">ARB Meetings</h1>
               <p className="text-slate-600 mt-1">Schedule and manage ARB meetings</p>
             </div>
             <button
+              onClick={() => setIsScheduleMeetingOpen(true)}
               className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors"
               data-testid="schedule-meeting-btn"
             >
@@ -134,9 +138,21 @@ export function ARBPage() {
 
           <div data-testid="meetings-list">
             <MeetingsList
-              onView={(meeting) => setSelectedMeeting(meeting)}
+              onView={(meeting) => {
+                navigate(`/arb/meetings/${meeting.id}`);
+              }}
             />
           </div>
+
+          {isScheduleMeetingOpen && (
+            <ScheduleMeetingForm
+              onClose={() => setIsScheduleMeetingOpen(false)}
+              onSuccess={() => {
+                // Refresh meetings list but keep modal open
+                // Modal will be closed by user or after success message timeout
+              }}
+            />
+          )}
         </div>
       </div>
     );

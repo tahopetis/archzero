@@ -27,6 +27,8 @@ export class TestDataSeeder {
       // Seed in the correct order
       await this.seedCards();
       await this.seedRelationships();
+      await this.seedARBMeetings();
+      await this.seedARBSubmissions();
 
       console.log('✅ Test data seeding complete');
     } catch (error) {
@@ -197,6 +199,84 @@ export class TestDataSeeder {
     }
 
     console.log(`✅ Created ${createdCount} relationships, ${skippedCount} already existed`);
+  }
+
+  /**
+   * Seed ARB meetings
+   */
+  async seedARBMeetings() {
+    console.log('📅 Seeding ARB meetings...');
+
+    // Get test meetings from TestDataFactory
+    const meetings = TestDataFactory.createTestARBMeetings();
+
+    let createdCount = 0;
+    let skippedCount = 0;
+
+    for (const meeting of meetings) {
+      try {
+        const response = await this.request.post(`${this.baseURL}/api/v1/arb/meetings`, {
+          headers: {
+            'Authorization': `Bearer ${this.authToken}`,
+          },
+          data: meeting,
+        });
+
+        if (response.ok()) {
+          createdCount++;
+          console.log(`  ✅ Created ARB meeting: ${meeting.title}`);
+        } else if (response.status() === 409) {
+          skippedCount++;
+          console.log(`  ⏭️  Skipped existing meeting: ${meeting.title}`);
+        } else {
+          const errorText = await response.text();
+          console.warn(`⚠️  Failed to create meeting ${meeting.title}: ${response.status()} - ${errorText}`);
+        }
+      } catch (error) {
+        console.warn(`⚠️  Error creating meeting ${meeting.title}:`, error);
+      }
+    }
+
+    console.log(`✅ Created ${createdCount} ARB meetings, ${skippedCount} already existed`);
+  }
+
+  /**
+   * Seed ARB submissions
+   */
+  async seedARBSubmissions() {
+    console.log('📝 Seeding ARB submissions...');
+
+    // Get test submissions from TestDataFactory
+    const submissions = TestDataFactory.createTestARBSubmissions();
+
+    let createdCount = 0;
+    let skippedCount = 0;
+
+    for (const submission of submissions) {
+      try {
+        const response = await this.request.post(`${this.baseURL}/api/v1/arb/submissions`, {
+          headers: {
+            'Authorization': `Bearer ${this.authToken}`,
+          },
+          data: submission,
+        });
+
+        if (response.ok()) {
+          createdCount++;
+          console.log(`  ✅ Created ARB submission: ${submission.title || submission.submissionType}`);
+        } else if (response.status() === 409) {
+          skippedCount++;
+          console.log(`  ⏭️  Skipped existing submission: ${submission.title || submission.submissionType}`);
+        } else {
+          const errorText = await response.text();
+          console.warn(`⚠️  Failed to create submission: ${response.status()} - ${errorText}`);
+        }
+      } catch (error) {
+        console.warn(`⚠️  Error creating submission:`, error);
+      }
+    }
+
+    console.log(`✅ Created ${createdCount} ARB submissions, ${skippedCount} already existed`);
   }
 
   /**
@@ -516,6 +596,79 @@ class TestDataFactory {
         target_card_name: 'Redis-Cache',
         relationship_type: 'reliesOn',
         description: 'Test Application uses Redis Cache for session management',
+      },
+    ];
+  }
+
+  /**
+   * Create test ARB meetings
+   */
+  static createTestARBMeetings() {
+    // Get future dates for meetings
+    const now = new Date();
+    const nextWeek = new Date(now);
+    nextWeek.setDate(now.getDate() + 7);
+
+    const weekAfter = new Date(now);
+    weekAfter.setDate(now.getDate() + 14);
+
+    const formatDateString = (date: Date) => {
+      return date.toISOString().split('T')[0];
+    };
+
+    return [
+      {
+        title: 'ARB Review - January 2026',
+        scheduledDate: formatDateString(nextWeek),
+        status: 'Scheduled',
+        agenda: [
+          'Review Payment Processing System',
+          'Architecture Decision: Database Migration',
+          'New Technology Proposal: React Native for Mobile',
+        ],
+        attendees: [],
+      },
+      {
+        title: 'ARB Review - February 2026',
+        scheduledDate: formatDateString(weekAfter),
+        status: 'Scheduled',
+        agenda: [
+          'Cloud Migration Strategy',
+          'Microservices Architecture Review',
+        ],
+        attendees: [],
+      },
+    ];
+  }
+
+  /**
+   * Create test ARB submissions (without decisions for pending items)
+   */
+  static createTestARBSubmissions() {
+    return [
+      {
+        type: 'ArchitectureReview',
+        title: 'Payment Processing System Review',
+        rationale: 'Review the new payment processing system architecture for compliance and security',
+        priority: 'High',
+      },
+      {
+        type: 'NewTechnologyProposal',
+        title: 'React Native for Mobile Development',
+        rationale: 'Proposal to use React Native for cross-platform mobile application development',
+        priority: 'Medium',
+      },
+      {
+        type: 'ExceptionRequest',
+        title: 'Database Migration Exception',
+        rationale: 'Request for exception to standard database migration process due to tight timeline',
+        priority: 'Critical',
+      },
+      {
+        type: 'PolicyViolation',
+        title: 'Direct Database Access',
+        rationale: 'Report of direct database access in production environment',
+        priority: 'Critical',
       },
     ];
   }

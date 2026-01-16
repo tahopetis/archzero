@@ -54,10 +54,15 @@ yarn-error.log*
 # Temporary files
 *.tmp
 *.temp
+*.backup
+*.bak
 docs/review.md
 CLEANUP_*.md
 CODEBASE_*.md
 GIT_BACKUP_*.md
+*implementation-status.md
+*implementation-plan.md
+session-resume.md
 
 # Playwright (E2E Testing)
 /test-results/

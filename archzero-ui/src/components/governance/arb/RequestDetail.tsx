@@ -1,11 +1,11 @@
 /**
  * ARB Request Detail Component
- * Displays full submission information with edit capability
+ * Displays full submission information with review and edit capability
  */
 
 import { useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
-import { useARBSubmission, useUpdateARBSubmission, useDeleteARBSubmission } from '@/lib/governance-hooks';
+import { useARBSubmission, useUpdateARBSubmission, useDeleteARBSubmission, useRecordARBDecision } from '@/lib/governance-hooks';
 import {
   Calendar,
   User,
@@ -19,19 +19,55 @@ import {
   XCircle,
   Save,
   X,
-  Paperclip
+  Paperclip,
+  Plus,
+  ThumbsUp,
+  ThumbsDown,
+  AlertTriangle,
+  Pause,
+  FileCheck,
+  Gavel
 } from 'lucide-react';
 import { Card, StatusBadge } from '../shared';
 import { NewRequestForm } from './ARBComponents';
-import type { ARBSubmission, ARBDecision } from '@/types/governance';
+import { ARBDecisionType, type ARBSubmission, type ARBDecision } from '@/types/governance';
+
+interface Condition {
+  id: string;
+  text: string;
+}
+
+interface ActionItem {
+  id: string;
+  text: string;
+  assignee: string;
+}
 
 export function RequestDetail() {
   const { id } = useParams<{ id: string }>();
   const { data: submission, isLoading } = useARBSubmission(id!);
   const updateSubmission = useUpdateARBSubmission();
   const deleteSubmission = useDeleteARBSubmission();
+  const recordDecision = useRecordARBDecision();
+
+  // UI state
   const [isEditing, setIsEditing] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [isReviewing, setIsReviewing] = useState(false);
+
+  // Review state
+  const [reviewComments, setReviewComments] = useState('');
+  const [conditions, setConditions] = useState<Condition[]>([]);
+  const [actionItems, setActionItems] = useState<ActionItem[]>([]);
+
+  // Decision state
+  const [selectedDecisionType, setSelectedDecisionType] = useState<ARBDecisionType | null>(null);
+  const [decisionRationale, setDecisionRationale] = useState('');
+  const [decisionConditions, setDecisionConditions] = useState('');
+  const [decisionConditions2, setDecisionConditions2] = useState('');
+
+  // Success messages
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
   if (isLoading) {
     return (
@@ -56,6 +92,128 @@ export function RequestDetail() {
       console.error('Failed to delete request:', error);
       alert('Failed to delete request. Please try again.');
     }
+  };
+
+  // Review handlers
+  const handleStartReview = () => {
+    setIsReviewing(true);
+    setSelectedDecisionType(null);
+  };
+
+  const handleAddCondition = () => {
+    setConditions([...conditions, { id: Date.now().toString(), text: '' }]);
+  };
+
+  const handleRemoveCondition = (id: string) => {
+    setConditions(conditions.filter(c => c.id !== id));
+  };
+
+  const handleConditionChange = (id: string, text: string) => {
+    setConditions(conditions.map(c => c.id === id ? { ...c, text } : c));
+  };
+
+  const handleAddAction = () => {
+    setActionItems([...actionItems, { id: Date.now().toString(), text: '', assignee: '' }]);
+  };
+
+  const handleRemoveAction = (id: string) => {
+    setActionItems(actionItems.filter(a => a.id !== id));
+  };
+
+  const handleActionChange = (id: string, field: 'text' | 'assignee', value: string) => {
+    setActionItems(actionItems.map(a => a.id === id ? { ...a, [field]: value } : a));
+  };
+
+  const handleSubmitReview = async () => {
+    if (!submission) return;
+
+    try {
+      const conditionsText = conditions.length > 0
+        ? conditions.map(c => c.text).join('\n')
+        : undefined;
+
+      await recordDecision.mutateAsync({
+        id: submission.id,
+        data: {
+          submissionId: submission.id,
+          type: ARBDecisionType.ApproveWithConditions,
+          conditions: conditionsText,
+          rationale: reviewComments,
+        },
+      });
+
+      setSuccessMessage('Review submitted');
+      setIsReviewing(false);
+      setReviewComments('');
+      setConditions([]);
+      setActionItems([]);
+
+      // Clear success message after 3 seconds
+      setTimeout(() => setSuccessMessage(null), 3000);
+    } catch (error) {
+      console.error('Failed to submit review:', error);
+      alert('Failed to submit review. Please try again.');
+    }
+  };
+
+  // Decision handlers
+  const handleQuickDecision = async (decisionType: ARBDecisionType) => {
+    setSelectedDecisionType(decisionType);
+    setDecisionRationale('');
+    setDecisionConditions('');
+    setDecisionConditions2('');
+  };
+
+  const handleConfirmDecision = async () => {
+    if (!submission || !selectedDecisionType) return;
+
+    try {
+      // Combine conditions for conditional approval
+      let combinedConditions = decisionConditions;
+      if (selectedDecisionType === ARBDecisionType.ApproveWithConditions && decisionConditions2) {
+        combinedConditions = `${decisionConditions}\n${decisionConditions2}`;
+      }
+
+      await recordDecision.mutateAsync({
+        id: submission.id,
+        data: {
+          submissionId: submission.id,
+          type: selectedDecisionType,
+          conditions: combinedConditions || undefined,
+          rationale: decisionRationale || decisionConditions || 'No rationale provided',
+        },
+      });
+
+      const messages: Record<ARBDecisionType, string> = {
+        [ARBDecisionType.Approve]: 'Request approved',
+        [ARBDecisionType.ApproveWithConditions]: 'Request conditionally approved',
+        [ARBDecisionType.Reject]: 'Request rejected',
+        [ARBDecisionType.RequestMoreInfo]: 'Request deferred',
+        [ARBDecisionType.Defer]: 'Request deferred',
+      };
+
+      // Close modal first to ensure it disappears
+      setSelectedDecisionType(null);
+      setDecisionRationale('');
+      setDecisionConditions('');
+      setDecisionConditions2('');
+
+      // Then show success message
+      setSuccessMessage(messages[selectedDecisionType]);
+
+      // Clear success message after 5 seconds (increased from 3)
+      setTimeout(() => setSuccessMessage(null), 5000);
+    } catch (error) {
+      console.error('Failed to record decision:', error);
+      alert('Failed to record decision. Please try again.');
+    }
+  };
+
+  const handleCancelDecision = () => {
+    setSelectedDecisionType(null);
+    setDecisionRationale('');
+    setDecisionConditions('');
+    setDecisionConditions2('');
   };
 
   const canEdit = !submission.decision; // Can only edit draft/pending requests
@@ -173,6 +331,329 @@ export function RequestDetail() {
           )}
         </div>
       </Card>
+
+      {/* Success Message */}
+      {successMessage && (
+        <div className="p-4 bg-emerald-50 border border-emerald-200 rounded-lg" data-testid="success-message">
+          <p className="text-sm font-semibold text-emerald-800">{successMessage}</p>
+        </div>
+      )}
+
+      {/* Review Interface - when no decision exists and reviewer clicks Start Review */}
+      {!submission.decision && isReviewing && (
+        <Card className="p-6" data-testid="review-interface">
+          <div className="flex items-center gap-2 mb-4">
+            <FileCheck className="w-5 h-5 text-indigo-600" />
+            <h2 className="text-lg font-bold text-slate-900">Review Request</h2>
+          </div>
+
+          <div className="space-y-4">
+            {/* Review Comments */}
+            <div>
+              <label className="block text-sm font-semibold text-slate-700 mb-1">
+                Review Comments
+              </label>
+              <textarea
+                value={reviewComments}
+                onChange={(e) => setReviewComments(e.target.value)}
+                rows={4}
+                className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                placeholder="Add your review comments..."
+                data-testid="review-comments"
+              />
+            </div>
+
+            {/* Dynamic Conditions */}
+            <div>
+              <div className="flex items-center justify-between mb-2">
+                <label className="block text-sm font-semibold text-slate-700">
+                  Conditions
+                </label>
+                <button
+                  type="button"
+                  onClick={handleAddCondition}
+                  className="flex items-center gap-1 px-3 py-1.5 text-sm text-indigo-600 hover:text-indigo-700 hover:bg-indigo-50 rounded-lg transition-colors"
+                  data-testid="add-condition-btn"
+                >
+                  <Plus className="w-4 h-4" />
+                  Add Condition
+                </button>
+              </div>
+              {conditions.map((condition) => (
+                <div key={condition.id} className="mb-2 flex gap-2">
+                  <textarea
+                    value={condition.text}
+                    onChange={(e) => handleConditionChange(condition.id, e.target.value)}
+                    rows={2}
+                    className="flex-1 px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                    placeholder="Enter condition..."
+                    data-testid="condition-text"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => handleRemoveCondition(condition.id)}
+                    className="p-2 text-red-600 hover:text-red-700 hover:bg-red-50 rounded-lg transition-colors"
+                  >
+                    <X className="w-5 h-5" />
+                  </button>
+                </div>
+              ))}
+            </div>
+
+            {/* Dynamic Action Items */}
+            <div>
+              <div className="flex items-center justify-between mb-2">
+                <label className="block text-sm font-semibold text-slate-700">
+                  Action Items
+                </label>
+                <button
+                  type="button"
+                  onClick={handleAddAction}
+                  className="flex items-center gap-1 px-3 py-1.5 text-sm text-indigo-600 hover:text-indigo-700 hover:bg-indigo-50 rounded-lg transition-colors"
+                  data-testid="add-action-btn"
+                >
+                  <Plus className="w-4 h-4" />
+                  Add Action
+                </button>
+              </div>
+              {actionItems.map((action) => (
+                <div key={action.id} className="mb-2 space-y-2">
+                  <div className="flex gap-2">
+                    <textarea
+                      value={action.text}
+                      onChange={(e) => handleActionChange(action.id, 'text', e.target.value)}
+                      rows={2}
+                      className="flex-1 px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                      placeholder="Enter action item..."
+                      data-testid="action-text"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => handleRemoveAction(action.id)}
+                      className="p-2 text-red-600 hover:text-red-700 hover:bg-red-50 rounded-lg transition-colors"
+                    >
+                      <X className="w-5 h-5" />
+                    </button>
+                  </div>
+                  <select
+                    value={action.assignee}
+                    onChange={(e) => handleActionChange(action.id, 'assignee', e.target.value)}
+                    className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                    data-testid="action-assignee"
+                  >
+                    <option value="">Select assignee...</option>
+                    <option value="admin@archzero.local">admin@archzero.local</option>
+                    <option value="security@archzero.local">security@archzero.local</option>
+                    <option value="architect@archzero.local">architect@archzero.local</option>
+                  </select>
+                </div>
+              ))}
+            </div>
+
+            {/* Submit buttons */}
+            <div className="flex items-center gap-3 pt-4">
+              <button
+                onClick={handleSubmitReview}
+                disabled={recordDecision.isPending}
+                className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                Submit Review
+              </button>
+              <button
+                onClick={() => {
+                  setIsReviewing(false);
+                  setReviewComments('');
+                  setConditions([]);
+                  setActionItems([]);
+                }}
+                disabled={recordDecision.isPending}
+                className="px-4 py-2 bg-slate-100 text-slate-700 rounded-lg hover:bg-slate-200 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </Card>
+      )}
+
+      {/* Quick Decision Buttons */}
+      {!submission.decision && !isReviewing && (
+        <Card className="p-6">
+          <div className="flex items-center gap-2 mb-4">
+            <Gavel className="w-5 h-5 text-indigo-600" />
+            <h2 className="text-lg font-bold text-slate-900">Quick Actions</h2>
+          </div>
+
+          <div className="space-y-3">
+            {/* Start Review Button */}
+            <button
+              onClick={handleStartReview}
+              className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors font-medium"
+              data-testid="start-review-btn"
+            >
+              <FileCheck className="w-5 h-5" />
+              Start Review
+            </button>
+
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+              <button
+                onClick={() => handleQuickDecision(ARBDecisionType.Approve)}
+                className="flex flex-col items-center gap-1 px-4 py-3 bg-emerald-50 text-emerald-700 rounded-lg hover:bg-emerald-100 transition-colors font-medium"
+                data-testid="decision-approve"
+              >
+                <ThumbsUp className="w-5 h-5" />
+                <span className="text-sm">Approve</span>
+              </button>
+
+              <button
+                onClick={() => handleQuickDecision(ARBDecisionType.Reject)}
+                className="flex flex-col items-center gap-1 px-4 py-3 bg-red-50 text-red-700 rounded-lg hover:bg-red-100 transition-colors font-medium"
+                data-testid="decision-reject"
+              >
+                <ThumbsDown className="w-5 h-5" />
+                <span className="text-sm">Reject</span>
+              </button>
+
+              <button
+                onClick={() => handleQuickDecision(ARBDecisionType.ApproveWithConditions)}
+                className="flex flex-col items-center gap-1 px-4 py-3 bg-amber-50 text-amber-700 rounded-lg hover:bg-amber-100 transition-colors font-medium"
+                data-testid="decision-conditional"
+              >
+                <AlertTriangle className="w-5 h-5" />
+                <span className="text-sm">Conditional</span>
+              </button>
+
+              <button
+                onClick={() => handleQuickDecision(ARBDecisionType.RequestMoreInfo)}
+                className="flex flex-col items-center gap-1 px-4 py-3 bg-slate-50 text-slate-700 rounded-lg hover:bg-slate-100 transition-colors font-medium"
+                data-testid="decision-defer"
+              >
+                <Pause className="w-5 h-5" />
+                <span className="text-sm">Defer</span>
+              </button>
+            </div>
+          </div>
+        </Card>
+      )}
+
+      {/* Decision Confirmation Dialogs */}
+      {selectedDecisionType && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <Card className="p-6 max-w-md w-full mx-4">
+            <h3 className="text-lg font-bold text-slate-900 mb-4">
+              {selectedDecisionType === ARBDecisionType.Approve && 'Confirm Approval'}
+              {selectedDecisionType === ARBDecisionType.Reject && 'Confirm Rejection'}
+              {selectedDecisionType === ARBDecisionType.ApproveWithConditions && 'Conditional Approval'}
+              {selectedDecisionType === ARBDecisionType.RequestMoreInfo && 'Defer Request'}
+              {selectedDecisionType === ARBDecisionType.Defer && 'Defer Request'}
+            </h3>
+
+            <div className="space-y-4">
+              {selectedDecisionType === ARBDecisionType.Approve && (
+                <div>
+                  <label className="block text-sm font-semibold text-slate-700 mb-1">
+                    Conditions (Optional)
+                  </label>
+                  <textarea
+                    value={decisionConditions}
+                    onChange={(e) => setDecisionConditions(e.target.value)}
+                    rows={3}
+                    className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                    placeholder="Specify approval conditions..."
+                    data-testid="approval-conditions"
+                  />
+                </div>
+              )}
+
+              {selectedDecisionType === ARBDecisionType.Reject && (
+                <div>
+                  <label className="block text-sm font-semibold text-slate-700 mb-1">
+                    Rejection Reason
+                  </label>
+                  <textarea
+                    value={decisionRationale}
+                    onChange={(e) => setDecisionRationale(e.target.value)}
+                    rows={3}
+                    className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                    placeholder="Explain why this request is being rejected..."
+                    required
+                    data-testid="rejection-reason"
+                  />
+                </div>
+              )}
+
+              {selectedDecisionType === ARBDecisionType.ApproveWithConditions && (
+                <div className="space-y-3">
+                  <div>
+                    <label className="block text-sm font-semibold text-slate-700 mb-1">
+                      Condition 1
+                    </label>
+                    <textarea
+                      value={decisionConditions}
+                      onChange={(e) => setDecisionConditions(e.target.value)}
+                      rows={2}
+                      className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                      placeholder="First condition..."
+                      data-testid="condition-1"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-semibold text-slate-700 mb-1">
+                      Condition 2
+                    </label>
+                    <textarea
+                      value={decisionConditions2}
+                      onChange={(e) => setDecisionConditions2(e.target.value)}
+                      rows={2}
+                      className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                      placeholder="Second condition..."
+                      data-testid="condition-2"
+                    />
+                  </div>
+                </div>
+              )}
+
+              {selectedDecisionType === ARBDecisionType.RequestMoreInfo && (
+                <div>
+                  <label className="block text-sm font-semibold text-slate-700 mb-1">
+                    Information Needed
+                  </label>
+                  <textarea
+                    value={decisionRationale}
+                    onChange={(e) => setDecisionRationale(e.target.value)}
+                    rows={3}
+                    className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                    placeholder="Specify what additional information is needed..."
+                    required
+                    data-testid="defer-reason"
+                  />
+                </div>
+              )}
+
+              <div className="flex items-center gap-3 pt-4">
+                <button
+                  onClick={handleConfirmDecision}
+                  disabled={recordDecision.isPending || (selectedDecisionType === ARBDecisionType.Reject && !decisionRationale)}
+                  className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {selectedDecisionType === ARBDecisionType.Approve && 'Confirm Approval'}
+                  {selectedDecisionType === ARBDecisionType.Reject && 'Confirm Rejection'}
+                  {selectedDecisionType === ARBDecisionType.ApproveWithConditions && 'Confirm Conditional Approval'}
+                  {selectedDecisionType === ARBDecisionType.RequestMoreInfo && 'Confirm Deferral'}
+                  {selectedDecisionType === ARBDecisionType.Defer && 'Confirm Deferral'}
+                </button>
+                <button
+                  onClick={handleCancelDecision}
+                  disabled={recordDecision.isPending}
+                  className="px-4 py-2 bg-slate-100 text-slate-700 rounded-lg hover:bg-slate-200 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  Cancel
+                </button>
+              </div>
+            </div>
+          </Card>
+        </div>
+      )}
 
       {/* Decision */}
       {submission.decision && (

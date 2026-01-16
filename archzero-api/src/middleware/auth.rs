@@ -4,10 +4,10 @@ use axum::{
     middleware::Next,
     response::Response,
 };
-use crate::services::AuthService;
+use crate::state::AppState;
 
 pub async fn auth_middleware(
-    State(auth_service): State<AuthService>,
+    State(state): State<AppState>,
     mut request: Request,
     next: Next,
 ) -> Result<Response, StatusCode> {
@@ -20,7 +20,8 @@ pub async fn auth_middleware(
         .and_then(|h| h.strip_prefix("Bearer "))
         .ok_or(StatusCode::UNAUTHORIZED)?;
 
-    let claims = auth_service
+    let claims = state
+        .auth_service
         .verify_token(token)
         .map_err(|_| StatusCode::UNAUTHORIZED)?;
 

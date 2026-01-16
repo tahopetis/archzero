@@ -26,7 +26,7 @@ export class DashboardPage extends BasePage {
    * Navigate to dashboard
    */
   async goto() {
-    await this.goto('/');
+    await this.page.goto('/');
   }
 
   /**

@@ -15,7 +15,7 @@ use archzero_api::{
     state::AppState,
     handlers::{auth, cards, health, relationships, bia, migration, tco, policies, principles, standards, exceptions, initiatives, risks, compliance, arb, graph, import, bulk, csrf, cache, test_reset},
     services::{CardService, AuthService, RelationshipService, Neo4jService, SagaOrchestrator, BIAService, TopologyService, MigrationService, TCOService, CsrfService, RateLimitService, CacheService},
-    middleware::{security_headers, security_logging, rate_limit_middleware},
+    middleware::{security_headers, security_logging, rate_limit_middleware, auth_middleware},
     models::card::{Card, CardType, LifecyclePhase, CreateCardRequest, UpdateCardRequest, CardSearchParams},
     models::relationship::{Relationship, RelationshipType, CreateRelationshipRequest, UpdateRelationshipRequest},
     models::principles::*,
@@ -551,14 +551,17 @@ async fn main() -> anyhow::Result<()> {
                 .route("/:id/dashboard", get(compliance::get_compliance_dashboard))
                 // Removed Extension layer to fix type inference),
         )
-        // Phase 3: ARB Workflow endpoints
+        // Phase 3: ARB Workflow endpoints (with authentication)
         .nest(
             "/api/v1/arb/meetings",
             Router::new()
                 .route("/", get(arb::list_meetings).post(arb::create_meeting))
                 .route("/:id", get(arb::get_meeting).put(arb::update_meeting).delete(arb::delete_meeting))
                 .route("/:id/agenda", get(arb::get_meeting_agenda).post(arb::add_submission_to_agenda))
-                // Removed Extension layer to fix type inference),
+                .layer(axum::middleware::from_fn_with_state(
+                    app_state.clone(),
+                    auth_middleware,
+                )),
         )
         .nest(
             "/api/v1/arb/submissions",
@@ -566,14 +569,20 @@ async fn main() -> anyhow::Result<()> {
                 .route("/", get(arb::list_submissions).post(arb::create_submission))
                 .route("/:id", get(arb::get_submission).put(arb::update_submission).delete(arb::delete_submission))
                 .route("/:id/decision", post(arb::record_decision))
-                // Removed Extension layer to fix type inference),
+                .layer(axum::middleware::from_fn_with_state(
+                    app_state.clone(),
+                    auth_middleware,
+                )),
         )
         .nest(
             "/api/v1/arb",
             Router::new()
                 .route("/dashboard", get(arb::get_dashboard))
                 .route("/statistics", get(arb::get_statistics))
-                // Removed Extension layer to fix type inference),
+                .layer(axum::middleware::from_fn_with_state(
+                    app_state.clone(),
+                    auth_middleware,
+                )),
         )
         // Phase 4: Graph Visualization endpoints
         .nest(

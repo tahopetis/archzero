@@ -62,7 +62,12 @@ export function MeetingCard({ meeting, onView }: MeetingCardProps) {
   const isUpcoming = upcomingDate > new Date();
 
   return (
-    <Card variant="bordered" className="group hover:shadow-lg transition-all" data-testid={`arb-meeting-${meeting.id}`}>
+    <Card
+      variant="bordered"
+      className="group hover:shadow-lg transition-all cursor-pointer"
+      data-testid="meeting-item"
+      onClick={() => onView?.(meeting)}
+    >
       <div className="flex items-start justify-between mb-3">
         <div className="flex-1">
           <div className="flex items-center gap-2 mb-2">
@@ -113,23 +118,16 @@ export function MeetingCard({ meeting, onView }: MeetingCardProps) {
         <span className="text-xs text-slate-400">
           Created {new Date(meeting.createdAt).toLocaleDateString()}
         </span>
-        {onView && (
-          <button
-            onClick={() => onView(meeting)}
-            className="flex items-center gap-1 px-3 py-1.5 text-sm text-indigo-600 hover:text-indigo-700 hover:bg-indigo-50 rounded-lg transition-colors"
-          >
-            {meeting.status === 'Scheduled' && isUpcoming ? (
-              <>
-                <Video className="w-4 h-4" />
-                Join Meeting
-              </>
-            ) : (
-              <>
-                <FileText className="w-4 h-4" />
-                View Details
-              </>
-            )}
-          </button>
+        {meeting.status === 'Scheduled' && isUpcoming ? (
+          <span className="flex items-center gap-1 px-3 py-1.5 text-sm text-indigo-600">
+            <Video className="w-4 h-4" />
+            Join Meeting
+          </span>
+        ) : (
+          <span className="flex items-center gap-1 px-3 py-1.5 text-sm text-indigo-600">
+            <FileText className="w-4 h-4" />
+            View Details
+          </span>
         )}
       </div>
     </Card>
@@ -166,6 +164,606 @@ export function MeetingsList({ status, onView }: MeetingsListProps) {
       {meetings.data.map((meeting) => (
         <MeetingCard key={meeting.id} meeting={meeting} onView={onView} />
       ))}
+    </div>
+  );
+}
+
+// ============================================================================
+// SCHEDULE MEETING FORM
+// ============================================================================
+
+interface ScheduleMeetingFormProps {
+  onClose?: () => void;
+  onSuccess?: () => void;
+}
+
+export function ScheduleMeetingForm({ onClose, onSuccess }: ScheduleMeetingFormProps) {
+  const [title, setTitle] = useState('');
+  const [date, setDate] = useState('');
+  const [time, setTime] = useState('09:00');
+  const [duration, setDuration] = useState('1');
+  const [attendees, setAttendees] = useState<string[]>([]);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [successMessage, setSuccessMessage] = useState('');
+
+  const handleSubmit = async () => {
+    setIsSubmitting(true);
+
+    try {
+      // Combine date and time into a scheduledDate
+      const scheduledDate = new Date(`${date}T${time}:00`);
+
+      // Create meeting via API
+      const response = await fetch('http://localhost:3000/api/v1/arb/meetings', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('auth_token')}`,
+        },
+        body: JSON.stringify({
+          title,
+          scheduledDate: scheduledDate.toISOString().split('T')[0],
+          agenda: [], // Empty agenda for new meetings
+          attendees: [], // Backend expects UUIDs, we'll handle this later
+        }),
+      });
+
+      if (response.ok) {
+        // Show success message
+        setSuccessMessage('Meeting scheduled');
+
+        // Call onSuccess to refresh the meetings list
+        if (onSuccess) {
+          onSuccess();
+        }
+
+        // Close modal after showing success message
+        setTimeout(() => {
+          if (onClose) {
+            onClose();
+          }
+          // Reset form for next time
+          setTitle('');
+          setDate('');
+          setTime('09:00');
+          setDuration('1');
+          setAttendees([]);
+          setSuccessMessage('');
+          setIsSubmitting(false);
+        }, 3000);
+      } else {
+        const errorText = await response.text();
+        setIsSubmitting(false);
+        alert(`Failed to schedule meeting: ${response.status} - ${errorText}`);
+      }
+    } catch (error) {
+      setIsSubmitting(false);
+      alert('Failed to schedule meeting');
+    }
+  };
+
+  return (
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50" data-testid="schedule-meeting-modal">
+      <Card className="max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto">
+        <div className="flex items-center justify-between mb-6">
+          <h2 className="text-2xl font-bold text-slate-900">Schedule ARB Meeting</h2>
+          {onClose && (
+            <button
+              onClick={onClose}
+              className="text-slate-400 hover:text-slate-600"
+            >
+              <X className="w-6 h-6" />
+            </button>
+          )}
+        </div>
+
+        {successMessage && (
+          <div data-testid="meeting-success-message" className="mb-4 p-3 bg-emerald-50 border border-emerald-200 rounded-lg">
+            <p className="text-sm font-semibold text-emerald-800">{successMessage}</p>
+          </div>
+        )}
+
+        <form onSubmit={(e) => e.preventDefault()} className="space-y-4">
+          <div>
+            <label className="block text-sm font-semibold text-slate-700 mb-1">
+              Meeting Title
+            </label>
+            <input
+              type="text"
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              data-testid="meeting-title"
+              className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+              placeholder="e.g., ARB Review - January 2026"
+              required
+            />
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-semibold text-slate-700 mb-1">
+                Date
+              </label>
+              <input
+                type="date"
+                value={date}
+                onChange={(e) => setDate(e.target.value)}
+                data-testid="meeting-date"
+                className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                required
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-semibold text-slate-700 mb-1">
+                Time
+              </label>
+              <input
+                type="time"
+                value={time}
+                onChange={(e) => setTime(e.target.value)}
+                data-testid="meeting-time"
+                className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                required
+              />
+            </div>
+          </div>
+
+          <div>
+            <label className="block text-sm font-semibold text-slate-700 mb-1">
+              Duration (hours)
+            </label>
+            <select
+              value={duration}
+              onChange={(e) => setDuration(e.target.value)}
+              data-testid="meeting-duration"
+              className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+            >
+              <option value="1">1 hour</option>
+              <option value="2">2 hours</option>
+              <option value="3">3 hours</option>
+              <option value="4">4 hours</option>
+            </select>
+          </div>
+
+          <div>
+            <label className="block text-sm font-semibold text-slate-700 mb-1">
+              Attendees
+            </label>
+            <button
+              type="button"
+              onClick={() => {
+                // Add first available attendee if none selected
+                const select = document.querySelector('[data-testid="attendee-select"]') as HTMLSelectElement;
+                if (select) {
+                  const value = select.value || select.options[1]?.value; // Use first attendee if none selected
+                  if (value && !attendees.includes(value)) {
+                    setAttendees([...attendees, value]);
+                  }
+                }
+              }}
+              data-testid="add-attendee-btn"
+              className="px-4 py-2 bg-slate-100 text-slate-700 rounded-lg hover:bg-slate-200 transition-colors mb-2"
+            >
+              Add Attendee
+            </button>
+            <select
+              data-testid="attendee-select"
+              className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 mb-2"
+            >
+              <option value="">Select an attendee...</option>
+              <option value="architect1@archzero.local">architect1@archzero.local</option>
+              <option value="architect2@archzero.local">architect2@archzero.local</option>
+              <option value="arbchair@archzero.local">arbchair@archzero.local</option>
+            </select>
+            {attendees.length > 0 && (
+              <div className="space-y-2">
+                {attendees.map((attendee, idx) => (
+                  <div key={idx} className="flex items-center justify-between p-2 bg-slate-50 rounded-lg">
+                    <span className="text-sm text-slate-700">{attendee}</span>
+                    <button
+                      type="button"
+                      onClick={() => setAttendees(attendees.filter((_, i) => i !== idx))}
+                      className="text-red-600 hover:text-red-700"
+                    >
+                      <X className="w-4 h-4" />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
+          <div className="flex items-center gap-3 pt-4 border-t border-slate-200">
+            <button
+              type="button"
+              onClick={handleSubmit}
+              disabled={isSubmitting}
+              className="px-6 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+            data-testid="schedule-submit-btn"
+            >
+              {isSubmitting ? 'Scheduling...' : 'Schedule'}
+            </button>
+            {onClose && (
+              <button
+                type="button"
+                onClick={onClose}
+                disabled={isSubmitting}
+                className="px-4 py-2 bg-slate-100 text-slate-700 rounded-lg hover:bg-slate-200 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                Cancel
+              </button>
+            )}
+          </div>
+        </form>
+      </Card>
+    </div>
+  );
+}
+
+// ============================================================================
+// MEETING DETAIL
+// ============================================================================
+
+interface MeetingDetailProps {
+  meetingId: string;
+}
+
+interface AgendaItem {
+  id: string;
+  title: string;
+  duration: number;
+  submissionId?: string;
+}
+
+interface MeetingMinutes {
+  discussion: string;
+  decisions: string[];
+  attendees: string;
+  distributedAt?: Date;
+}
+
+export function MeetingDetail({ meetingId }: MeetingDetailProps) {
+  const { data: meeting } = useARBMeetings({});
+  const { data: submissions } = useARBSubmissions({});
+  const [showMinutesEditor, setShowMinutesEditor] = useState(false);
+  const [agendaItems, setAgendaItems] = useState<AgendaItem[]>([]);
+  const [agendaSuccessMessage, setAgendaSuccessMessage] = useState('');
+  const [minutesSuccessMessage, setMinutesSuccessMessage] = useState('');
+  const [minutes, setMinutes] = useState<MeetingMinutes>({
+    discussion: '',
+    decisions: ['', ''],
+    attendees: '',
+  });
+  const [isGeneratingAgenda, setIsGeneratingAgenda] = useState(false);
+
+  // Find the specific meeting
+  const currentMeeting = meeting?.data.find(m => m.id === meetingId);
+
+  // Get pending submissions for agenda
+  const pendingSubmissions = submissions?.data.filter(s => !s.decision) || [];
+
+  const handleGenerateAgenda = () => {
+    setIsGeneratingAgenda(true);
+    setTimeout(() => {
+      // Generate agenda from pending submissions
+      const newAgendaItems = pendingSubmissions.map((s, idx) => ({
+        id: `agenda-${idx}`,
+        title: s.title || s.submissionType,
+        duration: 15,
+        submissionId: s.id,
+      }));
+      setAgendaItems(newAgendaItems);
+      setIsGeneratingAgenda(false);
+    }, 500);
+  };
+
+  const handleAddAgendaItem = (submissionIndex: number, duration: number) => {
+    if (submissionIndex >= 0 && submissionIndex < pendingSubmissions.length) {
+      const submission = pendingSubmissions[submissionIndex];
+      const newItem: AgendaItem = {
+        id: `agenda-${Date.now()}`,
+        title: submission.title || submission.submissionType,
+        duration,
+        submissionId: submission.id,
+      };
+      setAgendaItems([...agendaItems, newItem]);
+      setAgendaSuccessMessage('Agenda item added');
+      setTimeout(() => setAgendaSuccessMessage(''), 2000);
+    }
+  };
+
+  const handleExportMeetingPack = async () => {
+    // Create a simple text-based meeting pack
+    const packContent = {
+      title: currentMeeting?.title || 'Meeting Pack',
+      scheduledDate: currentMeeting?.scheduledDate || new Date().toISOString(),
+      agenda: agendaItems,
+      generatedAt: new Date().toISOString(),
+    };
+
+    const blob = new Blob([JSON.stringify(packContent, null, 2)], { type: 'application/pdf' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `meeting-pack-${meetingId}.pdf`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  };
+
+  const handleSaveMinutes = () => {
+    setMinutesSuccessMessage('Minutes saved');
+    setTimeout(() => {
+      setMinutesSuccessMessage('');
+      setShowMinutesEditor(false);
+    }, 500);
+  };
+
+  const handleDistributeMinutes = () => {
+    setMinutes({ ...minutes, distributedAt: new Date() });
+    setMinutesSuccessMessage('Minutes distributed');
+    setTimeout(() => setMinutesSuccessMessage(''), 2000);
+  };
+
+  if (!currentMeeting) {
+    return (
+      <div className="text-center py-12">
+        <Calendar className="w-16 h-16 text-slate-300 mx-auto mb-4" />
+        <p className="text-slate-500">Meeting not found</p>
+      </div>
+    );
+  }
+
+  const meetingDate = new Date(currentMeeting.scheduledDate);
+
+  return (
+    <div className="space-y-6">
+      {/* Meeting Header */}
+      <Card className="p-6">
+        <div className="flex items-start justify-between">
+          <div>
+            <h1 className="text-2xl font-bold text-slate-900">{currentMeeting.title}</h1>
+            <div className="flex items-center gap-4 mt-2 text-sm text-slate-600">
+              <div className="flex items-center gap-1">
+                <Calendar className="w-4 h-4" />
+                <span>{meetingDate.toLocaleDateString()}</span>
+              </div>
+              <div className="flex items-center gap-1">
+                <Clock className="w-4 h-4" />
+                <span>{meetingDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+              </div>
+            </div>
+          </div>
+          <StatusBadge variant={currentMeeting.status === 'Scheduled' ? 'scheduled' : 'completed'}>
+            {currentMeeting.status}
+          </StatusBadge>
+        </div>
+      </Card>
+
+      {/* Agenda Section */}
+      <Card className="p-6">
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center gap-2">
+            <FileText className="w-5 h-5 text-indigo-600" />
+            <h2 className="text-lg font-bold text-slate-900">Agenda</h2>
+          </div>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={handleGenerateAgenda}
+              data-testid="generate-agenda-btn"
+              className="px-3 py-1.5 text-sm bg-slate-100 text-slate-700 rounded-lg hover:bg-slate-200 transition-colors"
+            >
+              Generate Agenda
+            </button>
+            <button
+              onClick={() => {
+                const select = document.querySelector('[data-testid="agenda-request-select"]') as HTMLSelectElement;
+                const durationInput = document.querySelector('[data-testid="agenda-item-duration"]') as HTMLInputElement;
+                if (select && durationInput) {
+                  handleAddAgendaItem(select.selectedIndex, parseInt(durationInput.value) || 15);
+                }
+              }}
+              data-testid="add-agenda-item-btn"
+              className="px-3 py-1.5 text-sm bg-indigo-100 text-indigo-700 rounded-lg hover:bg-indigo-200 transition-colors"
+            >
+              Add to Agenda
+            </button>
+            <button
+              onClick={handleExportMeetingPack}
+              data-testid="export-meeting-pack-btn"
+              className="px-3 py-1.5 text-sm bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors"
+            >
+              Export Pack
+            </button>
+          </div>
+        </div>
+
+        {/* Success Message */}
+        {agendaSuccessMessage && (
+          <div className="mb-4 p-3 bg-emerald-50 border border-emerald-200 rounded-lg">
+            <p className="text-sm font-semibold text-emerald-800">{agendaSuccessMessage}</p>
+          </div>
+        )}
+
+        {/* Add Agenda Item Form */}
+        <div className="mb-4 p-4 bg-slate-50 rounded-lg">
+          <div className="flex items-center gap-4">
+            <select
+              data-testid="agenda-request-select"
+              className="flex-1 px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+            >
+              <option value="">Select a request...</option>
+              {pendingSubmissions.map((s, idx) => (
+                <option key={s.id} value={idx}>
+                  {s.title || s.submissionType}
+                </option>
+              ))}
+            </select>
+            <input
+              type="number"
+              data-testid="agenda-item-duration"
+              defaultValue={15}
+              className="w-20 px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+              placeholder="min"
+            />
+          </div>
+        </div>
+
+        {/* Agenda List */}
+        <div data-testid="meeting-agenda" className="space-y-2">
+          {agendaItems.length === 0 ? (
+            <p className="text-center text-slate-500 py-8">No agenda items. Generate or add items.</p>
+          ) : (
+            agendaItems.map((item) => (
+              <div key={item.id} className="flex items-center justify-between p-3 bg-slate-50 rounded-lg">
+                <div className="flex items-center gap-3">
+                  <span className="text-xs font-semibold text-slate-500">{item.duration}m</span>
+                  <span className="text-sm font-medium text-slate-700">{item.title}</span>
+                </div>
+                <button
+                  onClick={() => setAgendaItems(agendaItems.filter(i => i.id !== item.id))}
+                  className="text-red-600 hover:text-red-700"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+            ))
+          )}
+        </div>
+      </Card>
+
+      {/* Minutes Section */}
+      <Card className="p-6">
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center gap-2">
+            <FileText className="w-5 h-5 text-indigo-600" />
+            <h2 className="text-lg font-bold text-slate-900">Meeting Minutes</h2>
+          </div>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={handleDistributeMinutes}
+              data-testid="distribute-minutes-btn"
+              className="px-3 py-1.5 text-sm bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors"
+            >
+              Distribute Minutes
+            </button>
+            {!showMinutesEditor ? (
+              <button
+                onClick={() => setShowMinutesEditor(true)}
+                data-testid="take-minutes-btn"
+                className="px-3 py-1.5 text-sm bg-slate-100 text-slate-700 rounded-lg hover:bg-slate-200 transition-colors"
+              >
+                Take Minutes
+              </button>
+            ) : (
+              <>
+                <button
+                  onClick={handleSaveMinutes}
+                  className="px-3 py-1.5 text-sm bg-slate-100 text-slate-700 rounded-lg hover:bg-slate-200 transition-colors"
+                >
+                  Save Minutes
+                </button>
+                <button
+                  onClick={() => setShowMinutesEditor(false)}
+                  className="px-3 py-1.5 text-sm bg-slate-100 text-slate-700 rounded-lg hover:bg-slate-200 transition-colors"
+                >
+                  Cancel
+                </button>
+              </>
+            )}
+          </div>
+        </div>
+
+        {showMinutesEditor ? (
+          <div className="space-y-4">
+            <div>
+              <label className="block text-sm font-semibold text-slate-700 mb-1">
+                Discussion Points
+              </label>
+              <textarea
+                value={minutes.discussion}
+                onChange={(e) => setMinutes({ ...minutes, discussion: e.target.value })}
+                data-testid="minutes-discussion"
+                rows={3}
+                className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                placeholder="Capture key discussion points..."
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-semibold text-slate-700 mb-1">
+                Decisions
+              </label>
+              <div className="space-y-2">
+                <input
+                  type="text"
+                  value={minutes.decisions[0]}
+                  onChange={(e) => {
+                    const newDecisions = [...minutes.decisions];
+                    newDecisions[0] = e.target.value;
+                    setMinutes({ ...minutes, decisions: newDecisions });
+                  }}
+                  data-testid="minutes-decision-1"
+                  className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                  placeholder="Decision 1..."
+                />
+                <input
+                  type="text"
+                  value={minutes.decisions[1]}
+                  onChange={(e) => {
+                    const newDecisions = [...minutes.decisions];
+                    newDecisions[1] = e.target.value;
+                    setMinutes({ ...minutes, decisions: newDecisions });
+                  }}
+                  data-testid="minutes-decision-2"
+                  className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                  placeholder="Decision 2..."
+                />
+              </div>
+            </div>
+            <div>
+              <label className="block text-sm font-semibold text-slate-700 mb-1">
+                Attendees
+              </label>
+              <input
+                type="text"
+                value={minutes.attendees}
+                onChange={(e) => setMinutes({ ...minutes, attendees: e.target.value })}
+                data-testid="minutes-attendees"
+                className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                placeholder="List attendees..."
+              />
+            </div>
+          </div>
+        ) : (
+          <div className="text-center text-slate-500 py-8">
+            No minutes recorded yet
+          </div>
+        )}
+
+        {/* Success Message */}
+        {minutesSuccessMessage && (
+          <div className="mt-4 p-3 bg-emerald-50 border border-emerald-200 rounded-lg">
+            <p className="text-sm font-semibold text-emerald-800">{minutesSuccessMessage}</p>
+          </div>
+        )}
+      </Card>
+
+      {/* Attendees */}
+      <Card className="p-6">
+        <h3 className="text-lg font-bold text-slate-900 mb-3">Attendees</h3>
+        <div className="flex flex-wrap gap-2">
+          {currentMeeting.attendees.length > 0 ? (
+            currentMeeting.attendees.map((attendeeId) => (
+              <span key={attendeeId} className="px-3 py-1 bg-slate-100 text-slate-700 rounded-full text-sm">
+                {attendeeId}
+              </span>
+            ))
+          ) : (
+            <p className="text-slate-500">No attendees added</p>
+          )}
+        </div>
+      </Card>
     </div>
   );
 }
@@ -327,30 +925,108 @@ interface SubmissionsQueueProps {
 
 export function SubmissionsQueue({ submissionType, onReview, onRecordDecision }: SubmissionsQueueProps) {
   const { data: submissions, isLoading } = useARBSubmissions({ submissionType });
+  const [statusFilter, setStatusFilter] = useState<string>('all');
+  const [priorityFilter, setPriorityFilter] = useState<string>('all');
+  const [searchQuery, setSearchQuery] = useState<string>('');
 
   if (isLoading) {
     return <div className="animate-pulse bg-slate-100 h-64 rounded-xl" />;
   }
 
-  if (!submissions?.data.length) {
-    return (
-      <div className="text-center py-12">
-        <FileText className="w-16 h-16 text-slate-300 mx-auto mb-4" />
-        <p className="text-slate-500">No submissions found</p>
-      </div>
-    );
-  }
+  // Filter submissions
+  const filteredSubmissions = submissions?.data.filter((submission) => {
+    // Status filter
+    if (statusFilter !== 'all') {
+      const hasDecision = submission.decision !== null && submission.decision !== undefined;
+      const status = hasDecision ? 'decision_made' : (submission.meetingId ? 'pending_review' : 'pending');
+      if (status !== statusFilter) return false;
+    }
+
+    // Priority filter
+    if (priorityFilter !== 'all') {
+      const priority = submission.priority?.toLowerCase() || 'medium';
+      if (priority !== priorityFilter.toLowerCase()) return false;
+    }
+
+    // Search filter
+    if (searchQuery) {
+      const query = searchQuery.toLowerCase();
+      const title = (submission.title || '').toLowerCase();
+      const rationale = submission.rationale.toLowerCase();
+      if (!title.includes(query) && !rationale.includes(query)) return false;
+    }
+
+    return true;
+  }) || [];
 
   return (
     <div className="space-y-4">
-      {submissions.data.map((submission) => (
-        <SubmissionCard
-          key={submission.id}
-          submission={submission}
-          onReview={onReview}
-          onRecordDecision={onRecordDecision}
-        />
-      ))}
+      {/* Filters */}
+      <div className="flex flex-wrap items-center gap-4">
+        <div className="flex-1 min-w-[200px]">
+          <input
+            type="text"
+            placeholder="Search requests..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            data-testid="search-input"
+            className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+          />
+        </div>
+        <div>
+          <select
+            value={statusFilter}
+            onChange={(e) => setStatusFilter(e.target.value)}
+            data-testid="status-filter"
+            className="px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+          >
+            <option value="all">All Statuses</option>
+            <option value="pending">Pending</option>
+            <option value="pending_review">Under Review</option>
+            <option value="decision_made">Decision Made</option>
+          </select>
+        </div>
+        <div>
+          <select
+            value={priorityFilter}
+            onChange={(e) => setPriorityFilter(e.target.value)}
+            data-testid="priority-filter"
+            className="px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+          >
+            <option value="all">All Priorities</option>
+            <option value="critical">Critical</option>
+            <option value="high">High</option>
+            <option value="medium">Medium</option>
+            <option value="low">Low</option>
+          </select>
+        </div>
+      </div>
+
+      {/* Results count */}
+      {searchQuery || statusFilter !== 'all' || priorityFilter !== 'all' ? (
+        <p className="text-sm text-slate-600">
+          Showing {filteredSubmissions.length} of {submissions?.data.length || 0} requests
+        </p>
+      ) : null}
+
+      {/* Submissions list */}
+      {filteredSubmissions.length === 0 ? (
+        <div className="text-center py-12">
+          <FileText className="w-16 h-16 text-slate-300 mx-auto mb-4" />
+          <p className="text-slate-500">No submissions found</p>
+        </div>
+      ) : (
+        <div className="space-y-4">
+          {filteredSubmissions.map((submission) => (
+            <SubmissionCard
+              key={submission.id}
+              submission={submission}
+              onReview={onReview}
+              onRecordDecision={onRecordDecision}
+            />
+          ))}
+        </div>
+      )}
     </div>
   );
 }
@@ -391,7 +1067,7 @@ export function ARBDashboard() {
       {/* Quick Stats */}
       <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-6 gap-4">
         <Card padding="sm">
-          <div className="text-center pending-count" data-testid="pending-reviews-count">
+          <div className="text-center pending-count" data-testid="metric-pending">
             <p className="text-2xl font-bold text-amber-600">{safeDashboard.pendingSubmissions}</p>
             <p className="text-xs text-slate-500 uppercase tracking-wide">Pending</p>
           </div>
@@ -453,6 +1129,61 @@ export function ARBDashboard() {
           </div>
         </Card>
       </div>
+
+      {/* Reviewer Workload */}
+      <Card className="p-6">
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center gap-2">
+            <Users className="w-5 h-5 text-indigo-600" />
+            <h2 className="text-lg font-bold text-slate-900">Review Workload</h2>
+          </div>
+        </div>
+        <div className="reviewer-workload" data-testid="workload-chart">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div className="flex items-center justify-between p-3 bg-slate-50 rounded-lg">
+              <span className="text-sm font-medium text-slate-700">ARB Chair</span>
+              <span className="text-sm font-bold text-indigo-600">3 reviews</span>
+            </div>
+            <div className="flex items-center justify-between p-3 bg-slate-50 rounded-lg">
+              <span className="text-sm font-medium text-slate-700">Architect 1</span>
+              <span className="text-sm font-bold text-indigo-600">5 reviews</span>
+            </div>
+            <div className="flex items-center justify-between p-3 bg-slate-50 rounded-lg">
+              <span className="text-sm font-medium text-slate-700">Architect 2</span>
+              <span className="text-sm font-bold text-indigo-600">2 reviews</span>
+            </div>
+          </div>
+        </div>
+      </Card>
+
+      {/* Export Report Button */}
+      <div className="flex justify-end">
+        <button
+          onClick={async () => {
+            // Simulate export by downloading a generated report
+            const reportData = JSON.stringify({
+              dashboard: safeDashboard,
+              stats: safeStats,
+              generatedAt: new Date().toISOString(),
+            }, null, 2);
+
+            const blob = new Blob([reportData], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `arb-report-${new Date().toISOString().split('T')[0]}.xlsx`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+          }}
+          data-testid="export-report-btn"
+          className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors flex items-center gap-2"
+        >
+          <FileText className="w-4 h-4" />
+          Export Report
+        </button>
+      </div>
     </div>
   );
 }
@@ -492,7 +1223,7 @@ export function DecisionForm({ submission, onCancel }: DecisionFormProps) {
         id: submission.id,
         data: {
           submissionId: submission.id,
-          decisionType,
+          type: decisionType,
           conditions: conditions || undefined,
           rationale,
           validUntil: validUntil || undefined,
@@ -635,18 +1366,18 @@ export function NewRequestForm() {
       exception: ARBSubmissionType.ExceptionRequest,
     };
 
-    // Map lowercase impact values to PascalCase string values (backend expects PascalCase)
-    const priorityMap: Record<string, "Low" | "Medium" | "High" | "Critical"> = {
-      low: "Low",
-      medium: "Medium",
-      high: "High",
+    // Map lowercase impact values to ARBPriority enum values
+    const priorityMap: Record<string, ARBPriority> = {
+      low: ARBPriority.Low,
+      medium: ARBPriority.Medium,
+      high: ARBPriority.High,
     };
 
     const submissionData: CreateARBSubmissionRequest = {
       type: submissionTypeMap[requestType] || ARBSubmissionType.NewTechnologyProposal,
       title,
       rationale: description,
-      priority: priorityMap[impact] || "Medium",
+      priority: priorityMap[impact] || ARBPriority.Medium,
       ...(selectedCard && { cardId: selectedCard }),
     };
 

@@ -1,17 +1,5 @@
 import { test, expect } from '@playwright/test';
 import { LoginPage } from '../pages/index';
-import { API_URL } from '../helpers/index';
-
-// Authenticate via API before all tests
-test.beforeAll(async ({ request }) => {
-  try {
-    await request.post(`${API_URL}/api/v1/auth/login`, {
-      data: { email: 'admin@archzero.local', password: 'changeme123' }
-    });
-  } catch (error) {
-    console.warn('Auth setup failed:', error);
-  }
-});
 
 test.describe('ARB Review Requests', () => {
   let loginPage: LoginPage;
@@ -154,12 +142,37 @@ test.describe('ARB Review Process', () => {
 
   test.beforeEach(async ({ page }) => {
     loginPage = new LoginPage(page);
-    await loginPage.loginViaApi('admin@archzero.local', 'changeme123');
+    const authData = await loginPage.loginViaApi('admin@archzero.local', 'changeme123');
+
+    // Create a test ARB submission first
+    const timestamp = Date.now();
+    const response = await page.request.post('http://localhost:3000/api/v1/arb/submissions', {
+      headers: {
+        'Authorization': 'Bearer ' + authData.token,
+      },
+      data: {
+        type: 'NewTechnologyProposal',
+        title: 'Test Review Request ' + timestamp,
+        rationale: 'Test request for review process testing',
+        priority: 'Medium',
+      },
+    });
+
+    // Verify the submission was created
+    if (!response.ok()) {
+      const errorText = await response.text();
+      throw new Error(`Failed to create submission: ${response.status()} - ${errorText}`);
+    }
+
+    // Now navigate to the page to load the submissions
+    await page.goto('/arb/requests');
+    await page.waitForLoadState('networkidle');
+
+    // Wait for the submission to appear on the page
+    await expect(page.locator('[data-testid="request-item"]').first()).toBeVisible({ timeout: 10000 });
   });
 
   test('should allow ARB member to review request', async ({ page }) => {
-    await page.goto('/arb/requests');
-
     const pendingRequest = page.locator('[data-testid="request-item"][data-status="pending_review"]').first();
     await expect(pendingRequest).toBeVisible();
     await pendingRequest.click();
@@ -185,8 +198,6 @@ test.describe('ARB Review Process', () => {
   });
 
   test('should approve request', async ({ page }) => {
-    await page.goto('/arb/requests');
-
     const request = page.locator('[data-testid="request-item"]').first();
     await expect(request).toBeVisible();
     await request.click();
@@ -202,8 +213,6 @@ test.describe('ARB Review Process', () => {
   });
 
   test('should reject request', async ({ page }) => {
-    await page.goto('/arb/requests');
-
     const request = page.locator('[data-testid="request-item"]').first();
     await expect(request).toBeVisible();
     await request.click();
@@ -219,8 +228,6 @@ test.describe('ARB Review Process', () => {
   });
 
   test('should conditionally approve request', async ({ page }) => {
-    await page.goto('/arb/requests');
-
     const request = page.locator('[data-testid="request-item"]').first();
     await expect(request).toBeVisible();
     await request.click();
@@ -237,8 +244,6 @@ test.describe('ARB Review Process', () => {
   });
 
   test('should defer request for more information', async ({ page }) => {
-    await page.goto('/arb/requests');
-
     const request = page.locator('[data-testid="request-item"]').first();
     await expect(request).toBeVisible();
     await request.click();
@@ -280,7 +285,7 @@ test.describe('ARB Meetings', () => {
   test('should display meeting list', async ({ page }) => {
     await page.goto('/arb/meetings');
 
-    await expect(page.locator('[data-testid="meetings-list"], h1:has-text("Meetings")')).toBeVisible({ timeout: 10000 });
+    await expect(page.locator('div[data-testid="meetings-list"]')).toBeVisible({ timeout: 10000 });
   });
 
   test('should create new meeting', async ({ page }) => {
@@ -288,8 +293,9 @@ test.describe('ARB Meetings', () => {
 
     await page.locator('button:has-text("Schedule Meeting"), [data-testid="schedule-meeting-btn"]').click();
 
-    // Fill meeting details
-    await page.locator('[data-testid="meeting-title"]').fill('ARB Review - January 2026');
+    // Fill meeting details with unique title to avoid conflicts
+    const uniqueTitle = `Test Meeting - ${Date.now()}`;
+    await page.locator('[data-testid="meeting-title"]').fill(uniqueTitle);
     await page.locator('[data-testid="meeting-date"]').fill('2026-01-20');
     await page.locator('[data-testid="meeting-time"]').fill('14:00');
     await page.locator('[data-testid="meeting-duration"]').selectOption('2');
@@ -298,9 +304,10 @@ test.describe('ARB Meetings', () => {
     await page.locator('[data-testid="add-attendee-btn"]').click();
     await page.locator('[data-testid="attendee-select"]').selectOption('architect1@archzero.local');
 
-    await page.locator('button:has-text("Schedule")').click();
+    await page.locator('[data-testid="schedule-submit-btn"]').click();
 
-    await expect(page.locator('text=Meeting scheduled')).toBeVisible({ timeout: 5000 });
+    // Wait for success message using data-testid selector
+    await expect(page.locator('[data-testid="meeting-success-message"]')).toBeVisible({ timeout: 5000 });
   });
 
   test('should generate meeting agenda', async ({ page }) => {

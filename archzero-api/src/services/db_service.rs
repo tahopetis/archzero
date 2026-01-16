@@ -8,7 +8,7 @@ pub struct DatabaseService {
 impl DatabaseService {
     pub async fn new(database_url: &str) -> Result<Self> {
         let pool = PgPoolOptions::new()
-            .max_connections(10)
+            .max_connections(50)  // Increased from 10 to 50 for better parallel test performance
             .connect(database_url)
             .await?;
 

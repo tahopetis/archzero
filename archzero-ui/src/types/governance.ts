@@ -870,7 +870,7 @@ export interface ARBDecision {
 
 export interface CreateARBDecisionRequest {
   submissionId: string;
-  decisionType: ARBDecisionType;
+  "type": ARBDecisionType;
   conditions?: string;
   rationale: string;
   validUntil?: string;
