@@ -5,6 +5,7 @@ use axum::{
 };
 use uuid::Uuid;
 use chrono::{Utc, NaiveDate};
+use serde::Deserialize;
 
 use crate::{
     models::{
@@ -1229,3 +1230,69 @@ pub async fn delete_template(
     state.arb_template_service.delete_template(id).await?;
     Ok(StatusCode::NO_CONTENT)
 }
+
+// ============================================================================
+// Audit Log Handlers
+// ============================================================================
+
+/// Filter for audit log queries
+#[derive(Debug, Deserialize, Default)]
+pub struct AuditLogFilter {
+    pub entity_type: Option<String>,
+    pub entity_id: Option<Uuid>,
+    pub action: Option<String>,
+    pub actor_id: Option<Uuid>,
+    pub start_date: Option<String>,
+    pub end_date: Option<String>,
+}
+
+/// Get audit logs for a specific entity
+pub async fn get_entity_audit_logs(
+    State(state): State<AppState>,
+    Path((entity_type, entity_id)): Path<(String, Uuid)>,
+    Query(params): Query<AuditLogQueryParams>,
+) -> Result<Json<Vec<crate::models::arb_audit_log::ARBAuditLog>>, AppError> {
+    let limit = params.limit.unwrap_or(50).min(100);
+    let offset = params.offset.unwrap_or(0);
+
+    let logs = state
+        .arb_audit_service
+        .get_entity_logs(&entity_type, entity_id, limit, offset)
+        .await?;
+
+    Ok(Json(logs))
+}
+
+/// Get audit logs with filters
+pub async fn get_audit_logs(
+    State(state): State<AppState>,
+    Query(filters): Query<AuditLogFilter>,
+    Query(params): Query<AuditLogQueryParams>,
+) -> Result<Json<Vec<crate::models::arb_audit_log::ARBAuditLog>>, AppError> {
+    let limit = params.limit.unwrap_or(50).min(100);
+    let offset = params.offset.unwrap_or(0);
+
+    let service_filters = crate::services::arb_audit_service::AuditLogFilter {
+        entity_type: filters.entity_type,
+        entity_id: filters.entity_id,
+        action: filters.action,
+        actor_id: filters.actor_id,
+        start_date: filters.start_date,
+        end_date: filters.end_date,
+    };
+
+    let logs = state
+        .arb_audit_service
+        .get_logs_filtered(service_filters, limit, offset)
+        .await?;
+
+    Ok(Json(logs))
+}
+
+/// Query parameters for pagination
+#[derive(Debug, Deserialize)]
+pub struct AuditLogQueryParams {
+    pub limit: Option<i64>,
+    pub offset: Option<i64>,
+}
+

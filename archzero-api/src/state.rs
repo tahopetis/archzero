@@ -5,7 +5,7 @@ use tokio::sync::Mutex;
 
 use crate::services::{
     CardService, AuthService, RelationshipService, Neo4jService,
-    SagaOrchestrator, BIAService, TopologyService, MigrationService, TCOService, CsrfService, RateLimitService, CacheService, ArbTemplateService
+    SagaOrchestrator, BIAService, TopologyService, MigrationService, TCOService, CsrfService, RateLimitService, CacheService, ArbTemplateService, ARBAuditService
 };
 
 #[derive(Clone)]
@@ -23,5 +23,6 @@ pub struct AppState {
     pub rate_limit_service: Arc<RateLimitService>,
     pub cache_service: Arc<CacheService>,
     pub arb_template_service: Arc<ArbTemplateService>,
+    pub arb_audit_service: Arc<ARBAuditService>,
     pub import_jobs: Arc<Mutex<std::collections::HashMap<Uuid, crate::handlers::import::ImportJob>>>,
 }

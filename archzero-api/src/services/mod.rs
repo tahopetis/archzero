@@ -1,3 +1,4 @@
+pub mod arb_audit_service;
 pub mod arb_template_service;
 pub mod auth_service;
 pub mod bia_service;
@@ -14,6 +15,7 @@ pub mod topology_service;
 pub mod tco_service;
 pub mod rate_limit;
 
+pub use arb_audit_service::ARBAuditService;
 pub use arb_template_service::ArbTemplateService;
 pub use auth_service::AuthService;
 pub use bia_service::BIAService;
