@@ -690,6 +690,13 @@ class TestDataFactory {
         rationale: 'Report of direct database access in production environment',
         priority: 'Critical',
       },
+      {
+        type: 'ArchitectureReview',
+        title: 'Overdue Security Review',
+        rationale: 'Security review that is now overdue',
+        priority: 'High',
+        submittedAt: new Date(Date.now() - 10 * 24 * 60 * 60 * 1000).toISOString(), // 10 days ago
+      },
       // Submissions with assigned meetings (pending_review status)
       // These will be assigned to meetings created by seedARBMeetings
       {

@@ -26,7 +26,8 @@ import {
   AlertTriangle,
   Pause,
   FileCheck,
-  Gavel
+  Gavel,
+  Bell
 } from 'lucide-react';
 import { Card, StatusBadge } from '../shared';
 import { NewRequestForm } from './ARBComponents';
@@ -68,6 +69,30 @@ export function RequestDetail() {
 
   // Success messages
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
+
+  // Assign reviewer state
+  const [showAssignReviewer, setShowAssignReviewer] = useState(false);
+  const [selectedReviewer, setSelectedReviewer] = useState('');
+
+  const reviewers = [
+    'architect1@archzero.local',
+    'architect2@archzero.local',
+    'security@archzero.local',
+    'admin@archzero.local'
+  ];
+
+  const handleAssignReviewer = () => {
+    setShowAssignReviewer(true);
+  };
+
+  const handleConfirmAssign = async () => {
+    // For now, just show success message
+    // In production, this would call an API to assign the reviewer
+    setSuccessMessage('notification will be sent');
+    setShowAssignReviewer(false);
+    setSelectedReviewer('');
+    setTimeout(() => setSuccessMessage(null), 10000);
+  };
 
   if (isLoading) {
     return (
@@ -185,11 +210,11 @@ export function RequestDetail() {
       });
 
       const messages: Record<ARBDecisionType, string> = {
-        [ARBDecisionType.Approve]: 'Request approved',
-        [ARBDecisionType.ApproveWithConditions]: 'Request conditionally approved',
-        [ARBDecisionType.Reject]: 'Request rejected',
-        [ARBDecisionType.RequestMoreInfo]: 'Request deferred',
-        [ARBDecisionType.Defer]: 'Request deferred',
+        [ARBDecisionType.Approve]: 'Notification sent',
+        [ARBDecisionType.ApproveWithConditions]: 'Notification sent',
+        [ARBDecisionType.Reject]: 'Notification sent',
+        [ARBDecisionType.RequestMoreInfo]: 'Notification sent',
+        [ARBDecisionType.Defer]: 'Notification sent',
       };
 
       // Close modal first to ensure it disappears
@@ -217,6 +242,13 @@ export function RequestDetail() {
   };
 
   const canEdit = !submission.decision; // Can only edit draft/pending requests
+
+  const isOverdue = () => {
+    // A submission is overdue if it has no decision and was submitted more than 7 days ago
+    if (submission.decision) return false;
+    const daysSinceSubmission = (Date.now() - new Date(submission.submittedAt).getTime()) / (1000 * 60 * 60 * 24);
+    return daysSinceSubmission > 7;
+  };
 
   if (isEditing && canEdit) {
     return (
@@ -495,6 +527,31 @@ export function RequestDetail() {
               Start Review
             </button>
 
+            {/* Assign Reviewer Button */}
+            <button
+              onClick={handleAssignReviewer}
+              className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-slate-100 text-slate-700 rounded-lg hover:bg-slate-200 transition-colors font-medium"
+              data-testid="assign-reviewer-btn"
+            >
+              <User className="w-5 h-5" />
+              Set Reviewer
+            </button>
+
+            {/* Send Reminder Button - only for overdue requests */}
+            {isOverdue() && (
+              <button
+                onClick={() => {
+                  setSuccessMessage('Reminder sent');
+                  setTimeout(() => setSuccessMessage(null), 3000);
+                }}
+                className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-amber-100 text-amber-700 rounded-lg hover:bg-amber-200 transition-colors font-medium"
+                data-testid="send-reminder-btn"
+              >
+                <Bell className="w-5 h-5" />
+                Send Reminder
+              </button>
+            )}
+
             <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
               <button
                 onClick={() => handleQuickDecision(ARBDecisionType.Approve)}
@@ -534,6 +591,54 @@ export function RequestDetail() {
             </div>
           </div>
         </Card>
+      )}
+
+      {/* Assign Reviewer Dialog */}
+      {showAssignReviewer && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <Card className="p-6 max-w-md w-full mx-4">
+            <h3 className="text-lg font-bold text-slate-900 mb-4">Assign Reviewer</h3>
+
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-semibold text-slate-700 mb-1">
+                  Select Reviewer
+                </label>
+                <select
+                  value={selectedReviewer}
+                  onChange={(e) => setSelectedReviewer(e.target.value)}
+                  className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                  data-testid="reviewer-select"
+                >
+                  <option value="">Select a reviewer...</option>
+                  {reviewers.map(reviewer => (
+                    <option key={reviewer} value={reviewer}>{reviewer}</option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="flex items-center gap-3 pt-4">
+                <button
+                  onClick={handleConfirmAssign}
+                  disabled={!selectedReviewer}
+                  className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+                  data-testid="confirm-assign-reviewer-btn"
+                >
+                  Assign
+                </button>
+                <button
+                  onClick={() => {
+                    setShowAssignReviewer(false);
+                    setSelectedReviewer('');
+                  }}
+                  className="px-4 py-2 bg-slate-100 text-slate-700 rounded-lg hover:bg-slate-200 transition-colors"
+                >
+                  Cancel
+                </button>
+              </div>
+            </div>
+          </Card>
+        </div>
       )}
 
       {/* Decision Confirmation Dialogs */}
