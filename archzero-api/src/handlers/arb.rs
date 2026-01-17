@@ -715,7 +715,7 @@ pub async fn create_submission(
 
     let attributes = serde_json::json!({
         "title": req.title,
-        "meetingId": serde_json::Value::Null,
+        "meetingId": req.meeting_id,
         "cardId": req.card_id,
         "submissionType": req.submission_type,
         "rationale": req.rationale,

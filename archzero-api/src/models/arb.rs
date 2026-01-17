@@ -119,6 +119,7 @@ pub enum ARBPriority {
 #[serde(rename_all = "camelCase")]
 pub struct CreateARBSubmissionRequest {
     pub card_id: Option<Uuid>,
+    pub meeting_id: Option<Uuid>,
     #[serde(rename = "type")]
     pub submission_type: ARBSubmissionType,
     pub title: Option<String>,

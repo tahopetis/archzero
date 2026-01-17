@@ -814,13 +814,33 @@ export function SubmissionCard({ submission, onReview, onRecordDecision }: Submi
   };
 
   const getStatusForTest = () => {
-    if (!submission.decision) return 'draft';
-    return submission.decision.decisionType.toLowerCase();
+    // Determine status based on decision and meeting assignment
+    // Tests expect: 'draft' for no decision, 'pending_review' with meeting, 'decision_made' with decision
+    if (submission.decision) {
+      return 'decision_made';
+    } else if (submission.meetingId) {
+      return 'pending_review';
+    } else {
+      return 'draft';  // Changed from 'pending' to 'draft' to match test expectations
+    }
+  };
+
+  const isOverdue = () => {
+    // A submission is overdue if it has no decision and was submitted more than 7 days ago
+    if (submission.decision) return false;
+    const daysSinceSubmission = (Date.now() - new Date(submission.submittedAt).getTime()) / (1000 * 60 * 60 * 24);
+    return daysSinceSubmission > 7;
   };
 
   return (
     <Link to={`/arb/submissions/${submission.id}`} className="block">
-      <Card variant="bordered" className="group hover:shadow-lg transition-all cursor-pointer" data-testid="request-item" data-status={getStatusForTest()}>
+      <Card
+        variant="bordered"
+        className="group hover:shadow-lg transition-all cursor-pointer"
+        data-testid="request-item"
+        data-status={getStatusForTest()}
+        data-overdue={isOverdue() ? "true" : undefined}
+      >
         <div className="flex items-start justify-between mb-3">
           <div className="flex-1">
             <div className="flex items-center gap-2 mb-2 flex-wrap">

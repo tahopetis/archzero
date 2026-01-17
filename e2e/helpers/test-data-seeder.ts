@@ -27,8 +27,8 @@ export class TestDataSeeder {
       // Seed in the correct order
       await this.seedCards();
       await this.seedRelationships();
-      await this.seedARBMeetings();
-      await this.seedARBSubmissions();
+      const meetingIds = await this.seedARBMeetings();
+      await this.seedARBSubmissions(meetingIds);
 
       console.log('✅ Test data seeding complete');
     } catch (error) {
@@ -203,12 +203,14 @@ export class TestDataSeeder {
 
   /**
    * Seed ARB meetings
+   * Returns array of created meeting IDs for use in submissions
    */
-  async seedARBMeetings() {
+  async seedARBMeetings(): Promise<string[]> {
     console.log('📅 Seeding ARB meetings...');
 
     // Get test meetings from TestDataFactory
     const meetings = TestDataFactory.createTestARBMeetings();
+    const meetingIds: string[] = [];
 
     let createdCount = 0;
     let skippedCount = 0;
@@ -223,6 +225,8 @@ export class TestDataSeeder {
         });
 
         if (response.ok()) {
+          const meetingData = await response.json();
+          meetingIds.push(meetingData.id);
           createdCount++;
           console.log(`  ✅ Created ARB meeting: ${meeting.title}`);
         } else if (response.status() === 409) {
@@ -238,12 +242,13 @@ export class TestDataSeeder {
     }
 
     console.log(`✅ Created ${createdCount} ARB meetings, ${skippedCount} already existed`);
+    return meetingIds;
   }
 
   /**
    * Seed ARB submissions
    */
-  async seedARBSubmissions() {
+  async seedARBSubmissions(meetingIds: string[] = []) {
     console.log('📝 Seeding ARB submissions...');
 
     // Get test submissions from TestDataFactory
@@ -254,19 +259,33 @@ export class TestDataSeeder {
 
     for (const submission of submissions) {
       try {
+        // Handle special meetingId markers
+        let submissionData = { ...submission };
+        if (submission.meetingId === 'ASSIGN_TO_FIRST_MEETING' && meetingIds.length > 0) {
+          submissionData.meetingId = meetingIds[0];
+        } else if (submission.meetingId === 'ASSIGN_TO_SECOND_MEETING' && meetingIds.length > 1) {
+          submissionData.meetingId = meetingIds[1];
+        } else if (submission.meetingId && !submission.meetingId.startsWith('ASSIGN_TO_')) {
+          // Keep the meetingId as-is if it's a real UUID
+        } else {
+          // Remove meetingId if it's a marker or not assigned
+          delete submissionData.meetingId;
+        }
+
         const response = await this.request.post(`${this.baseURL}/api/v1/arb/submissions`, {
           headers: {
             'Authorization': `Bearer ${this.authToken}`,
           },
-          data: submission,
+          data: submissionData,
         });
 
         if (response.ok()) {
           createdCount++;
-          console.log(`  ✅ Created ARB submission: ${submission.title || submission.submissionType}`);
+          const status = submissionData.meetingId ? '[with meeting]' : '[pending]';
+          console.log(`  ✅ Created ARB submission: ${submission.title} ${status}`);
         } else if (response.status() === 409) {
           skippedCount++;
-          console.log(`  ⏭️  Skipped existing submission: ${submission.title || submission.submissionType}`);
+          console.log(`  ⏭️  Skipped existing submission: ${submission.title}`);
         } else {
           const errorText = await response.text();
           console.warn(`⚠️  Failed to create submission: ${response.status()} - ${errorText}`);
@@ -642,10 +661,11 @@ class TestDataFactory {
   }
 
   /**
-   * Create test ARB submissions (without decisions for pending items)
+   * Create test ARB submissions with various statuses for comprehensive testing
    */
   static createTestARBSubmissions() {
     return [
+      // Pending submissions (no meeting, no decision)
       {
         type: 'ArchitectureReview',
         title: 'Payment Processing System Review',
@@ -669,6 +689,29 @@ class TestDataFactory {
         title: 'Direct Database Access',
         rationale: 'Report of direct database access in production environment',
         priority: 'Critical',
+      },
+      // Submissions with assigned meetings (pending_review status)
+      // These will be assigned to meetings created by seedARBMeetings
+      {
+        type: 'ArchitectureReview',
+        title: 'Cloud Migration Strategy',
+        rationale: 'Review proposed cloud migration approach and architectural considerations',
+        priority: 'High',
+        meetingId: 'ASSIGN_TO_FIRST_MEETING', // Special marker to assign to first meeting
+      },
+      {
+        type: 'NewTechnologyProposal',
+        title: 'Microservices Architecture',
+        rationale: 'Proposal to transition from monolithic to microservices architecture',
+        priority: 'Medium',
+        meetingId: 'ASSIGN_TO_FIRST_MEETING',
+      },
+      {
+        type: 'ExceptionRequest',
+        title: 'Security Protocol Exception',
+        rationale: 'Temporary exception to security protocols for emergency fix deployment',
+        priority: 'Critical',
+        meetingId: 'ASSIGN_TO_SECOND_MEETING',
       },
     ];
   }
