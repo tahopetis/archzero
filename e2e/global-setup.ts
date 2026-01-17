@@ -63,6 +63,21 @@ async function globalSetup(config: FullConfig) {
           console.warn(`⚠️  Database cleanup failed: ${cleanupResponse.status()}`);
         }
 
+        // 4.5. Seed ARB test users
+        console.log('👥 Seeding ARB test users...');
+        const arbUsersResponse = await requestContext.post('/api/v1/test/seed-arb-users', {
+          headers: {
+            'Authorization': `Bearer ${loginData.token}`,
+          },
+        });
+
+        if (arbUsersResponse.ok()) {
+          const arbUsersData = await arbUsersResponse.json();
+          console.log(`✅ ARB test users seeded: ${arbUsersData.count} users`);
+        } else {
+          console.warn(`⚠️  ARB user seeding failed: ${arbUsersResponse.status()}`);
+        }
+
         // 5. Seed test data
         console.log('🌱 Seeding test data...');
         const seeder = new TestDataSeeder(requestContext, loginData.token);

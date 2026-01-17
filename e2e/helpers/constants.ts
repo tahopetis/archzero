@@ -24,7 +24,7 @@ export const TEST_USERS = {
   },
   VIEWER: {
     email: 'viewer@archzero.local',
-    password: 'test123456',
+    password: 'changeme123',
     role: 'viewer',
   },
 } as const;

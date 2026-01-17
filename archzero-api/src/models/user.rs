@@ -7,6 +7,8 @@ use validator::Validate;
 #[serde(rename_all = "lowercase")]
 pub enum UserRole {
     Admin,
+    ArbChair,
+    ArbMember,
     Architect,
     Editor,
     Viewer,

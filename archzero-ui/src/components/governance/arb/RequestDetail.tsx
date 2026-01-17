@@ -6,6 +6,7 @@
 import { useState, useEffect } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { useARBSubmission, useUpdateARBSubmission, useDeleteARBSubmission, useRecordARBDecision } from '@/lib/governance-hooks';
+import { useAuthStore } from '@/stores/useAuthStore';
 import {
   Calendar,
   User,
@@ -50,6 +51,10 @@ export function RequestDetail() {
   const updateSubmission = useUpdateARBSubmission();
   const deleteSubmission = useDeleteARBSubmission();
   const recordDecision = useRecordARBDecision();
+  const { user } = useAuthStore();
+
+  // Check if user can approve (only ARB Chair)
+  const canApprove = user?.role === 'arbchair' || user?.role === 'admin';
 
   // UI state
   const [isEditing, setIsEditing] = useState(false);
@@ -566,7 +571,12 @@ export function RequestDetail() {
             <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
               <button
                 onClick={() => handleQuickDecision(ARBDecisionType.Approve)}
-                className="flex flex-col items-center gap-1 px-4 py-3 bg-emerald-50 text-emerald-700 rounded-lg hover:bg-emerald-100 transition-colors font-medium"
+                disabled={!canApprove}
+                className={`flex flex-col items-center gap-1 px-4 py-3 rounded-lg font-medium transition-colors ${
+                  canApprove
+                    ? 'bg-emerald-50 text-emerald-700 hover:bg-emerald-100'
+                    : 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                }`}
                 data-testid="decision-approve"
               >
                 <ThumbsUp className="w-5 h-5" />
@@ -575,7 +585,12 @@ export function RequestDetail() {
 
               <button
                 onClick={() => handleQuickDecision(ARBDecisionType.Reject)}
-                className="flex flex-col items-center gap-1 px-4 py-3 bg-red-50 text-red-700 rounded-lg hover:bg-red-100 transition-colors font-medium"
+                disabled={!canApprove}
+                className={`flex flex-col items-center gap-1 px-4 py-3 rounded-lg font-medium transition-colors ${
+                  canApprove
+                    ? 'bg-red-50 text-red-700 hover:bg-red-100'
+                    : 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                }`}
                 data-testid="decision-reject"
               >
                 <ThumbsDown className="w-5 h-5" />
@@ -584,7 +599,12 @@ export function RequestDetail() {
 
               <button
                 onClick={() => handleQuickDecision(ARBDecisionType.ApproveWithConditions)}
-                className="flex flex-col items-center gap-1 px-4 py-3 bg-amber-50 text-amber-700 rounded-lg hover:bg-amber-100 transition-colors font-medium"
+                disabled={!canApprove}
+                className={`flex flex-col items-center gap-1 px-4 py-3 rounded-lg font-medium transition-colors ${
+                  canApprove
+                    ? 'bg-amber-50 text-amber-700 hover:bg-amber-100'
+                    : 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                }`}
                 data-testid="decision-conditional"
               >
                 <AlertTriangle className="w-5 h-5" />
@@ -593,7 +613,12 @@ export function RequestDetail() {
 
               <button
                 onClick={() => handleQuickDecision(ARBDecisionType.RequestMoreInfo)}
-                className="flex flex-col items-center gap-1 px-4 py-3 bg-slate-50 text-slate-700 rounded-lg hover:bg-slate-100 transition-colors font-medium"
+                disabled={!canApprove}
+                className={`flex flex-col items-center gap-1 px-4 py-3 rounded-lg font-medium transition-colors ${
+                  canApprove
+                    ? 'bg-slate-50 text-slate-700 hover:bg-slate-100'
+                    : 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                }`}
                 data-testid="decision-defer"
               >
                 <Pause className="w-5 h-5" />

@@ -52,6 +52,8 @@ export type LifecyclePhaseValue = typeof LifecyclePhase[keyof typeof LifecyclePh
 
 export const UserRole = {
   Admin: 'admin',
+  ArbChair: 'arbchair',
+  ArbMember: 'arbmember',
   Architect: 'architect',
   Editor: 'editor',
   Viewer: 'viewer',

@@ -424,6 +424,7 @@ async fn main() -> anyhow::Result<()> {
         // Test-only endpoints (only available in development)
         .route("/api/v1/test/reset-auth-state", post(test_reset::reset_auth_state))
         .route("/api/v1/test/cleanup-all-cards", post(test_reset::cleanup_all_cards))
+        .route("/api/v1/test/seed-arb-users", post(test_reset::seed_arb_users))
         .nest(
             "/api/v1/auth",
             Router::new()

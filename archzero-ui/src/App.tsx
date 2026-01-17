@@ -126,11 +126,11 @@ function App() {
           }
         />
 
-        {/* ARB Routes */}
+        {/* ARB Routes - only accessible by admin, ARB members, and architects */}
         <Route
           path="/arb"
           element={
-            <ProtectedRoute>
+            <ProtectedRoute allowedRoles={['admin', 'arbchair', 'arbmember', 'architect']}>
               <Layout>
                 <ARBPage />
               </Layout>
@@ -140,7 +140,7 @@ function App() {
         <Route
           path="/arb/requests"
           element={
-            <ProtectedRoute>
+            <ProtectedRoute allowedRoles={['admin', 'arbchair', 'arbmember', 'architect']}>
               <Layout>
                 <ARBPage />
               </Layout>
@@ -150,7 +150,7 @@ function App() {
         <Route
           path="/arb/requests/new"
           element={
-            <ProtectedRoute>
+            <ProtectedRoute allowedRoles={['admin', 'arbchair', 'arbmember', 'architect']}>
               <Layout>
                 <ARBPage />
               </Layout>
@@ -160,7 +160,7 @@ function App() {
         <Route
           path="/arb/meetings"
           element={
-            <ProtectedRoute>
+            <ProtectedRoute allowedRoles={['admin', 'arbchair', 'arbmember', 'architect']}>
               <Layout>
                 <ARBPage />
               </Layout>
@@ -170,7 +170,7 @@ function App() {
         <Route
           path="/arb/meetings/:id"
           element={
-            <ProtectedRoute>
+            <ProtectedRoute allowedRoles={['admin', 'arbchair', 'arbmember', 'architect']}>
               <Layout>
                 <ARBPage />
               </Layout>
@@ -180,7 +180,7 @@ function App() {
         <Route
           path="/arb/submissions/:id"
           element={
-            <ProtectedRoute>
+            <ProtectedRoute allowedRoles={['admin', 'arbchair', 'arbmember', 'architect']}>
               <Layout>
                 <ARBPage />
               </Layout>

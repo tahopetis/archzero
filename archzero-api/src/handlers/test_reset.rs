@@ -30,3 +30,17 @@ pub async fn cleanup_all_cards(
         "deleted_count": deleted_count
     })))
 }
+
+/// Seed ARB test users for E2E testing
+/// This endpoint should ONLY be available in development/test environments
+pub async fn seed_arb_users(
+    State(state): State<AppState>,
+) -> Result<Json<serde_json::Value>> {
+    let count = state.auth_service.seed_arb_users().await?;
+
+    Ok(Json(serde_json::json!({
+        "status": "ok",
+        "message": "ARB test users seeded",
+        "count": count
+    })))
+}

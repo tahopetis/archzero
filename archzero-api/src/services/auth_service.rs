@@ -105,6 +105,8 @@ impl AuthService {
         // Parse role from string (database uses lowercase)
         let role = match user_row.role.as_str() {
             "admin" => UserRole::Admin,
+            "arbchair" => UserRole::ArbChair,
+            "arbmember" => UserRole::ArbMember,
             "architect" => UserRole::Architect,
             "editor" => UserRole::Editor,
             "viewer" => UserRole::Viewer,
@@ -201,5 +203,128 @@ impl AuthService {
             .await
             .map_err(|e| AppError::Internal(anyhow::anyhow!("Database error: {}", e)))?;
         Ok(())
+    }
+
+    /// Seed ARB test users for E2E testing
+    /// This should ONLY be called in development/test environments
+    pub async fn seed_arb_users(&self) -> Result<usize, AppError> {
+        tracing::info!("🌱 Starting ARB user seeding process");
+
+        // First, drop and recreate the role constraint to include ARB roles
+        tracing::info!("🔓 Dropping existing role constraint");
+        sqlx::query("ALTER TABLE users DROP CONSTRAINT IF EXISTS users_role_check")
+            .execute(&self.pool)
+            .await
+            .map_err(|e| AppError::Internal(anyhow::anyhow!("Database error: {}", e)))?;
+        tracing::info!("✅ Role constraint dropped");
+
+        tracing::info!("🔒 Creating new role constraint with ARB roles");
+        sqlx::query("ALTER TABLE users ADD CONSTRAINT users_role_check CHECK (role IN ('admin', 'architect', 'editor', 'viewer', 'arbchair', 'arbmember'))")
+            .execute(&self.pool)
+            .await
+            .map_err(|e| AppError::Internal(anyhow::anyhow!("Database error: {}", e)))?;
+        tracing::info!("✅ Role constraint created with ARB roles");
+
+        // Hash password 'changeme123'
+        let password_hash = hash("changeme123", DEFAULT_COST)
+            .map_err(|e| AppError::Internal(anyhow::anyhow!("Password hash failed: {}", e)))?;
+        tracing::info!("🔐 Password hashed successfully");
+
+        // Delete existing ARB users if they exist (to ensure clean state)
+        tracing::info!("🗑️  Deleting existing ARB users");
+        let delete_result = sqlx::query("DELETE FROM users WHERE email IN ('arb-chair@archzero.local', 'arb-member@archzero.local')")
+            .execute(&self.pool)
+            .await
+            .map_err(|e| AppError::Internal(anyhow::anyhow!("Database error: {}", e)))?;
+        tracing::info!("✅ Deleted {} existing ARB users", delete_result.rows_affected());
+
+        // Insert arb-chair user
+        tracing::info!("➕ Inserting arb-chair user with role='arbchair'");
+        let chair_id = Uuid::new_v4();
+        tracing::info!("📝 arb-chair ID: {}", chair_id);
+
+        let chair_result = sqlx::query(
+            "INSERT INTO users (id, email, full_name, role, password_hash, failed_login_attempts, locked_until, created_at, updated_at)
+             VALUES ($1, $2, $3, $4, $5, 0, NULL, NOW(), NOW())"
+        )
+        .bind(chair_id)
+        .bind("arb-chair@archzero.local")
+        .bind("ARB Chair")
+        .bind("arbchair")
+        .bind(&password_hash)
+        .execute(&self.pool)
+        .await
+        .map_err(|e| AppError::Internal(anyhow::anyhow!("Database error: {}", e)))?;
+        tracing::info!("✅ arb-chair inserted: {} row(s) affected", chair_result.rows_affected());
+
+        // Verify arb-chair insertion
+        let chair_check: Option<UserRow> = sqlx::query_as(
+            "SELECT id, email, full_name, role, password_hash, failed_login_attempts, locked_until, created_at, updated_at FROM users WHERE email = 'arb-chair@archzero.local'"
+        )
+        .fetch_optional(&self.pool)
+        .await
+        .map_err(|e| AppError::Internal(anyhow::anyhow!("Database error: {}", e)))?;
+
+        match &chair_check {
+            Some(user) => tracing::info!("✅ VERIFIED: arb-chair user exists with role='{}'", user.role),
+            None => tracing::error!("❌ ERROR: arb-chair user NOT FOUND in database after insertion!"),
+        }
+
+        // Insert arb-member user
+        tracing::info!("➕ Inserting arb-member user with role='arbmember'");
+        let member_id = Uuid::new_v4();
+        tracing::info!("📝 arb-member ID: {}", member_id);
+
+        let member_result = sqlx::query(
+            "INSERT INTO users (id, email, full_name, role, password_hash, failed_login_attempts, locked_until, created_at, updated_at)
+             VALUES ($1, $2, $3, $4, $5, 0, NULL, NOW(), NOW())"
+        )
+        .bind(member_id)
+        .bind("arb-member@archzero.local")
+        .bind("ARB Member")
+        .bind("arbmember")
+        .bind(&password_hash)
+        .execute(&self.pool)
+        .await
+        .map_err(|e| AppError::Internal(anyhow::anyhow!("Database error: {}", e)))?;
+        tracing::info!("✅ arb-member inserted: {} row(s) affected", member_result.rows_affected());
+
+        // Verify arb-member insertion
+        let member_check: Option<UserRow> = sqlx::query_as(
+            "SELECT id, email, full_name, role, password_hash, failed_login_attempts, locked_until, created_at, updated_at FROM users WHERE email = 'arb-member@archzero.local'"
+        )
+        .fetch_optional(&self.pool)
+        .await
+        .map_err(|e| AppError::Internal(anyhow::anyhow!("Database error: {}", e)))?;
+
+        match &member_check {
+            Some(user) => tracing::info!("✅ VERIFIED: arb-member user exists with role='{}'", user.role),
+            None => tracing::error!("❌ ERROR: arb-member user NOT FOUND in database after insertion!"),
+        }
+
+        // Update viewer user to ensure role is correct, password matches, and account is unlocked
+        tracing::info!("🔄 Updating viewer user");
+        let viewer_result = sqlx::query("UPDATE users SET role = 'viewer', password_hash = $1, failed_login_attempts = 0, locked_until = NULL WHERE email = 'viewer@archzero.local'")
+            .bind(&password_hash)
+            .execute(&self.pool)
+            .await
+            .map_err(|e| AppError::Internal(anyhow::anyhow!("Database error: {}", e)))?;
+        tracing::info!("✅ viewer updated: {} row(s) affected", viewer_result.rows_affected());
+
+        // Verify viewer update
+        let viewer_check: Option<UserRow> = sqlx::query_as(
+            "SELECT id, email, full_name, role, password_hash, failed_login_attempts, locked_until, created_at, updated_at FROM users WHERE email = 'viewer@archzero.local'"
+        )
+        .fetch_optional(&self.pool)
+        .await
+        .map_err(|e| AppError::Internal(anyhow::anyhow!("Database error: {}", e)))?;
+
+        match &viewer_check {
+            Some(user) => tracing::info!("✅ VERIFIED: viewer user exists with role='{}'", user.role),
+            None => tracing::error!("❌ ERROR: viewer user NOT FOUND in database!"),
+        }
+
+        tracing::info!("🎉 ARB user seeding completed successfully");
+        Ok(3) // Return count of affected users
     }
 }
