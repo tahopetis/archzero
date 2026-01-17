@@ -77,6 +77,10 @@ export function RequestDetail() {
   // Success messages
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
+  // Template modal state
+  const [showTemplateModal, setShowTemplateModal] = useState(false);
+  const [templateName, setTemplateName] = useState('');
+
   // Assign reviewer state
   const [showAssignReviewer, setShowAssignReviewer] = useState(false);
   const [selectedReviewer, setSelectedReviewer] = useState('');
@@ -128,14 +132,20 @@ export function RequestDetail() {
 
   const createTemplate = useCreateTemplate();
 
-  const handleSaveAsTemplate = async () => {
+  const handleSaveAsTemplate = () => {
+    setShowTemplateModal(true);
+    setTemplateName(`${submission.title} - Template`);
+  };
+
+  const handleConfirmSaveTemplate = async () => {
     try {
       await createTemplate.mutateAsync({
-        title: `${submission.title} - Template`,
+        title: templateName,
         description: submission.rationale?.substring(0, 200),
         submission_id: submission.id,
       });
-      setSuccessMessage('Template saved successfully');
+      setSuccessMessage('Template saved');
+      setShowTemplateModal(false);
       setTimeout(() => setSuccessMessage(null), 3000);
     } catch (error) {
       console.error('Failed to save template:', error);
@@ -940,6 +950,42 @@ export function RequestDetail() {
               </button>
               <button
                 onClick={() => setShowDeleteConfirm(false)}
+                className="px-4 py-2 bg-slate-100 text-slate-700 rounded-lg hover:bg-slate-200 transition-colors"
+              >
+                Cancel
+              </button>
+            </div>
+          </Card>
+        </div>
+      )}
+
+      {/* Template Save Modal */}
+      {showTemplateModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <Card className="p-6 max-w-md">
+            <h3 className="text-lg font-bold text-slate-900 mb-2">Save as Template</h3>
+            <p className="text-slate-600 mb-4">
+              Give this template a name for easy reference.
+            </p>
+            <input
+              type="text"
+              value={templateName}
+              onChange={(e) => setTemplateName(e.target.value)}
+              data-testid="template-name"
+              className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 mb-4"
+              placeholder="Template name"
+              autoFocus
+            />
+            <div className="flex items-center gap-3">
+              <button
+                onClick={handleConfirmSaveTemplate}
+                disabled={createTemplate.isPending}
+                className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors font-medium disabled:opacity-50"
+              >
+                {createTemplate.isPending ? 'Saving...' : 'Save'}
+              </button>
+              <button
+                onClick={() => setShowTemplateModal(false)}
                 className="px-4 py-2 bg-slate-100 text-slate-700 rounded-lg hover:bg-slate-200 transition-colors"
               >
                 Cancel

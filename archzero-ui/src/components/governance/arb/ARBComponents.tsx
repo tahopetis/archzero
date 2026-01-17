@@ -1395,8 +1395,8 @@ export function NewRequestForm() {
   const createFromTemplate = useCreateFromTemplate();
 
   const [requestType, setRequestType] = useState<string>('new_application');
-  const [showTemplateModal, setShowTemplateModal] = useState(false);
-  const [selectedTemplate, setSelectedTemplate] = useState<string | null>(null);
+  const [showTemplateSelect, setShowTemplateSelect] = useState(false);
+  const [selectedTemplateId, setSelectedTemplateId] = useState<string>('');
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [businessJustification, setBusinessJustification] = useState('');
@@ -1496,30 +1496,10 @@ export function NewRequestForm() {
     setAttachments(attachments.filter((_, i) => i !== index));
   };
 
-  const handleUseTemplate = async (templateId: string, templateTitle: string) => {
-    try {
-      // Create submission from template
-      const result = await createFromTemplate.mutateAsync({
-        template_id: templateId,
-        title: templateTitle,
-        additional_notes: '',
-      });
+  const handleUseTemplate = async () => {
+    if (!selectedTemplateId) return;
 
-      // Show success and redirect
-      setSuccessMessage('Submission created from template');
-      setSubmitSuccess(true);
-
-      setTimeout(() => {
-        navigate(`/arb/submissions/${result.id}`);
-      }, 1000);
-    } catch (error) {
-      console.error('Failed to create from template:', error);
-      alert('Failed to create submission from template. Please try again.');
-    }
-  };
-
-  const handlePrefillFromTemplate = (templateId: string) => {
-    const template = templates?.find(t => t.id === templateId);
+    const template = templates?.find(t => t.id === selectedTemplateId);
     if (!template) return;
 
     // Pre-fill form with template data
@@ -1543,7 +1523,7 @@ export function NewRequestForm() {
     if (templateData.exceptionTimeline) setExceptionTimeline(templateData.exceptionTimeline);
     if (templateData.priority) setImpact(templateData.priority);
 
-    setShowTemplateModal(false);
+    setShowTemplateSelect(false);
   };
 
   return (
@@ -1556,7 +1536,7 @@ export function NewRequestForm() {
           </div>
           <button
             type="button"
-            onClick={() => setShowTemplateModal(true)}
+            onClick={() => setShowTemplateSelect(!showTemplateSelect)}
             className="flex items-center gap-2 px-4 py-2 bg-indigo-100 text-indigo-700 rounded-lg hover:bg-indigo-200 transition-colors font-medium"
             data-testid="use-template-btn"
           >
@@ -1564,6 +1544,34 @@ export function NewRequestForm() {
             Use Template
           </button>
         </div>
+
+      {showTemplateSelect && (
+        <div className="p-4 bg-indigo-50 border border-indigo-200 rounded-lg">
+          <div className="flex items-center gap-4">
+            <select
+              value={selectedTemplateId}
+              onChange={(e) => setSelectedTemplateId(e.target.value)}
+              data-testid="template-select"
+              className="flex-1 px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+            >
+              <option value="">Select a template...</option>
+              {templates?.map(template => (
+                <option key={template.id} value={template.id}>
+                  {template.title}
+                </option>
+              ))}
+            </select>
+            <button
+              type="button"
+              onClick={handleUseTemplate}
+              disabled={!selectedTemplateId}
+              className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              Load Template
+            </button>
+          </div>
+        </div>
+      )}
 
       <form onSubmit={handleSubmit} className="space-y-6">
         {/* Success Message */}
@@ -1855,82 +1863,6 @@ export function NewRequestForm() {
         </div>
       </form>
     </Card>
-
-      {/* Template Selection Modal */}
-      {showTemplateModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50" data-testid="template-modal">
-          <Card className="max-w-3xl w-full mx-4 max-h-[80vh] overflow-y-auto">
-            <div className="flex items-center justify-between mb-6">
-              <div>
-                <h2 className="text-2xl font-bold text-slate-900">Select a Template</h2>
-                <p className="text-slate-600 mt-1">Choose a template to pre-fill your request</p>
-              </div>
-              <button
-                onClick={() => setShowTemplateModal(false)}
-                className="text-slate-400 hover:text-slate-600"
-              >
-                <X className="w-6 h-6" />
-              </button>
-            </div>
-
-            {!templates || templates.length === 0 ? (
-              <div className="text-center py-12">
-                <FileText className="w-16 h-16 text-slate-300 mx-auto mb-4" />
-                <p className="text-slate-500">No templates available</p>
-                <p className="text-sm text-slate-400 mt-1">Save a submission as a template to get started</p>
-              </div>
-            ) : (
-              <div className="space-y-3">
-                {templates.map((template) => (
-                  <div
-                    key={template.id}
-                    className="p-4 border border-slate-200 rounded-lg hover:border-indigo-300 hover:bg-indigo-50 transition-colors cursor-pointer"
-                    data-testid={`template-option-${template.id}`}
-                  >
-                    <div className="flex items-start justify-between mb-2">
-                      <div className="flex-1">
-                        <div className="flex items-center gap-2 mb-1">
-                          <h3 className="font-semibold text-slate-900">{template.title}</h3>
-                          <span className="px-2 py-1 text-xs font-medium rounded-full bg-indigo-100 text-indigo-800">
-                            {template.request_type}
-                          </span>
-                        </div>
-                        {template.description && (
-                          <p className="text-sm text-slate-600 line-clamp-2">{template.description}</p>
-                        )}
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-2 mt-3">
-                      <button
-                        type="button"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handlePrefillFromTemplate(template.id);
-                        }}
-                        className="flex-1 px-3 py-1.5 text-sm bg-indigo-100 text-indigo-700 rounded-lg hover:bg-indigo-200 transition-colors"
-                        data-testid={`prefill-template-btn-${template.id}`}
-                      >
-                        Prefill Form
-                      </button>
-                      <button
-                        type="button"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleUseTemplate(template.id, template.title);
-                        }}
-                        className="flex-1 px-3 py-1.5 text-sm bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors"
-                        data-testid={`create-from-template-btn-${template.id}`}
-                      >
-                        Create Directly
-                      </button>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-          </Card>
-        </div>
-      )}
     </>
   );
 }
