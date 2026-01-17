@@ -189,6 +189,16 @@ function App() {
           }
         />
         <Route
+          path="/arb/notifications"
+          element={
+            <ProtectedRoute allowedRoles={['admin', 'arbchair', 'arbmember', 'architect']}>
+              <Layout>
+                <ARBPage />
+              </Layout>
+            </ProtectedRoute>
+          }
+        />
+        <Route
           path="/arb/submissions/:id"
           element={
             <ProtectedRoute allowedRoles={['admin', 'arbchair', 'arbmember', 'architect']}>

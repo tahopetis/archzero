@@ -104,6 +104,12 @@ pub fn card_to_arb_submission(card: crate::models::card::Card) -> Result<ARBSubm
         .and_then(|v| v.as_str())
         .and_then(|s| Uuid::parse_str(s).ok());
 
+    let status_str = attrs.get("status")
+        .and_then(|v| v.as_str())
+        .unwrap_or("Pending");
+    let status: ARBSubmissionStatus = serde_json::from_str(&format!("\"{}\"", status_str))
+        .unwrap_or(ARBSubmissionStatus::Pending);
+
     Ok(ARBSubmission {
         id: card.id,
         title: attrs.get("title").and_then(|v| v.as_str()).map(String::from),
@@ -116,6 +122,7 @@ pub fn card_to_arb_submission(card: crate::models::card::Card) -> Result<ARBSubm
         decision,
         priority,
         related_policy_id,
+        status,
         created_at: card.created_at,
         updated_at: card.updated_at,
     })
@@ -261,6 +268,7 @@ pub async fn create_meeting(
     // Extract user ID from JWT claims (injected by auth middleware)
     let user_id = Uuid::parse_str(&claims.sub).map_err(|_| StatusCode::UNAUTHORIZED)?;
 
+    let meeting_title = req.title.clone();
     let attributes = serde_json::json!({
         "scheduledDate": req.scheduled_date.to_string(),
         "status": ARBMeetingStatus::Scheduled,
@@ -286,6 +294,21 @@ pub async fn create_meeting(
             return Err(StatusCode::INTERNAL_SERVER_ERROR);
         }
     };
+
+    // Create notifications for all attendees
+    for attendee_id in &req.attendees {
+        let _ = state.arb_notification_service.create_notification(
+            crate::models::arb_notification::CreateNotificationRequest {
+                recipient_id: *attendee_id,
+                submission_id: None,
+                meeting_id: Some(card.id),
+                notification_type: "meeting_scheduled".to_string(),
+                title: "ARB Meeting Scheduled".to_string(),
+                message: format!("You have been invited to ARB meeting: {}", meeting_title),
+                action_url: Some(format!("/arb/meetings/{}", card.id)),
+            },
+        ).await;
+    }
 
     match card_to_arb_meeting(card) {
         Ok(meeting) => return Ok(Json(meeting)),
@@ -715,6 +738,8 @@ pub async fn create_submission(
         })
     };
 
+    let submission_status = if req.is_draft.unwrap_or(false) { "Draft" } else { "Pending" };
+
     let attributes = serde_json::json!({
         "title": req.title,
         "meetingId": req.meeting_id,
@@ -725,6 +750,7 @@ pub async fn create_submission(
         "submittedAt": submitted_at.to_rfc3339(),
         "priority": req.priority,
         "relatedPolicyId": req.related_policy_id,
+        "status": submission_status,
     });
 
     let create_req = CreateCardRequest {
@@ -755,7 +781,7 @@ pub async fn create_submission(
             entity_id: card.id,
             action: "created".to_string(),
             actor_id: user_id,
-            actor_name,
+            actor_name: actor_name.clone(),
             actor_role: Some(actor_role.clone()),
             changes: None,
             metadata: Some(serde_json::json!({
@@ -766,6 +792,39 @@ pub async fn create_submission(
         None, // IP address
         None, // User agent
     ).await;
+
+    // Create notification for submission creator
+    let submission_title = req.title.as_ref().unwrap_or(&"N/A".to_string()).clone();
+    let _ = state.arb_notification_service.create_notification(
+        crate::models::arb_notification::CreateNotificationRequest {
+            recipient_id: user_id,
+            submission_id: Some(card.id),
+            meeting_id: req.meeting_id,
+            notification_type: "submission_created".to_string(),
+            title: "ARB Submission Created".to_string(),
+            message: format!("Your ARB submission '{}' has been created and is pending review.", submission_title),
+            action_url: Some(format!("/arb/submissions/{}", card.id)),
+        },
+    ).await;
+
+    // Update related card with ARB submission reference
+    if let Some(related_card) = related_card {
+        let mut card_attrs = related_card.attributes;
+        card_attrs["arbSubmissionId"] = serde_json::json!(card.id);
+        card_attrs["arbStatus"] = serde_json::json!("pending_review");
+
+        let _ = state.card_service.update(
+            related_card.id,
+            crate::models::card::UpdateCardRequest {
+                name: None,
+                lifecycle_phase: None,
+                quality_score: None,
+                description: None,
+                attributes: Some(card_attrs),
+                tags: None,
+            }
+        ).await;
+    }
 
     match card_to_arb_submission(card) {
         Ok(submission) => return Ok(Json(submission)),
@@ -966,6 +1025,16 @@ pub async fn record_decision(
         valid_until: req.valid_until,
     };
 
+    // Extract submitter_id before moving attributes
+    let submitter_id = submission.attributes.get("submittedBy")
+        .and_then(|v| v.as_str())
+        .and_then(|s| Uuid::parse_str(s).ok());
+
+    // Extract related_card_id before moving attributes
+    let related_card_id = submission.attributes.get("cardId")
+        .and_then(|v| v.as_str())
+        .and_then(|s| Uuid::parse_str(s).ok());
+
     // Store decision in submission's attributes
     let mut attrs = submission.attributes;
     attrs["decision"] = serde_json::to_value(&decision).unwrap();
@@ -990,7 +1059,7 @@ pub async fn record_decision(
                     entity_id: submission_id,
                     action: "decision_recorded".to_string(),
                     actor_id: user_id,
-                    actor_name,
+                    actor_name: actor_name.clone(),
                     actor_role: Some(actor_role.clone()),
                     changes: Some(serde_json::json!({
                         "decision_type": decision.decision_type,
@@ -1003,6 +1072,51 @@ pub async fn record_decision(
                 None,
                 None,
             ).await;
+
+            // Create notification for submitter about the decision
+            if let Some(submitter_uuid) = submitter_id {
+                let decision_type_str = format!("{:?}", decision.decision_type);
+                let _ = state.arb_notification_service.create_notification(
+                    crate::models::arb_notification::CreateNotificationRequest {
+                        recipient_id: submitter_uuid,
+                        submission_id: Some(submission_id),
+                        meeting_id: None,
+                        notification_type: "decision_recorded".to_string(),
+                        title: "ARB Decision Recorded".to_string(),
+                        message: format!("A decision has been recorded on your ARB submission: {}", decision_type_str),
+                        action_url: Some(format!("/arb/submissions/{}", submission_id)),
+                    },
+                ).await;
+            }
+
+            // Update related card with ARB decision status
+            if let Some(card_uuid) = related_card_id {
+                if let Ok(related_card) = state.card_service.get(card_uuid).await {
+                    let mut card_attrs = related_card.attributes;
+                    let decision_status = match decision.decision_type {
+                        crate::models::arb::ARBDecisionType::Approve => "approved",
+                        crate::models::arb::ARBDecisionType::ApproveWithConditions => "approved_with_conditions",
+                        crate::models::arb::ARBDecisionType::Reject => "rejected",
+                        crate::models::arb::ARBDecisionType::Defer => "deferred",
+                        crate::models::arb::ARBDecisionType::RequestMoreInfo => "more_info_requested",
+                    };
+                    card_attrs["arbStatus"] = serde_json::json!(decision_status);
+                    card_attrs["arbDecisionType"] = serde_json::json!(format!("{:?}", decision.decision_type));
+                    card_attrs["arbDecisionDate"] = serde_json::json!(decided_at.to_rfc3339());
+
+                    let _ = state.card_service.update(
+                        card_uuid,
+                        crate::models::card::UpdateCardRequest {
+                            name: None,
+                            lifecycle_phase: None,
+                            quality_score: None,
+                            description: None,
+                            attributes: Some(card_attrs),
+                            tags: None,
+                        }
+                    ).await;
+                }
+            }
 
             Ok(Json(decision))
         },
@@ -1373,5 +1487,92 @@ pub async fn get_audit_logs(
 pub struct AuditLogQueryParams {
     pub limit: Option<i64>,
     pub offset: Option<i64>,
+}
+
+// ============================================================================
+// Notification Handlers
+// ============================================================================
+
+/// Query parameters for notification queries
+#[derive(Debug, Deserialize)]
+pub struct NotificationQueryParams {
+    pub include_read: Option<bool>,
+    pub limit: Option<i64>,
+    pub offset: Option<i64>,
+}
+
+/// Get notifications for the current user
+pub async fn get_notifications(
+    State(state): State<AppState>,
+    Extension(claims): Extension<Claims>,
+    Query(params): Query<NotificationQueryParams>,
+) -> Result<Json<Vec<crate::models::arb_notification::ARBNotification>>, AppError> {
+    let recipient_id = Uuid::parse_str(&claims.sub).map_err(|_| AppError::Auth("Invalid user ID".to_string()))?;
+    let include_read = params.include_read.unwrap_or(true);
+    let limit = params.limit.unwrap_or(50).min(100);
+    let offset = params.offset.unwrap_or(0);
+
+    let notifications = state
+        .arb_notification_service
+        .get_user_notifications(recipient_id, include_read, limit, offset)
+        .await?;
+
+    Ok(Json(notifications))
+}
+
+/// Get unread notification count for the current user
+pub async fn get_unread_count(
+    State(state): State<AppState>,
+    Extension(claims): Extension<Claims>,
+) -> Result<Json<i64>, AppError> {
+    let recipient_id = Uuid::parse_str(&claims.sub).map_err(|_| AppError::Auth("Invalid user ID".to_string()))?;
+
+    let count = state
+        .arb_notification_service
+        .get_unread_count(recipient_id)
+        .await?;
+
+    Ok(Json(count))
+}
+
+/// Mark a notification as read
+pub async fn mark_notification_read(
+    State(state): State<AppState>,
+    Path(id): Path<Uuid>,
+) -> Result<Json<crate::models::arb_notification::ARBNotification>, AppError> {
+    let notification = state
+        .arb_notification_service
+        .mark_as_read(id)
+        .await?;
+
+    Ok(Json(notification))
+}
+
+/// Mark all notifications as read for the current user
+pub async fn mark_all_read(
+    State(state): State<AppState>,
+    Extension(claims): Extension<Claims>,
+) -> Result<Json<u64>, AppError> {
+    let recipient_id = Uuid::parse_str(&claims.sub).map_err(|_| AppError::Auth("Invalid user ID".to_string()))?;
+
+    let count = state
+        .arb_notification_service
+        .mark_all_as_read(recipient_id)
+        .await?;
+
+    Ok(Json(count))
+}
+
+/// Delete a notification
+pub async fn delete_notification(
+    State(state): State<AppState>,
+    Path(id): Path<Uuid>,
+) -> Result<StatusCode, AppError> {
+    state
+        .arb_notification_service
+        .delete_notification(id)
+        .await?;
+
+    Ok(StatusCode::NO_CONTENT)
 }
 

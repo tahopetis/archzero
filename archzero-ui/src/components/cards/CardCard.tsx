@@ -83,13 +83,25 @@ export function CardCard({ card, onClick, selected = false, onToggleSelect, show
         )}
       </div>
 
-      <div className="flex items-center gap-2 mb-3">
+      <div className="flex items-center gap-2 mb-3 flex-wrap">
         <span className={`px-2 py-1 rounded-md text-xs font-medium border ${typeColor}`}>
           {card.type}
         </span>
         <span className={`px-2 py-1 rounded-md text-xs font-medium ${phaseColor}`}>
           {card.lifecyclePhase}
         </span>
+        {card.attributes?.arbStatus && (
+          <span className={`px-2 py-1 rounded-md text-xs font-medium border ${
+            card.attributes.arbStatus === 'approved' ? 'bg-green-100 text-green-800 border-green-200' :
+            card.attributes.arbStatus === 'approved_with_conditions' ? 'bg-lime-100 text-lime-800 border-lime-200' :
+            card.attributes.arbStatus === 'rejected' ? 'bg-red-100 text-red-800 border-red-200' :
+            card.attributes.arbStatus === 'deferred' ? 'bg-yellow-100 text-yellow-800 border-yellow-200' :
+            card.attributes.arbStatus === 'pending_review' ? 'bg-amber-100 text-amber-800 border-amber-200' :
+            'bg-gray-100 text-gray-800 border-gray-200'
+          }`} data-testid="arb-status-badge">
+            ARB: {card.attributes.arbStatus.replace(/_/g, ' ')}
+          </span>
+        )}
       </div>
 
       {card.description && (

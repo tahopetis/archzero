@@ -1,5 +1,5 @@
 use axum::{
-    routing::{get, post},
+    routing::{get, post, delete},
     Router,
     Json,
 };
@@ -14,7 +14,7 @@ use archzero_api::{
     config::Settings,
     state::AppState,
     handlers::{auth, cards, health, relationships, bia, migration, tco, policies, principles, standards, exceptions, initiatives, risks, compliance, arb, graph, import, bulk, csrf, cache, test_reset},
-    services::{CardService, AuthService, RelationshipService, Neo4jService, SagaOrchestrator, BIAService, TopologyService, MigrationService, TCOService, CsrfService, RateLimitService, CacheService, ArbTemplateService, ARBAuditService},
+    services::{CardService, AuthService, RelationshipService, Neo4jService, SagaOrchestrator, BIAService, TopologyService, MigrationService, TCOService, CsrfService, RateLimitService, CacheService, ArbTemplateService, ARBAuditService, ARBNotificationService},
     middleware::{security_headers, security_logging, rate_limit_middleware, auth_middleware},
     models::card::{Card, CardType, LifecyclePhase, CreateCardRequest, UpdateCardRequest, CardSearchParams},
     models::relationship::{Relationship, RelationshipType, CreateRelationshipRequest, UpdateRelationshipRequest},
@@ -385,6 +385,9 @@ async fn main() -> anyhow::Result<()> {
     // Initialize ARB Audit Service
     let arb_audit_service = Arc::new(ARBAuditService::new(pool.clone()));
 
+    // Initialize ARB Notification Service
+    let arb_notification_service = Arc::new(ARBNotificationService::new(pool.clone()));
+
     let import_jobs: Arc<tokio::sync::Mutex<std::collections::HashMap<Uuid, import::ImportJob>>> =
         Arc::new(tokio::sync::Mutex::new(std::collections::HashMap::new()));
 
@@ -404,6 +407,7 @@ async fn main() -> anyhow::Result<()> {
         cache_service: cache_service.clone(),
         arb_template_service: arb_template_service.clone(),
         arb_audit_service: arb_audit_service.clone(),
+        arb_notification_service: arb_notification_service.clone(),
         import_jobs: import_jobs.clone(),
     };
 
@@ -600,6 +604,19 @@ async fn main() -> anyhow::Result<()> {
             Router::new()
                 .route("/", get(arb::get_audit_logs))
                 .route("/:entity_type/:entity_id", get(arb::get_entity_audit_logs))
+                .layer(axum::middleware::from_fn_with_state(
+                    app_state.clone(),
+                    auth_middleware,
+                )),
+        )
+        .nest(
+            "/api/v1/arb/notifications",
+            Router::new()
+                .route("/", get(arb::get_notifications))
+                .route("/unread-count", get(arb::get_unread_count))
+                .route("/:id/read", post(arb::mark_notification_read))
+                .route("/read-all", post(arb::mark_all_read))
+                .route("/:id", delete(arb::delete_notification))
                 .layer(axum::middleware::from_fn_with_state(
                     app_state.clone(),
                     auth_middleware,

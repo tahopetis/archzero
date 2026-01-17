@@ -100,6 +100,7 @@ pub struct ARBSubmission {
     pub decision: Option<ARBDecision>,
     pub priority: Option<ARBPriority>,
     pub related_policy_id: Option<Uuid>,
+    pub status: ARBSubmissionStatus,
     pub created_at: DateTime<Utc>,
     pub updated_at: DateTime<Utc>,
 }
@@ -126,6 +127,7 @@ pub struct CreateARBSubmissionRequest {
     pub rationale: String,
     pub priority: ARBPriority,
     pub related_policy_id: Option<Uuid>,
+    pub is_draft: Option<bool>,
 }
 
 /// Request to update an ARB submission
@@ -152,6 +154,7 @@ pub struct ARBSubmissionSearchParams {
 #[derive(Debug, Serialize, Deserialize, Clone, PartialEq, ToSchema)]
 #[serde(rename_all = "PascalCase")]
 pub enum ARBSubmissionStatus {
+    Draft,
     Pending,
     UnderReview,
     DecisionMade,

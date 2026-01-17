@@ -10,6 +10,7 @@ pub mod services;
 // Re-export common types
 pub use error::{AppError, Result};
 pub use config::Settings;
+pub use services::ARBNotificationService;
 
 use axum::{Router, Json, routing::{get, post, put, delete}};
 use std::sync::Arc;
@@ -176,6 +177,9 @@ pub async fn create_app(settings: Settings) -> axum::Router {
     // Initialize ARB Audit Service
     let arb_audit_service = Arc::new(ARBAuditService::new(pool.clone()));
 
+    // Initialize ARB Notification Service
+    let arb_notification_service = Arc::new(ARBNotificationService::new(pool.clone()));
+
     // Initialize Phase 5: Redis Cache Service (optional - fails gracefully if Redis unavailable)
     let cache_service = if let Ok(cache) = CacheService::new(&settings.cache.redis_url.clone().unwrap_or_else(|| "redis://127.0.0.1:6379".to_string())) {
         Arc::new(cache)
@@ -205,6 +209,7 @@ pub async fn create_app(settings: Settings) -> axum::Router {
         cache_service: cache_service.clone(),
         arb_template_service: arb_template_service.clone(),
         arb_audit_service: arb_audit_service.clone(),
+        arb_notification_service: arb_notification_service.clone(),
         import_jobs: Arc::new(Mutex::new(std::collections::HashMap::new())),
     };
 

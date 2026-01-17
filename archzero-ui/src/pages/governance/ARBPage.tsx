@@ -4,7 +4,7 @@
 
 import { useState } from 'react';
 import { useParams, useLocation, useNavigate, Link } from 'react-router-dom';
-import { ARBDashboard, MeetingsList, SubmissionsQueue, DecisionForm, NewRequestForm, RequestDetail, ScheduleMeetingForm, MeetingDetail, type ARBMeeting, type ARBSubmission } from '@/components/governance/arb';
+import { ARBDashboard, MeetingsList, SubmissionsQueue, DecisionForm, NewRequestForm, RequestDetail, ScheduleMeetingForm, MeetingDetail, Notifications, type ARBMeeting, type ARBSubmission } from '@/components/governance/arb';
 
 export function ARBPage() {
   const { id } = useParams<'id'>();
@@ -18,6 +18,7 @@ export function ARBPage() {
   // Determine view based on route
   const isRequestsRoute = location.pathname.includes('/requests');
   const isMeetingsRoute = location.pathname.includes('/meetings');
+  const isNotificationsRoute = location.pathname.includes('/notifications');
   const isNewRequestRoute = location.pathname.includes('/requests/new');
   const isSubmissionDetailRoute = location.pathname.includes('/submissions/');
   const isMeetingDetailRoute = location.pathname.includes('/meetings/') && id;
@@ -153,6 +154,17 @@ export function ARBPage() {
               }}
             />
           )}
+        </div>
+      </div>
+    );
+  }
+
+  // Notifications view
+  if (isNotificationsRoute) {
+    return (
+      <div className="min-h-screen bg-slate-50" data-testid="notifications-page">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          <Notifications />
         </div>
       </div>
     );
