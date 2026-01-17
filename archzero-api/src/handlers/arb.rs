@@ -746,6 +746,27 @@ pub async fn create_submission(
         }
     };
 
+    // Log audit event
+    let actor_name = claims.email.clone();
+    let actor_role = format!("{:?}", claims.role);
+    let _ = state.arb_audit_service.log_audit_event(
+        crate::models::arb_audit_log::CreateAuditLogRequest {
+            entity_type: "submission".to_string(),
+            entity_id: card.id,
+            action: "created".to_string(),
+            actor_id: user_id,
+            actor_name,
+            actor_role: Some(actor_role.clone()),
+            changes: None,
+            metadata: Some(serde_json::json!({
+                "submission_type": req.submission_type,
+                "title": req.title,
+            })),
+        },
+        None, // IP address
+        None, // User agent
+    ).await;
+
     match card_to_arb_submission(card) {
         Ok(submission) => return Ok(Json(submission)),
         Err(e) => {
@@ -774,8 +795,11 @@ pub async fn create_submission(
 pub async fn update_submission(
     State(state): State<AppState>,
     Path(id): Path<Uuid>,
+    Extension(claims): Extension<Claims>,
     Json(req): Json<UpdateARBSubmissionRequest>,
 ) -> Result<Json<ARBSubmission>, StatusCode> {
+    let user_id = Uuid::parse_str(&claims.sub).map_err(|_| StatusCode::UNAUTHORIZED)?;
+
     let current = match state.card_service.get(id).await {
         Ok(c) => c,
         Err(AppError::NotFound(_)) => return Err(StatusCode::NOT_FOUND),
@@ -789,15 +813,27 @@ pub async fn update_submission(
         return Err(StatusCode::NOT_FOUND);
     }
 
+    // Track changes for audit log
+    let mut changes = serde_json::Map::new();
+
     // Merge attributes
     let mut attrs = current.attributes;
     if let Some(meeting_id) = req.meeting_id {
+        if let Some(old_val) = attrs.get("meetingId") {
+            changes.insert("meetingId".to_string(), serde_json::json!({"old": old_val, "new": meeting_id}));
+        }
         attrs["meetingId"] = serde_json::json!(meeting_id);
     }
     if let Some(ref rationale) = req.rationale {
+        if let Some(old_val) = attrs.get("rationale") {
+            changes.insert("rationale".to_string(), serde_json::json!({"old": old_val, "new": rationale}));
+        }
         attrs["rationale"] = serde_json::json!(rationale);
     }
     if let Some(priority) = req.priority {
+        if let Some(old_val) = attrs.get("priority") {
+            changes.insert("priority".to_string(), serde_json::json!({"old": old_val, "new": priority}));
+        }
         attrs["priority"] = serde_json::json!(priority);
     }
 
@@ -817,6 +853,24 @@ pub async fn update_submission(
             return Err(StatusCode::INTERNAL_SERVER_ERROR);
         }
     };
+
+    // Log audit event
+    let actor_name = claims.email.clone();
+    let actor_role = format!("{:?}", claims.role);
+    let _ = state.arb_audit_service.log_audit_event(
+        crate::models::arb_audit_log::CreateAuditLogRequest {
+            entity_type: "submission".to_string(),
+            entity_id: id,
+            action: "updated".to_string(),
+            actor_id: user_id,
+            actor_name,
+            actor_role: Some(actor_role.clone()),
+            changes: if changes.is_empty() { None } else { Some(serde_json::json!(changes)) },
+            metadata: None,
+        },
+        None,
+        None,
+    ).await;
 
     match card_to_arb_submission(card) {
         Ok(submission) => return Ok(Json(submission)),
@@ -926,7 +980,32 @@ pub async fn record_decision(
     };
 
     match state.card_service.update(submission_id, update_req).await {
-        Ok(_) => Ok(Json(decision)),
+        Ok(_) => {
+            // Log audit event for decision
+            let actor_name = claims.email.clone();
+            let actor_role = format!("{:?}", claims.role);
+            let _ = state.arb_audit_service.log_audit_event(
+                crate::models::arb_audit_log::CreateAuditLogRequest {
+                    entity_type: "submission".to_string(),
+                    entity_id: submission_id,
+                    action: "decision_recorded".to_string(),
+                    actor_id: user_id,
+                    actor_name,
+                    actor_role: Some(actor_role.clone()),
+                    changes: Some(serde_json::json!({
+                        "decision_type": decision.decision_type,
+                    })),
+                    metadata: Some(serde_json::json!({
+                        "rationale": decision.rationale,
+                        "conditions": decision.conditions,
+                    })),
+                },
+                None,
+                None,
+            ).await;
+
+            Ok(Json(decision))
+        },
         Err(e) => {
             tracing::error!("Failed to record decision: {}", e);
             return Err(StatusCode::INTERNAL_SERVER_ERROR);

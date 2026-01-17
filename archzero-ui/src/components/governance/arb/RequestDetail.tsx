@@ -34,6 +34,7 @@ import {
 } from 'lucide-react';
 import { Card, StatusBadge } from '../shared';
 import { NewRequestForm } from './ARBComponents';
+import { AuditTrail } from './AuditTrail';
 import { ARBDecisionType, type ARBSubmission, type ARBDecision } from '@/types/governance';
 
 interface Condition {
@@ -902,34 +903,7 @@ export function RequestDetail() {
 
       {/* History/Decision History */}
       <Card className="p-6">
-        <div className="flex items-center gap-2 mb-3">
-          <Calendar className="w-5 h-5 text-slate-600" />
-          <h2 className="text-lg font-bold text-slate-900" data-testid="decision-history-tab">History</h2>
-        </div>
-        <div className="space-y-3" data-testid="decision-history">
-          <div className="flex items-start gap-3 p-3 bg-slate-50 rounded-lg">
-            <div className="flex-shrink-0 w-2 h-2 mt-2 bg-indigo-600 rounded-full" />
-            <div>
-              <p className="text-sm font-semibold text-slate-900">Request Created</p>
-              <p className="text-xs text-slate-600">
-                {new Date(submission.submittedAt).toLocaleString()} by {submission.submittedBy}
-              </p>
-            </div>
-          </div>
-          {submission.decision && (
-            <div className="flex items-start gap-3 p-3 bg-slate-50 rounded-lg">
-              <div className="flex-shrink-0 w-2 h-2 mt-2 bg-emerald-600 rounded-full" />
-              <div>
-                <p className="text-sm font-semibold text-slate-900">
-                  Decision: {submission.decision.decisionType}
-                </p>
-                <p className="text-xs text-slate-600">
-                  {new Date(submission.decision.decidedAt).toLocaleString()} by {submission.decision.decidedBy}
-                </p>
-              </div>
-            </div>
-          )}
-        </div>
+        <AuditTrail entityType="submission" entityId={submission.id} />
       </Card>
 
       {/* Delete Confirmation Modal */}
