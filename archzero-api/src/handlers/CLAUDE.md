@@ -22,6 +22,7 @@
 
 | ID | Time | T | Title | Read |
 |----|------|---|-------|------|
+| #3422 | 2:32 PM | ✅ | Changed card_to_arb_submission function visibility from private to public | ~270 |
 | #3402 | 2:26 PM | 🔵 | ARB handler file contains 1383 lines of Rust code | ~223 |
 | #3399 | 2:25 PM | 🔵 | ARB handler file structure reviewed - comprehensive implementation | ~181 |
 | #3397 | " | 🔵 | ARB meeting creation handler uses card system | ~283 |

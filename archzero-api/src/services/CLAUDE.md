@@ -8,12 +8,12 @@
 | ID | Time | T | Title | Read |
 |----|------|---|-------|------|
 | #1959 | 9:25 AM | 🔵 | Card Service Implementation Examined | ~199 |
-| #1693 | 5:08 AM | ✅ | Account locked error message simplified | ~215 |
 
 ### Jan 17, 2026
 
 | ID | Time | T | Title | Read |
 |----|------|---|-------|------|
+| #3443 | 2:39 PM | 🔴 | Fixed card type deserialization in ARB template service | ~117 |
 | #3440 | 2:37 PM | 🔴 | Changed sqlx::query! to sqlx::query for type casting flexibility | ~248 |
 | #3426 | 2:33 PM | 🔴 | Fixed card insertion to use owner_id instead of created_by | ~224 |
 </claude-mem-context>
