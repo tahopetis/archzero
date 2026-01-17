@@ -10,6 +10,7 @@ import { CardDetail } from './components/cards/CardDetail';
 import { CardForm } from './components/cards/CardForm';
 import { ProtectedRoute } from './components/ProtectedRoute';
 import { Layout } from './components/Layout';
+import { TemplateLibrary } from './components/governance/arb/TemplateLibrary';
 // Governance Pages
 import {
   PrinciplesPage,
@@ -173,6 +174,16 @@ function App() {
             <ProtectedRoute allowedRoles={['admin', 'arbchair', 'arbmember', 'architect']}>
               <Layout>
                 <ARBPage />
+              </Layout>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/arb/templates"
+          element={
+            <ProtectedRoute allowedRoles={['admin', 'arbchair', 'arbmember', 'architect']}>
+              <Layout>
+                <TemplateLibrary />
               </Layout>
             </ProtectedRoute>
           }

@@ -4,9 +4,10 @@
  */
 
 import { useState, useEffect } from 'react';
-import { Link, useParams } from 'react-router-dom';
+import { Link, useParams, useNavigate } from 'react-router-dom';
 import { useARBSubmission, useUpdateARBSubmission, useDeleteARBSubmission, useRecordARBDecision } from '@/lib/governance-hooks';
 import { useAuthStore } from '@/stores/useAuthStore';
+import { useCreateTemplate } from '@/services/arbTemplateService';
 import {
   Calendar,
   User,
@@ -28,7 +29,8 @@ import {
   Pause,
   FileCheck,
   Gavel,
-  Bell
+  Bell,
+  Copy
 } from 'lucide-react';
 import { Card, StatusBadge } from '../shared';
 import { NewRequestForm } from './ARBComponents';
@@ -121,6 +123,23 @@ export function RequestDetail() {
     } catch (error) {
       console.error('Failed to delete request:', error);
       alert('Failed to delete request. Please try again.');
+    }
+  };
+
+  const createTemplate = useCreateTemplate();
+
+  const handleSaveAsTemplate = async () => {
+    try {
+      await createTemplate.mutateAsync({
+        title: `${submission.title} - Template`,
+        description: submission.rationale?.substring(0, 200),
+        submission_id: submission.id,
+      });
+      setSuccessMessage('Template saved successfully');
+      setTimeout(() => setSuccessMessage(null), 3000);
+    } catch (error) {
+      console.error('Failed to save template:', error);
+      alert('Failed to save template. Please try again.');
     }
   };
 
@@ -313,6 +332,14 @@ export function RequestDetail() {
             )}
             {canEdit && (
               <>
+                <button
+                  onClick={handleSaveAsTemplate}
+                  className="p-2 text-slate-600 hover:text-emerald-600 hover:bg-emerald-50 rounded-lg transition-colors"
+                  data-testid="save-as-template-btn"
+                  title="Save as Template"
+                >
+                  <Copy className="w-5 h-5" />
+                </button>
                 <button
                   onClick={() => setIsEditing(true)}
                   className="p-2 text-slate-600 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors"
