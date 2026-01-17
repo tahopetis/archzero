@@ -127,7 +127,7 @@ pub async fn create_app(settings: Settings) -> axum::Router {
                     principles, standards, policies, exceptions, initiatives, arb, graph, import as import_handler, bulk, cache};
     use services::{
         CardService, AuthService, RelationshipService, Neo4jService,
-        SagaOrchestrator, BIAService, TopologyService, MigrationService, TCOService, CsrfService, RateLimitService, CacheService
+        SagaOrchestrator, BIAService, TopologyService, MigrationService, TCOService, CsrfService, RateLimitService, CacheService, ArbTemplateService
     };
     use state::AppState;
 
@@ -170,6 +170,9 @@ pub async fn create_app(settings: Settings) -> axum::Router {
     let csrf_service = Arc::new(CsrfService::new());
     let rate_limit_service = Arc::new(RateLimitService::new());
 
+    // Initialize ARB Template Service
+    let arb_template_service = Arc::new(ArbTemplateService::new(pool.clone()));
+
     // Initialize Phase 5: Redis Cache Service (optional - fails gracefully if Redis unavailable)
     let cache_service = if let Ok(cache) = CacheService::new(&settings.cache.redis_url.clone().unwrap_or_else(|| "redis://127.0.0.1:6379".to_string())) {
         Arc::new(cache)
@@ -197,6 +200,7 @@ pub async fn create_app(settings: Settings) -> axum::Router {
         csrf_service: csrf_service.clone(),
         rate_limit_service: rate_limit_service.clone(),
         cache_service: cache_service.clone(),
+        arb_template_service: arb_template_service.clone(),
         import_jobs: Arc::new(Mutex::new(std::collections::HashMap::new())),
     };
 

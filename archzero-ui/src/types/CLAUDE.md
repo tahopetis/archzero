@@ -20,4 +20,12 @@
 | #2753 | 10:13 AM | 🔴 | Fixed ARB decision API field name from decisionType to type | ~193 |
 | #2752 | " | 🔵 | ARB decision request type definition in governance.ts | ~199 |
 | #2713 | 5:39 AM | 🟣 | Implemented ARB Dashboard with test selectors | ~145 |
+
+### Jan 17, 2026
+
+| ID | Time | T | Title | Read |
+|----|------|---|-------|------|
+| #3355 | 12:41 PM | 🟣 | Implemented ARB Member Role Permissions System | ~327 |
+| #3226 | 10:13 AM | 🟣 | Frontend UserRole type extended with ARB-specific roles | ~300 |
+| #3225 | " | 🔵 | Frontend UserRole type defines 4 roles without ARB-specific roles | ~276 |
 </claude-mem-context>

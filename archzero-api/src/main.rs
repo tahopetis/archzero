@@ -14,7 +14,7 @@ use archzero_api::{
     config::Settings,
     state::AppState,
     handlers::{auth, cards, health, relationships, bia, migration, tco, policies, principles, standards, exceptions, initiatives, risks, compliance, arb, graph, import, bulk, csrf, cache, test_reset},
-    services::{CardService, AuthService, RelationshipService, Neo4jService, SagaOrchestrator, BIAService, TopologyService, MigrationService, TCOService, CsrfService, RateLimitService, CacheService},
+    services::{CardService, AuthService, RelationshipService, Neo4jService, SagaOrchestrator, BIAService, TopologyService, MigrationService, TCOService, CsrfService, RateLimitService, CacheService, ArbTemplateService},
     middleware::{security_headers, security_logging, rate_limit_middleware, auth_middleware},
     models::card::{Card, CardType, LifecyclePhase, CreateCardRequest, UpdateCardRequest, CardSearchParams},
     models::relationship::{Relationship, RelationshipType, CreateRelationshipRequest, UpdateRelationshipRequest},
@@ -26,6 +26,7 @@ use archzero_api::{
     models::risks::*,
     models::compliance::*,
     models::arb::*,
+    models::arb_template::*,
 };
 
 /// Arc Zero API Documentation
@@ -378,6 +379,9 @@ async fn main() -> anyhow::Result<()> {
         }
     };
 
+    // Initialize ARB Template Service
+    let arb_template_service = Arc::new(ArbTemplateService::new(pool.clone()));
+
     let import_jobs: Arc<tokio::sync::Mutex<std::collections::HashMap<Uuid, import::ImportJob>>> =
         Arc::new(tokio::sync::Mutex::new(std::collections::HashMap::new()));
 
@@ -395,6 +399,7 @@ async fn main() -> anyhow::Result<()> {
         csrf_service: csrf_service.clone(),
         rate_limit_service: rate_limit_service.clone(),
         cache_service: cache_service.clone(),
+        arb_template_service: arb_template_service.clone(),
         import_jobs: import_jobs.clone(),
     };
 
@@ -570,6 +575,17 @@ async fn main() -> anyhow::Result<()> {
                 .route("/", get(arb::list_submissions).post(arb::create_submission))
                 .route("/:id", get(arb::get_submission).put(arb::update_submission).delete(arb::delete_submission))
                 .route("/:id/decision", post(arb::record_decision))
+                .layer(axum::middleware::from_fn_with_state(
+                    app_state.clone(),
+                    auth_middleware,
+                )),
+        )
+        .nest(
+            "/api/v1/arb/templates",
+            Router::new()
+                .route("/", get(arb::list_templates).post(arb::create_template))
+                .route("/:id", get(arb::get_template).put(arb::update_template).delete(arb::delete_template))
+                .route("/from-template", post(arb::create_from_template))
                 .layer(axum::middleware::from_fn_with_state(
                     app_state.clone(),
                     auth_middleware,

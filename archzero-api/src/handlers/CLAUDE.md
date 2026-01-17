@@ -7,7 +7,6 @@
 
 | ID | Time | T | Title | Read |
 |----|------|---|-------|------|
-| #2325 | 3:51 PM | 🔵 | Test reset handler provides authentication state cleanup | ~212 |
 | #1945 | 9:22 AM | 🔵 | Cards Handler Implementation Reviewed | ~180 |
 | #1817 | 8:30 AM | 🔵 | Auth Handlers Partially Implemented | ~223 |
 | #1719 | 5:31 AM | 🟣 | Test reset handler module added to API | ~179 |
@@ -17,6 +16,16 @@
 
 | ID | Time | T | Title | Read |
 |----|------|---|-------|------|
-| #2695 | 4:59 AM | 🔄 | Refactored UUID generation in ARB submission creation | ~198 |
 | #2660 | 3:10 AM | 🔴 | Fixed type conversion error in ARB handler | ~207 |
+
+### Jan 17, 2026
+
+| ID | Time | T | Title | Read |
+|----|------|---|-------|------|
+| #3402 | 2:26 PM | 🔵 | ARB handler file contains 1383 lines of Rust code | ~223 |
+| #3399 | 2:25 PM | 🔵 | ARB handler file structure reviewed - comprehensive implementation | ~181 |
+| #3397 | " | 🔵 | ARB meeting creation handler uses card system | ~283 |
+| #3390 | 2:22 PM | 🟣 | ARB Templates Backend Handlers Implemented | ~307 |
+| #3068 | 5:36 AM | 🔵 | ARB submissions routes not found in router | ~203 |
+| #3067 | 5:35 AM | 🔵 | Located ARB backend GET handlers in arb.rs | ~185 |
 </claude-mem-context>

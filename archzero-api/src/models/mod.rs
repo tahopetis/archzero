@@ -1,4 +1,5 @@
 pub mod arb;
+pub mod arb_template;
 pub mod bia;
 pub mod card;
 pub mod compliance;
@@ -14,6 +15,7 @@ pub mod tco;
 pub mod user;
 
 pub use arb::*;
+pub use arb_template::*;
 pub use bia::*;
 pub use card::*;
 pub use compliance::*;

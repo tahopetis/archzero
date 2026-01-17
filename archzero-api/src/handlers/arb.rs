@@ -9,6 +9,7 @@ use chrono::{Utc, NaiveDate};
 use crate::{
     models::{
         arb::*,
+        arb_template::*,
         card::{CardType, LifecyclePhase, CreateCardRequest, UpdateCardRequest},
         user::Claims,
     },
@@ -58,7 +59,7 @@ fn card_to_arb_meeting(card: crate::models::card::Card) -> Result<ARBMeeting, Ap
 }
 
 /// Helper to extract ARB submission from card attributes
-fn card_to_arb_submission(card: crate::models::card::Card) -> Result<ARBSubmission, AppError> {
+pub fn card_to_arb_submission(card: crate::models::card::Card) -> Result<ARBSubmission, AppError> {
     let attrs = &card.attributes;
 
     let meeting_id = attrs.get("meetingId")
@@ -1165,4 +1166,66 @@ pub async fn get_statistics(
     };
 
     Ok(Json(statistics))
+}
+
+// ============================================================================
+// ARB Templates Handlers
+// ============================================================================
+
+/// List all ARB templates
+pub async fn list_templates(
+    State(state): State<AppState>,
+) -> Result<Json<Vec<ARBTemplate>>, AppError> {
+    let templates = state.arb_template_service.list_templates().await?;
+    Ok(Json(templates))
+}
+
+/// Get a specific template by ID
+pub async fn get_template(
+    State(state): State<AppState>,
+    Path(id): Path<Uuid>,
+) -> Result<Json<ARBTemplate>, AppError> {
+    let template = state.arb_template_service.get_template(id).await?;
+    Ok(Json(template))
+}
+
+/// Create a new template from an existing submission
+pub async fn create_template(
+    State(state): State<AppState>,
+    Extension(claims): Extension<Claims>,
+    Json(req): Json<CreateTemplateRequest>,
+) -> Result<Json<ARBTemplate>, AppError> {
+    let user_id = Uuid::parse_str(&claims.sub).map_err(|_| AppError::Auth("Invalid user ID".to_string()))?;
+    let template = state.arb_template_service.create_template(req, user_id).await?;
+    Ok(Json(template))
+}
+
+/// Create a new submission from a template
+pub async fn create_from_template(
+    State(state): State<AppState>,
+    Extension(claims): Extension<Claims>,
+    Json(req): Json<CreateFromTemplateRequest>,
+) -> Result<Json<crate::models::arb::ARBSubmission>, AppError> {
+    let user_id = Uuid::parse_str(&claims.sub).map_err(|_| AppError::Auth("Invalid user ID".to_string()))?;
+    let submission = state.arb_template_service.create_from_template(req, user_id).await?;
+    Ok(Json(submission))
+}
+
+/// Update an existing template
+pub async fn update_template(
+    State(state): State<AppState>,
+    Path(id): Path<Uuid>,
+    Json(req): Json<UpdateTemplateRequest>,
+) -> Result<Json<ARBTemplate>, AppError> {
+    let template = state.arb_template_service.update_template(id, req).await?;
+    Ok(Json(template))
+}
+
+/// Delete a template
+pub async fn delete_template(
+    State(state): State<AppState>,
+    Path(id): Path<Uuid>,
+) -> Result<StatusCode, AppError> {
+    state.arb_template_service.delete_template(id).await?;
+    Ok(StatusCode::NO_CONTENT)
 }

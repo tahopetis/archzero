@@ -8,11 +8,4 @@
 | ID | Time | T | Title | Read |
 |----|------|---|-------|------|
 | #2480 | 5:38 PM | 🔵 | Session 1 test results summary documented in markdown file | ~274 |
-
-### Jan 15, 2026
-
-| ID | Time | T | Title | Read |
-|----|------|---|-------|------|
-| #2609 | 4:30 AM | 🔄 | Global test setup modified to always refresh test data | ~270 |
-| #2585 | 3:39 AM | 🔄 | Removed duplicate test data seeding from global setup | ~208 |
 </claude-mem-context>

@@ -14,4 +14,10 @@
 | ID | Time | T | Title | Read |
 |----|------|---|-------|------|
 | #2659 | 3:06 AM | 🔴 | ARB model fixed to make card_id optional and add title field | ~83 |
+
+### Jan 17, 2026
+
+| ID | Time | T | Title | Read |
+|----|------|---|-------|------|
+| #3177 | 9:46 AM | 🟣 | Added ARB-specific user roles to backend | ~188 |
 </claude-mem-context>

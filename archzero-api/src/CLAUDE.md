@@ -13,4 +13,11 @@
 | #2131 | 12:08 PM | 🔵 | Backend API router structure verified with Phase 2 and 3 endpoints fully wired | ~450 |
 | #1978 | 9:30 AM | 🔵 | Error Handling Pattern Identified | ~248 |
 | #1820 | 8:30 AM | 🔵 | API Routes Configuration Found | ~295 |
+
+### Jan 17, 2026
+
+| ID | Time | T | Title | Read |
+|----|------|---|-------|------|
+| #3412 | 2:28 PM | 🔵 | AppState struct manages application services | ~282 |
+| #3410 | " | 🟣 | Added ArbTemplateService to AppState | ~154 |
 </claude-mem-context>
