@@ -245,11 +245,11 @@ export function RequestDetail() {
       });
 
       const messages: Record<ARBDecisionType, string> = {
-        [ARBDecisionType.Approve]: 'Notification sent',
-        [ARBDecisionType.ApproveWithConditions]: 'Notification sent',
-        [ARBDecisionType.Reject]: 'Notification sent',
-        [ARBDecisionType.RequestMoreInfo]: 'Notification sent',
-        [ARBDecisionType.Defer]: 'Notification sent',
+        [ARBDecisionType.Approve]: 'Request approved',
+        [ARBDecisionType.ApproveWithConditions]: 'Request conditionally approved',
+        [ARBDecisionType.Reject]: 'Request rejected',
+        [ARBDecisionType.RequestMoreInfo]: 'Request deferred',
+        [ARBDecisionType.Defer]: 'Request deferred',
       };
 
       // Show success message and close modal
@@ -902,7 +902,7 @@ export function RequestDetail() {
       )}
 
       {/* History/Decision History */}
-      <Card className="p-6">
+      <Card className="p-6" data-testid="decision-history">
         <AuditTrail entityType="submission" entityId={submission.id} />
       </Card>
 
