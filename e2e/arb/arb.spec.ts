@@ -667,9 +667,41 @@ test.describe('ARB Audit Trail', () => {
 test.describe('ARB Templates and Reuse', () => {
   let loginPage: LoginPage;
 
-  test.beforeEach(async ({ page }) => {
+  test.beforeEach(async ({ page, request }) => {
     loginPage = new LoginPage(page);
-    await loginPage.loginViaApi('admin@archzero.local', 'changeme123');
+    const authData = await loginPage.loginViaApi('admin@archzero.local', 'changeme123');
+
+    // Create a test template for the "create request from template" test
+    const baseURL = process.env.API_URL || 'http://localhost:3000';
+
+    // First, get an ARB submission to use as template source
+    const submissionsResponse = await request.get(`${baseURL}/api/v1/arb/submissions`, {
+      headers: {
+        'Authorization': `Bearer ${authData.token}`,
+      },
+    });
+
+    if (submissionsResponse.ok()) {
+      const submissionsData = await submissionsResponse.json();
+      const submissions = submissionsData.data || submissionsData;
+
+      if (Array.isArray(submissions) && submissions.length > 0) {
+        const firstSubmission = submissions[0];
+
+        // Create a template from the first submission
+        await request.post(`${baseURL}/api/v1/arb/templates`, {
+          headers: {
+            'Authorization': `Bearer ${authData.token}`,
+            'Content-Type': 'application/json',
+          },
+          data: {
+            title: 'New Application Template',
+            description: 'Template for new application ARB requests',
+            submission_id: firstSubmission.id,
+          },
+        });
+      }
+    }
   });
 
   test('should save request as template', async ({ page }) => {
@@ -679,7 +711,7 @@ test.describe('ARB Templates and Reuse', () => {
     await expect(request).toBeVisible();
     await request.click();
 
-    const saveTemplateBtn = page.locator('button:has-text("Save as Template"), [data-testid="save-template-btn"]');
+    const saveTemplateBtn = page.locator('button:has-text("Save as Template"), [data-testid="save-as-template-btn"]');
     await expect(saveTemplateBtn).toBeVisible();
     await saveTemplateBtn.click();
 
@@ -696,7 +728,20 @@ test.describe('ARB Templates and Reuse', () => {
     await expect(useTemplateBtn).toBeVisible();
     await useTemplateBtn.click();
 
-    await page.locator('[data-testid="template-select"]').selectOption('new_application_template');
+    // Select the first template option (created in beforeEach)
+    const templateSelect = page.locator('[data-testid="template-select"]');
+    await expect(templateSelect).toBeVisible();
+
+    // Get the first option value
+    const firstOption = templateSelect.locator('option').nth(1); // Skip the placeholder option
+    const optionValue = await firstOption.getAttribute('value');
+    await templateSelect.selectOption(optionValue);
+
+    // Click the Load Template button
+    await page.locator('button:has-text("Load Template")').click();
+
+    // Wait a bit for form to populate
+    await page.waitForTimeout(500);
 
     // Form should be pre-filled
     const title = await page.locator('[data-testid="request-title"]').inputValue();
