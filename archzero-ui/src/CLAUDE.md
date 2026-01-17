@@ -13,7 +13,6 @@
 | #2221 | 12:27 PM | 🟣 | ReportsDashboard import added to App.tsx for reports functionality | ~250 |
 | #2210 | 12:26 PM | 🟣 | Profile route added to App.tsx with ProtectedRoute wrapper | ~306 |
 | #2204 | 12:25 PM | ✅ | Added search route to App.tsx routing configuration | ~97 |
-| #2183 | 12:22 PM | 🟣 | Objectives and OKRs route added to App.tsx | ~127 |
 | #2166 | 12:20 PM | ✅ | ObjectivesPage component imported in App.tsx for OKRs functionality | ~298 |
 | #2140 | 12:11 PM | 🟣 | Missing frontend routes added for import, export, and relationships | ~397 |
 | #2139 | " | 🟣 | Frontend routes added for import/export and relationship components | ~306 |

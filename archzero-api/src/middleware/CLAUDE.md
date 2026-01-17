@@ -10,4 +10,11 @@
 | #1159 | 3:17 PM | 🔄 | Authentication Middleware Simplified | ~275 |
 | #1152 | 3:14 PM | 🟣 | JWT Authentication and Authorization Middleware | ~328 |
 | #1150 | " | 🟣 | Middleware Module Structure Created | ~156 |
+
+### Jan 16, 2026
+
+| ID | Time | T | Title | Read |
+|----|------|---|-------|------|
+| #2745 | 9:57 AM | 🔴 | ARB compilation error at lib.rs:337 | ~339 |
+| #2663 | 3:19 AM | 🔴 | Fixed ARB authentication to extract user ID from JWT | ~121 |
 </claude-mem-context>

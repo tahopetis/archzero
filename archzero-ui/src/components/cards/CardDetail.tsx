@@ -138,6 +138,13 @@ export function CardDetail() {
               >
                 Intelligence
               </button>
+              <button
+                data-testid="request-arb-btn"
+                onClick={() => navigate(`/arb/requests/new?cardId=${card.id}`)}
+                className="px-3 py-1 bg-gradient-to-r from-indigo-600 to-purple-600 text-white text-sm rounded-md hover:shadow-lg hover:shadow-indigo-500/20 font-medium"
+              >
+                Request ARB Review
+              </button>
               <span className={`px-3 py-1 rounded-md text-sm font-medium ${typeColor}`} data-testid="card-type">
                 {card.type}
               </span>

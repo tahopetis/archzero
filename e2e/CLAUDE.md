@@ -8,13 +8,11 @@
 | ID | Time | T | Title | Read |
 |----|------|---|-------|------|
 | #2480 | 5:38 PM | 🔵 | Session 1 test results summary documented in markdown file | ~274 |
-| #1791 | 8:22 AM | 🔵 | E2E Directory Structure Established with Auth, Cards, and Governance Test Suites | ~268 |
 
 ### Jan 15, 2026
 
 | ID | Time | T | Title | Read |
 |----|------|---|-------|------|
-| #2617 | 4:48 AM | ✅ | Fixed TestDataSeeder instantiation in global setup | ~183 |
 | #2609 | 4:30 AM | 🔄 | Global test setup modified to always refresh test data | ~270 |
 | #2585 | 3:39 AM | 🔄 | Removed duplicate test data seeding from global setup | ~208 |
 </claude-mem-context>

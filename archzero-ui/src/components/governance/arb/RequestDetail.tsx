@@ -3,7 +3,7 @@
  * Displays full submission information with review and edit capability
  */
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { useARBSubmission, useUpdateARBSubmission, useDeleteARBSubmission, useRecordARBDecision } from '@/lib/governance-hooks';
 import {
@@ -217,16 +217,14 @@ export function RequestDetail() {
         [ARBDecisionType.Defer]: 'Notification sent',
       };
 
-      // Close modal first to ensure it disappears
+      // Show success message and close modal
+      setSuccessMessage(messages[selectedDecisionType]);
       setSelectedDecisionType(null);
       setDecisionRationale('');
       setDecisionConditions('');
       setDecisionConditions2('');
 
-      // Then show success message
-      setSuccessMessage(messages[selectedDecisionType]);
-
-      // Clear success message after 5 seconds (increased from 3)
+      // Clear success message after 5 seconds
       setTimeout(() => setSuccessMessage(null), 5000);
     } catch (error) {
       console.error('Failed to record decision:', error);
@@ -298,6 +296,16 @@ export function RequestDetail() {
             <p className="text-slate-600">{submission.rationale}</p>
           </div>
           <div className="flex items-center gap-2">
+            {submission.cardId && (
+              <Link
+                to={`/cards/${submission.cardId}`}
+                className="inline-flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white text-sm rounded-lg hover:bg-indigo-700 transition-colors"
+                data-testid="view-card-btn"
+              >
+                <FileText className="w-4 h-4" />
+                View Card
+              </Link>
+            )}
             {canEdit && (
               <>
                 <button
@@ -366,8 +374,11 @@ export function RequestDetail() {
 
       {/* Success Message */}
       {successMessage && (
-        <div className="p-4 bg-emerald-50 border border-emerald-200 rounded-lg" data-testid="success-message">
-          <p className="text-sm font-semibold text-emerald-800">{successMessage}</p>
+        <div
+          className="p-4 bg-emerald-50 border border-emerald-200 rounded-lg text-sm font-semibold text-emerald-800"
+          data-testid="success-message"
+        >
+          {successMessage.trim()}
         </div>
       )}
 

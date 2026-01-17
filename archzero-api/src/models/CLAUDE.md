@@ -8,4 +8,10 @@
 | ID | Time | T | Title | Read |
 |----|------|---|-------|------|
 | #1964 | 9:26 AM | 🔵 | Card Model Structure Reviewed | ~228 |
+
+### Jan 16, 2026
+
+| ID | Time | T | Title | Read |
+|----|------|---|-------|------|
+| #2659 | 3:06 AM | 🔴 | ARB model fixed to make card_id optional and add title field | ~83 |
 </claude-mem-context>

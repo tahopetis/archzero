@@ -46,7 +46,8 @@ export function CardCard({ card, onClick, selected = false, onToggleSelect, show
 
   return (
     <div
-      data-testid={`card-${card.id}`}
+      data-testid="card-item"
+      data-card-id={card.id}
       data-card-name={card.name}
       onClick={onClick}
       className={`bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow duration-200 p-6 border border-gray-200 cursor-pointer relative ${

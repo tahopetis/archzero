@@ -11,4 +11,13 @@
 | #1245 | 3:34 PM | 🟣 | API Types Created with Const Assertions | ~280 |
 | #1242 | 3:33 PM | 🔄 | TypeScript Enums Converted to Const Objects | ~253 |
 | #1231 | 3:32 PM | 🟣 | TypeScript API Types Defined | ~195 |
+
+### Jan 16, 2026
+
+| ID | Time | T | Title | Read |
+|----|------|---|-------|------|
+| #2754 | 10:14 AM | 🔵 | ARB implementation uses ARBDecisionType enum throughout codebase | ~137 |
+| #2753 | 10:13 AM | 🔴 | Fixed ARB decision API field name from decisionType to type | ~193 |
+| #2752 | " | 🔵 | ARB decision request type definition in governance.ts | ~199 |
+| #2713 | 5:39 AM | 🟣 | Implemented ARB Dashboard with test selectors | ~145 |
 </claude-mem-context>

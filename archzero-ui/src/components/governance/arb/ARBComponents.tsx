@@ -3,8 +3,8 @@
  * Including meeting management and decision recording
  */
 
-import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { Link, useSearchParams } from 'react-router-dom';
 import {
   Calendar,
   Clock,
@@ -1381,10 +1381,13 @@ export function DecisionForm({ submission, onCancel }: DecisionFormProps) {
 
 import { useNavigate } from 'react-router-dom';
 import { useCreateARBSubmission } from '@/lib/governance-hooks';
+import { cardApi } from '@/lib/cards';
 import type { CreateARBSubmissionRequest } from '@/types/governance';
+import type { Card as CardType } from '@/types/api';
 
 export function NewRequestForm() {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const createSubmission = useCreateARBSubmission();
 
   const [requestType, setRequestType] = useState<string>('new_application');
@@ -1397,10 +1400,24 @@ export function NewRequestForm() {
   const [impact, setImpact] = useState<string>('medium');
   const [urgency, setUrgency] = useState<string>('medium');
   const [selectedCard, setSelectedCard] = useState('');
+  const [attachedCard, setAttachedCard] = useState<CardType | null>(null);
   const [showCardSelect, setShowCardSelect] = useState(false);
   const [attachments, setAttachments] = useState<File[]>([]);
   const [submitSuccess, setSubmitSuccess] = useState(false);
   const [successMessage, setSuccessMessage] = useState('');
+
+  // Fetch attached card from URL params
+  useEffect(() => {
+    const cardId = searchParams.get('cardId');
+    if (cardId) {
+      setSelectedCard(cardId);
+      cardApi.get(cardId).then(card => {
+        setAttachedCard(card);
+      }).catch(err => {
+        console.error('Failed to load attached card:', err);
+      });
+    }
+  }, [searchParams]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -1485,6 +1502,39 @@ export function NewRequestForm() {
         {submitSuccess && successMessage && (
           <div className="p-4 bg-emerald-50 border border-emerald-200 rounded-lg">
             <p className="text-sm font-semibold text-emerald-800">{successMessage}</p>
+          </div>
+        )}
+
+        {/* Attached Card */}
+        {attachedCard && (
+          <div className="p-4 bg-indigo-50 border border-indigo-200 rounded-lg" data-testid="attached-card">
+            <div className="flex items-center justify-between mb-2">
+              <h3 className="text-sm font-semibold text-indigo-900">Linked Card</h3>
+              <button
+                type="button"
+                onClick={() => {
+                  setSelectedCard('');
+                  setAttachedCard(null);
+                  // Remove cardId from URL
+                  const newParams = new URLSearchParams(searchParams);
+                  newParams.delete('cardId');
+                  window.history.replaceState({}, '', `?${newParams.toString()}`);
+                }}
+                className="text-sm text-indigo-600 hover:text-indigo-700"
+              >
+                Remove
+              </button>
+            </div>
+            <div className="flex items-center gap-3">
+              <div className="flex-1">
+                <p className="text-base font-medium text-indigo-900">{attachedCard.name}</p>
+                <p className="text-sm text-indigo-700 line-clamp-1">{attachedCard.description || 'No description'}</p>
+                <p className="text-xs text-indigo-600 mt-1">ID: {attachedCard.id}</p>
+              </div>
+              <span className="px-2 py-1 bg-indigo-100 text-indigo-800 text-xs font-semibold rounded">
+                {attachedCard.type}
+              </span>
+            </div>
           </div>
         )}
 
