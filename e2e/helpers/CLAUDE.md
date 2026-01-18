@@ -23,9 +23,6 @@
 | #2581 | " | 🟣 | Authentication token support added to TestDataSeeder | ~284 |
 | #2579 | 3:35 AM | 🔄 | Removed qualityScore field from card creation request | ~217 |
 | #2574 | 3:27 AM | 🔄 | Fixed card name formatting in relationship mapping | ~299 |
-| #2573 | 3:26 AM | 🔄 | Test card names changed to kebab-case format | ~289 |
-| #2572 | 3:24 AM | 🔴 | Test data card name changed to hyphenated format | ~233 |
-| #2567 | 3:18 AM | 🔴 | Fixed test data seeder API field naming | ~234 |
 
 ### Jan 16, 2026
 
@@ -60,6 +57,9 @@
 
 | ID | Time | T | Title | Read |
 |----|------|---|-------|------|
+| #4021 | 4:43 PM | 🔴 | Fixed Initiative Health Enum Value | ~160 |
+| #4020 | 4:42 PM | 🔴 | Fixed Initiative Test Data Model | ~291 |
+| #4019 | " | 🔴 | Fixed Initiative Test Data Schema to Match Backend API | ~301 |
 | #4014 | 4:39 PM | 🔴 | Fixed Initiative API Endpoint Path | ~189 |
 | #4013 | " | 🔴 | Fixed Initiative API Endpoint Path | ~165 |
 | #4007 | 4:36 PM | 🟣 | Added Initiative Seeding Method to TestDataSeeder | ~284 |

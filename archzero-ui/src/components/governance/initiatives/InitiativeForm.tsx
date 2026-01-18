@@ -15,6 +15,7 @@ interface InitiativeFormProps {
 export function InitiativeForm({ initiative, onSuccess, onCancel }: InitiativeFormProps) {
   const createMutation = useCreateInitiative();
   const updateMutation = useUpdateInitiative();
+  const [showSuccess, setShowSuccess] = useState(false);
 
   const [name, setName] = useState(initiative?.name || '');
   const [description, setDescription] = useState(initiative?.description || '');
@@ -59,15 +60,31 @@ export function InitiativeForm({ initiative, onSuccess, onCancel }: InitiativeFo
           ownerId: ownerId || undefined,
         },
       });
+      setShowSuccess(true);
+      setTimeout(() => {
+        setShowSuccess(false);
+        onSuccess();
+      }, 2000);
     } else {
       await createMutation.mutateAsync(data);
+      setShowSuccess(true);
+      setTimeout(() => {
+        setShowSuccess(false);
+        onSuccess();
+      }, 2000);
     }
-
-    onSuccess();
   };
 
   return (
-    <div className="bg-white rounded-lg shadow p-6" data-testid="initiative-form">
+    <div className="space-y-4">
+      {showSuccess && (
+        <div className="bg-emerald-50 border border-emerald-200 text-emerald-800 px-4 py-3 rounded-lg" data-testid="success-message">
+          <p className="font-semibold">Initiative created</p>
+          <p className="text-sm">Success</p>
+        </div>
+      )}
+
+      <div className="bg-white rounded-lg shadow p-6" data-testid="initiative-form">
       <h2 className="text-xl font-bold text-slate-900 mb-4">
         {initiative ? 'Edit Initiative' : 'New Strategic Initiative'}
       </h2>
