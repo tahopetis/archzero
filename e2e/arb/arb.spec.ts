@@ -234,13 +234,14 @@ test.describe('ARB Review Process', () => {
   });
 
   test('should conditionally approve request', async ({ page }) => {
-    const requestItem = page.locator('[data-testid="request-item"]').first();
-    await expect(requestItem).toBeVisible();
+    // Find a submission without a decision (draft/pending)
+    const pendingRequestItem = page.locator('[data-testid="request-item"][data-status="pending"]').first();
+    await expect(pendingRequestItem).toBeVisible();
 
     // Click to navigate to detail page
     await Promise.all([
       page.waitForURL(/\/arb\/submissions\//),
-      requestItem.click()
+      pendingRequestItem.click()
     ]);
 
     await page.locator('[data-testid="decision-conditional"]').click();
@@ -584,13 +585,14 @@ test.describe('ARB Member Permissions', () => {
 
     await page.goto('/arb/requests');
 
-    const requestItem = page.locator('[data-testid="request-item"]').first();
-    await expect(requestItem).toBeVisible();
+    // Find a submission without a decision (draft/pending)
+    const pendingRequestItem = page.locator('[data-testid="request-item"][data-status="pending"]').first();
+    await expect(pendingRequestItem).toBeVisible();
 
     // Click to navigate to detail page
     await Promise.all([
       page.waitForURL(/\/arb\/submissions\//),
-      requestItem.click()
+      pendingRequestItem.click()
     ]);
 
     // Admin/Chair should see approve button
@@ -600,7 +602,7 @@ test.describe('ARB Member Permissions', () => {
 
   test('should allow member to review but not approve', async ({ page }) => {
     const loginPage = new LoginPage(page);
-    await loginPage.loginViaApi('architect1@archzero.local', 'changeme123');
+    await loginPage.loginViaApi('arb-member@archzero.local', 'changeme123');
 
     await page.goto('/arb/requests');
 
@@ -739,13 +741,14 @@ test.describe('ARB Templates and Reuse', () => {
   test('should save request as template', async ({ page }) => {
     await page.goto('/arb/requests');
 
-    const requestItem = page.locator('[data-testid="request-item"]').first();
-    await expect(requestItem).toBeVisible();
+    // Find a submission without a decision (draft/pending) so save-as-template button is visible
+    const pendingRequestItem = page.locator('[data-testid="request-item"][data-status="pending"]').first();
+    await expect(pendingRequestItem).toBeVisible();
 
     // Click to navigate to detail page
     await Promise.all([
       page.waitForURL(/\/arb\/submissions\//),
-      requestItem.click()
+      pendingRequestItem.click()
     ]);
 
     const saveTemplateBtn = page.locator('[data-testid="save-as-template-btn"]');
