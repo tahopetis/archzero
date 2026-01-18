@@ -72,13 +72,11 @@ test.describe('ARB Review Requests', () => {
   test('should show request details', async ({ page }) => {
     await page.goto('/arb/requests');
 
-    // Get the first request link and navigate directly
-    const requestLink = page.locator('[data-testid="request-item"]').locator('..').locator('a').first();
-    await expect(requestLink).toBeVisible();
-
-    // Get href and navigate directly
-    const href = await requestLink.getAttribute('href');
-    await page.goto(href!);
+    // Get the first request item and navigate directly
+    const requestItem = page.locator('[data-testid="request-item"]').first();
+    await expect(requestItem).toBeVisible();
+    const submissionId = await requestItem.getAttribute('data-id');
+    await page.goto(`/arb/submissions/${submissionId}`);
 
     await expect(page.locator('[data-testid="request-details"]')).toBeVisible({ timeout: 5000 });
   });
@@ -86,13 +84,11 @@ test.describe('ARB Review Requests', () => {
   test('should allow editing draft requests', async ({ page }) => {
     await page.goto('/arb/requests');
 
-    // Find draft request link
-    const draftRequestLink = page.locator('[data-testid="request-item"][data-status="draft"]').locator('..').locator('a').first();
-    await expect(draftRequestLink).toBeVisible();
-
-    // Navigate directly
-    const href = await draftRequestLink.getAttribute('href');
-    await page.goto(href!);
+    // Find draft request item
+    const draftRequestItem = page.locator('[data-testid="request-item"][data-status="draft"]').first();
+    await expect(draftRequestItem).toBeVisible();
+    const submissionId = await draftRequestItem.getAttribute('data-id');
+    await page.goto(`/arb/submissions/${submissionId}`);
 
     // Click edit button
     await page.locator('[data-testid="edit-request-btn"]').click();
