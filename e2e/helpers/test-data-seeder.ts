@@ -954,7 +954,7 @@ class TestDataFactory {
         targetEndDate: '2027-06-30',
         owner: 'admin@archzero.local',
         status: 'InProgress',
-        health: 'Critical',
+        health: 'BehindSchedule',
       },
       {
         name: 'Data Analytics Platform',
