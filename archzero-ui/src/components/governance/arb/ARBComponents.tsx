@@ -840,6 +840,7 @@ export function SubmissionCard({ submission, onReview, onRecordDecision }: Submi
         variant="bordered"
         className="group hover:shadow-lg transition-all cursor-pointer"
         data-testid="request-item"
+        data-id={submission.id}
         data-status={getStatusForTest()}
         data-overdue={isOverdue() ? "true" : undefined}
       >
