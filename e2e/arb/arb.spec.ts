@@ -105,9 +105,35 @@ test.describe('ARB Review Requests', () => {
   });
 
   test('should support file attachments', async ({ page }) => {
-    // File attachment feature not yet implemented in UI
-    // Mark test as skipped
-    test.skip(true, 'File attachment UI not yet implemented');
+    await page.goto('/arb/requests/new');
+
+    // Wait for page to load
+    await expect(page.locator('[data-testid="request-title"]')).toBeVisible({ timeout: 10000 });
+
+    // Click the "Attach File" button
+    const attachFileBtn = page.locator('[data-testid="attach-file-btn"]');
+    await expect(attachFileBtn).toBeVisible({ timeout: 5000 });
+
+    // Create a temporary test file
+    const testFile = {
+      name: 'test-document.pdf',
+      mimeType: 'application/pdf',
+      buffer: Buffer.from('Test PDF content for ARB submission')
+    };
+
+    // Find file input and upload test file
+    const fileInput = page.locator('[data-testid="file-input"]');
+    await fileInput.setInputFiles({
+      name: testFile.name,
+      mimeType: testFile.mimeType,
+      buffer: testFile.buffer
+    });
+
+    // Verify attachment is displayed (attachments are shown in a list)
+    await expect(page.locator('text=Attached Files:')).toBeVisible({ timeout: 5000 });
+
+    // Verify the filename is displayed
+    await expect(page.locator(`text=${testFile.name}`)).toBeVisible({ timeout: 5000 });
   });
 
   test('should calculate review priority score', async ({ page }) => {
@@ -151,7 +177,8 @@ test.describe('ARB Review Process', () => {
     // Verify the submission was created
     if (!response.ok()) {
       const errorText = await response.text();
-      throw new Error(`Failed to create submission: ${response.status()} - ${errorText}`);
+      const status = response.status();
+      throw new Error(`Failed to create submission: ${status} - ${errorText}`);
     }
 
     // Now navigate to the page to load the submissions
@@ -654,15 +681,53 @@ test.describe('ARB Audit Trail', () => {
   });
 
   test('should log request creation', async ({ page }) => {
-    // Audit log viewing page not yet implemented
-    // Audit trail is available inline on request detail page
-    test.skip(true, 'Audit log viewing page not yet implemented');
+    // Navigate to audit log page
+    await page.goto('/arb/audit-logs');
+
+    // Wait for audit log page to load
+    await expect(page.locator('[data-testid="audit-log-page"]')).toBeVisible({ timeout: 10000 });
+
+    // Filter to show only submissions
+    await page.locator('[data-testid="filter-submission"]').click();
+    await page.waitForTimeout(500); // Wait for filter to apply
+
+    // Verify audit log entries are displayed
+    const auditLogEntries = page.locator('[data-testid^="audit-log-entry-"]');
+    const entryCount = await auditLogEntries.count();
+
+    if (entryCount > 0) {
+      // Verify first entry has expected structure
+      const firstEntry = page.locator('[data-testid^="audit-log-entry-"]').first();
+      await expect(firstEntry).toBeVisible();
+
+      // Verify entry shows action, actor, and timestamp
+      await expect(firstEntry.locator('text=/Created|Updated|Decision/')).toBeVisible();
+    }
   });
 
   test('should log decision changes', async ({ page }) => {
-    // Audit log viewing page not yet implemented
-    // Audit trail is available inline on request detail page
-    test.skip(true, 'Audit log viewing page not yet implemented');
+    // Navigate to audit log page
+    await page.goto('/arb/audit-logs');
+
+    // Wait for audit log page to load
+    await expect(page.locator('[data-testid="audit-log-page"]')).toBeVisible({ timeout: 10000 });
+
+    // Filter to show only decisions
+    await page.locator('[data-testid="filter-decision"]').click();
+    await page.waitForTimeout(500); // Wait for filter to apply
+
+    // Verify decision audit logs are displayed
+    const auditLogEntries = page.locator('[data-testid^="audit-log-entry-"]');
+    const entryCount = await auditLogEntries.count();
+
+    if (entryCount > 0) {
+      // Verify first entry shows decision-related activity
+      const firstEntry = page.locator('[data-testid^="audit-log-entry-"]').first();
+      await expect(firstEntry).toBeVisible();
+
+      // Verify entry has decision indicator
+      await expect(firstEntry.locator('text=Decision')).toBeVisible();
+    }
   });
 
   test('should show full audit trail for request', async ({ page }) => {
@@ -683,20 +748,23 @@ test.describe('ARB Audit Trail', () => {
   });
 
   test('should export audit trail', async ({ page }) => {
-    await page.goto('/arb/requests');
+    // Navigate to audit log page
+    await page.goto('/arb/audit-logs');
 
-    const requestItem = page.locator('[data-testid="request-item"]').first();
-    await expect(requestItem).toBeVisible();
+    // Wait for audit log page to load
+    await expect(page.locator('[data-testid="audit-log-page"]')).toBeVisible({ timeout: 10000 });
 
-    // Click to navigate to detail page
-    await Promise.all([
-      page.waitForURL(/\/arb\/submissions\//),
-      requestItem.click()
-    ]);
+    // Verify export button exists
+    const exportBtn = page.locator('[data-testid="export-audit-btn"]');
+    await expect(exportBtn).toBeVisible();
 
-    // Verify audit trail is visible (export feature not yet implemented)
-    const auditTrail = page.locator('[data-testid="decision-history"]');
-    await expect(auditTrail).toBeVisible();
+    // Click export button (will trigger download)
+    const downloadPromise = page.waitForEvent('download');
+    await exportBtn.click();
+
+    // Wait for download to start
+    const download = await downloadPromise;
+    expect(download.suggestedFilename()).toMatch(/audit-logs.*\.csv/);
   });
 });
 
@@ -765,13 +833,72 @@ test.describe('ARB Templates and Reuse', () => {
   });
 
   test('should create request from template', async ({ page }) => {
-    // Template selection UI not yet implemented in new request form
-    test.skip(true, 'Template selection UI not yet implemented');
+    await page.goto('/arb/requests/new');
+
+    // Click the "Use Template" button to show template selector
+    const useTemplateBtn = page.locator('[data-testid="use-template-btn"]');
+    await expect(useTemplateBtn).toBeVisible({ timeout: 10000 });
+    await useTemplateBtn.click();
+
+    // Wait for template selection dropdown to be visible
+    await expect(page.locator('[data-testid="template-select"]')).toBeVisible({ timeout: 10000 });
+
+    // Select a template (should have at least one from beforeEach setup)
+    const templateSelect = page.locator('[data-testid="template-select"]');
+    const optionCount = await templateSelect.locator('option').count();
+
+    if (optionCount > 1) { // More than just the default "Select a template..." option
+      // Select the first available template (index 1, since index 0 is the placeholder)
+      await templateSelect.selectOption({ index: 1 });
+
+      // Click the "Load Template" button to populate form
+      const loadTemplateBtn = page.locator('button:has-text("Load Template")');
+      await expect(loadTemplateBtn).toBeVisible();
+      await loadTemplateBtn.click();
+
+      // Wait for form to be populated
+      await page.waitForTimeout(500);
+
+      // Verify that form fields are populated with template data
+      const titleField = page.locator('[data-testid="request-title"]');
+      const titleValue = await titleField.inputValue();
+
+      // Title should be populated (not empty)
+      expect(titleValue.length).toBeGreaterThan(0);
+
+      // Description should also be populated
+      const descriptionField = page.locator('[data-testid="request-description"]');
+      await expect(descriptionField).toHaveValue(/./); // At least one character
+    }
   });
 
   test('should manage template library', async ({ page }) => {
-    // Template library page not yet implemented
-    test.skip(true, 'Template library page not yet implemented');
+    await page.goto('/arb/templates');
+
+    // Wait for template library to load
+    await expect(page.locator('[data-testid="template-library"]')).toBeVisible({ timeout: 10000 });
+
+    // Verify search functionality exists
+    const searchInput = page.locator('[data-testid="template-search"]');
+    await expect(searchInput).toBeVisible();
+
+    // Search for templates
+    await searchInput.fill('Application');
+    await page.waitForTimeout(500); // Wait for search to filter
+
+    // Verify template cards are displayed with test selectors
+    const templateCards = page.locator('[data-testid^="template-"]');
+    const cardCount = await templateCards.count();
+
+    if (cardCount > 0) {
+      // Verify template details
+      const firstCard = page.locator('[data-testid^="template-"]').first();
+      await expect(firstCard).toBeVisible();
+
+      // Verify delete button exists
+      const deleteBtn = page.locator('[data-testid^="delete-template-btn-"]').first();
+      await expect(deleteBtn).toBeVisible();
+    }
   });
 });
 

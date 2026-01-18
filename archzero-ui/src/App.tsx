@@ -10,7 +10,7 @@ import { CardDetail } from './components/cards/CardDetail';
 import { CardForm } from './components/cards/CardForm';
 import { ProtectedRoute } from './components/ProtectedRoute';
 import { Layout } from './components/Layout';
-import { TemplateLibrary } from './components/governance/arb/TemplateLibrary';
+import { TemplateLibrary, AuditLogPage } from './components/governance/arb';
 // Governance Pages
 import {
   PrinciplesPage,
@@ -184,6 +184,16 @@ function App() {
             <ProtectedRoute allowedRoles={['admin', 'arbchair', 'arbmember', 'architect']}>
               <Layout>
                 <TemplateLibrary />
+              </Layout>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/arb/audit-logs"
+          element={
+            <ProtectedRoute allowedRoles={['admin', 'arbchair', 'arbmember']}>
+              <Layout>
+                <AuditLogPage />
               </Layout>
             </ProtectedRoute>
           }
