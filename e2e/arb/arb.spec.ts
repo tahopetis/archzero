@@ -72,11 +72,14 @@ test.describe('ARB Review Requests', () => {
   test('should show request details', async ({ page }) => {
     await page.goto('/arb/requests');
 
-    // Get the first request item and navigate directly
-    const requestItem = page.locator('[data-testid="request-item"]').first();
-    await expect(requestItem).toBeVisible();
-    const submissionId = await requestItem.getAttribute('data-id');
-    await page.goto(`/arb/submissions/${submissionId}`);
+    const firstRequest = page.locator('[data-testid="request-item"]').first();
+    await expect(firstRequest).toBeVisible();
+
+    // Click the request and wait for URL navigation
+    await Promise.all([
+      page.waitForURL(/\/arb\/submissions\//),
+      firstRequest.click()
+    ]);
 
     await expect(page.locator('[data-testid="request-details"]')).toBeVisible({ timeout: 5000 });
   });
@@ -217,8 +220,12 @@ test.describe('ARB Review Process', () => {
   test('should conditionally approve request', async ({ page }) => {
     const requestItem = page.locator('[data-testid="request-item"]').first();
     await expect(requestItem).toBeVisible();
-    const submissionId = await requestItem.getAttribute('data-id');
-    await page.goto(`/arb/submissions/${submissionId}`);
+
+    // Click to navigate to detail page
+    await Promise.all([
+      page.waitForURL(/\/arb\/submissions\//),
+      requestItem.click()
+    ]);
 
     await page.locator('[data-testid="decision-conditional"]').click();
 
@@ -516,8 +523,12 @@ test.describe('ARB Notifications', () => {
 
     const overdueRequestItem = page.locator('[data-testid="request-item"][data-overdue="true"]').first();
     await expect(overdueRequestItem).toBeVisible();
-    const submissionId = await overdueRequestItem.getAttribute('data-id');
-    await page.goto(`/arb/submissions/${submissionId}`);
+
+    // Click to navigate to detail page
+    await Promise.all([
+      page.waitForURL(/\/arb\/submissions\//),
+      overdueRequestItem.click()
+    ]);
 
     const remindBtn = page.locator('[data-testid="send-reminder-btn"]');
     await expect(remindBtn).toBeVisible();
@@ -543,8 +554,12 @@ test.describe('ARB Member Permissions', () => {
 
     const requestItem = page.locator('[data-testid="request-item"]').first();
     await expect(requestItem).toBeVisible();
-    const submissionId = await requestItem.getAttribute('data-id');
-    await page.goto(`/arb/submissions/${submissionId}`);
+
+    // Click to navigate to detail page
+    await Promise.all([
+      page.waitForURL(/\/arb\/submissions\//),
+      requestItem.click()
+    ]);
 
     // Admin/Chair should see approve button
     const approveBtn = page.locator('[data-testid="decision-approve"]');
@@ -559,8 +574,12 @@ test.describe('ARB Member Permissions', () => {
 
     const requestItem = page.locator('[data-testid="request-item"]').first();
     await expect(requestItem).toBeVisible();
-    const submissionId = await requestItem.getAttribute('data-id');
-    await page.goto(`/arb/submissions/${submissionId}`);
+
+    // Click to navigate to detail page
+    await Promise.all([
+      page.waitForURL(/\/arb\/submissions\//),
+      requestItem.click()
+    ]);
 
     // Member should see review button
     const reviewBtn = page.locator('[data-testid="start-review-btn"]');
@@ -682,8 +701,12 @@ test.describe('ARB Templates and Reuse', () => {
 
     const requestItem = page.locator('[data-testid="request-item"]').first();
     await expect(requestItem).toBeVisible();
-    const submissionId = await requestItem.getAttribute('data-id');
-    await page.goto(`/arb/submissions/${submissionId}`);
+
+    // Click to navigate to detail page
+    await Promise.all([
+      page.waitForURL(/\/arb\/submissions\//),
+      requestItem.click()
+    ]);
 
     const saveTemplateBtn = page.locator('[data-testid="save-as-template-btn"]');
     await expect(saveTemplateBtn).toBeVisible();

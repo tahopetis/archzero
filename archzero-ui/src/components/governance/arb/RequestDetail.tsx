@@ -50,10 +50,11 @@ interface ActionItem {
 
 export function RequestDetail() {
   const { id } = useParams<{ id: string }>();
-  const { data: submission, isLoading } = useARBSubmission(id!);
+  const { data: submission, isLoading } = useARBSubmission(id || '');
   const updateSubmission = useUpdateARBSubmission();
   const deleteSubmission = useDeleteARBSubmission();
   const recordDecision = useRecordARBDecision();
+  const createTemplate = useCreateTemplate();
   const { user } = useAuthStore();
 
   // Check if user can approve (only ARB Chair)
@@ -130,8 +131,6 @@ export function RequestDetail() {
       alert('Failed to delete request. Please try again.');
     }
   };
-
-  const createTemplate = useCreateTemplate();
 
   const handleSaveAsTemplate = () => {
     setShowTemplateModal(true);

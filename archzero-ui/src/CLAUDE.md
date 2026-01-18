@@ -17,5 +17,6 @@
 
 | ID | Time | T | Title | Read |
 |----|------|---|-------|------|
+| #3673 | 6:24 AM | 🔵 | ARB routing configuration verified in App.tsx | ~204 |
 | #3636 | 3:06 AM | 🔵 | ARB Submission Route Configuration | ~185 |
 </claude-mem-context>
