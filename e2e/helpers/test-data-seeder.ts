@@ -216,7 +216,7 @@ export class TestDataSeeder {
 
     for (const initiative of initiatives) {
       try {
-        const response = await this.request.post(`${this.baseURL}/api/v1/governance/initiatives`, {
+        const response = await this.request.post(`${this.baseURL}/api/v1/initiatives`, {
           headers: {
             'Authorization': `Bearer ${this.authToken}`,
           },
