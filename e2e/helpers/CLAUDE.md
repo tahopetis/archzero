@@ -26,8 +26,6 @@
 | #2573 | 3:26 AM | 🔄 | Test card names changed to kebab-case format | ~289 |
 | #2572 | 3:24 AM | 🔴 | Test data card name changed to hyphenated format | ~233 |
 | #2567 | 3:18 AM | 🔴 | Fixed test data seeder API field naming | ~234 |
-| #2564 | 3:17 AM | 🟣 | TestDataSeeder helper implemented for test data seeding | ~355 |
-| #2559 | 3:09 AM | 🟣 | Test data seeder class implemented | ~393 |
 
 ### Jan 16, 2026
 
@@ -62,6 +60,8 @@
 
 | ID | Time | T | Title | Read |
 |----|------|---|-------|------|
+| #4014 | 4:39 PM | 🔴 | Fixed Initiative API Endpoint Path | ~189 |
+| #4013 | " | 🔴 | Fixed Initiative API Endpoint Path | ~165 |
 | #4007 | 4:36 PM | 🟣 | Added Initiative Seeding Method to TestDataSeeder | ~284 |
 | #4006 | 4:35 PM | 🟣 | Added Initiative Seeding to Test Data Seeder | ~332 |
 | #4005 | " | 🟣 | Added Initiative Test Data Factory Method | ~312 |

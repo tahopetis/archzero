@@ -373,11 +373,6 @@ export function InitiativeDashboard() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold text-slate-900 mb-2">Strategic Initiatives</h1>
-        <p className="text-slate-600">Track and manage strategic transformation initiatives</p>
-      </div>
-
       {/* Quick Stats */}
       <div className="grid grid-cols-1 md:grid-cols-6 gap-4">
         <Card padding="sm">
