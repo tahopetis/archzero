@@ -120,10 +120,10 @@ export function TargetStatePage() {
   };
 
   return (
-    <div className="container mx-auto py-6" data-testid="target-state">
+    <div className="container mx-auto py-6">
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-3xl font-bold" data-testid="target-state-page-title">
-          Target State Architecture
+        <h1 className="text-3xl font-bold" data-testid="target-state">
+          Target State
         </h1>
         <button
           onClick={() => setIsCreating(true)}

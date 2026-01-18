@@ -195,10 +195,10 @@ export function RoadmapPage() {
   };
 
   return (
-    <div className="container mx-auto py-6" data-testid="transformation-roadmap">
+    <div className="container mx-auto py-6">
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-3xl font-bold" data-testid="roadmap-page-title">
-          Transformation Roadmap
+        <h1 className="text-3xl font-bold" data-testid="transformation-roadmap">
+          Roadmap
         </h1>
         <div className="flex gap-2">
           <button
