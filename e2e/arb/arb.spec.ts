@@ -73,7 +73,7 @@ test.describe('ARB Review Requests', () => {
     await page.goto('/arb/requests');
 
     // Get the first request link and navigate directly
-    const requestLink = page.locator('[data-testid="request-item"] a').first();
+    const requestLink = page.locator('[data-testid="request-item"]').locator('..').locator('a').first();
     await expect(requestLink).toBeVisible();
 
     // Get href and navigate directly
@@ -87,7 +87,7 @@ test.describe('ARB Review Requests', () => {
     await page.goto('/arb/requests');
 
     // Find draft request link
-    const draftRequestLink = page.locator('[data-testid="request-item"][data-status="draft"] a').first();
+    const draftRequestLink = page.locator('[data-testid="request-item"][data-status="draft"]').locator('..').locator('a').first();
     await expect(draftRequestLink).toBeVisible();
 
     // Navigate directly
@@ -161,7 +161,7 @@ test.describe('ARB Review Process', () => {
 
   test('should allow ARB member to review request', async ({ page }) => {
     // Find draft request link
-    const draftRequestLink = page.locator('[data-testid="request-item"][data-status="draft"] a').first();
+    const draftRequestLink = page.locator('[data-testid="request-item"][data-status="draft"]').locator('..').locator('a').first();
     await expect(draftRequestLink).toBeVisible();
     const href = await draftRequestLink.getAttribute('href');
     await page.goto(href);
@@ -187,7 +187,7 @@ test.describe('ARB Review Process', () => {
   });
 
   test('should approve request', async ({ page }) => {
-    const requestLink = page.locator('[data-testid="request-item"] a').first();
+    const requestLink = page.locator('[data-testid="request-item"]').locator('..').locator('a').first();
     await expect(requestLink).toBeVisible();
     const href = await requestLink.getAttribute('href');
     await page.goto(href);
@@ -203,7 +203,7 @@ test.describe('ARB Review Process', () => {
   });
 
   test('should reject request', async ({ page }) => {
-    const requestLink = page.locator('[data-testid="request-item"] a').first();
+    const requestLink = page.locator('[data-testid="request-item"]').locator('..').locator('a').first();
     await expect(requestLink).toBeVisible();
     const href = await requestLink.getAttribute('href');
     await page.goto(href);
@@ -219,7 +219,7 @@ test.describe('ARB Review Process', () => {
   });
 
   test('should conditionally approve request', async ({ page }) => {
-    const requestLink = page.locator('[data-testid="request-item"] a').first();
+    const requestLink = page.locator('[data-testid="request-item"]').locator('..').locator('a').first();
     await expect(requestLink).toBeVisible();
     const href = await requestLink.getAttribute('href');
     await page.goto(href);
@@ -235,7 +235,7 @@ test.describe('ARB Review Process', () => {
   });
 
   test('should defer request for more information', async ({ page }) => {
-    const requestLink = page.locator('[data-testid="request-item"] a').first();
+    const requestLink = page.locator('[data-testid="request-item"]').locator('..').locator('a').first();
     await expect(requestLink).toBeVisible();
     const href = await requestLink.getAttribute('href');
     await page.goto(href);
@@ -253,7 +253,7 @@ test.describe('ARB Review Process', () => {
   test('should show decision history', async ({ page }) => {
     await page.goto('/arb/requests');
 
-    const requestLink = page.locator('[data-testid="request-item"] a').first();
+    const requestLink = page.locator('[data-testid="request-item"]').locator('..').locator('a').first();
     await expect(requestLink).toBeVisible();
     const href = await requestLink.getAttribute('href');
     await page.goto(href);
@@ -485,7 +485,7 @@ test.describe('ARB Notifications', () => {
   test('should notify reviewer of assigned review', async ({ page }) => {
     await page.goto('/arb/requests');
 
-    const requestLink = page.locator('[data-testid="request-item"] a').first();
+    const requestLink = page.locator('[data-testid="request-item"]').locator('..').locator('a').first();
     await expect(requestLink).toBeVisible();
     const href = await requestLink.getAttribute('href');
     await page.goto(href);
@@ -503,7 +503,7 @@ test.describe('ARB Notifications', () => {
   test('should notify requester of decision', async ({ page }) => {
     await page.goto('/arb/requests');
 
-    const requestLink = page.locator('[data-testid="request-item"] a').first();
+    const requestLink = page.locator('[data-testid="request-item"]').locator('..').locator('a').first();
     await expect(requestLink).toBeVisible();
     const href = await requestLink.getAttribute('href');
     await page.goto(href);
@@ -518,7 +518,7 @@ test.describe('ARB Notifications', () => {
   test('should send reminder for overdue reviews', async ({ page }) => {
     await page.goto('/arb/requests');
 
-    const overdueRequestLink = page.locator('[data-testid="request-item"][data-overdue="true"] a').first();
+    const overdueRequestLink = page.locator('[data-testid="request-item"][data-overdue="true"]').locator('..').locator('a').first();
     await expect(overdueRequestLink).toBeVisible();
     const href = await overdueRequestLink.getAttribute('href');
     await page.goto(href);
@@ -545,7 +545,7 @@ test.describe('ARB Member Permissions', () => {
 
     await page.goto('/arb/requests');
 
-    const requestLink = page.locator('[data-testid="request-item"] a').first();
+    const requestLink = page.locator('[data-testid="request-item"]').locator('..').locator('a').first();
     await expect(requestLink).toBeVisible();
     const href = await requestLink.getAttribute('href');
     await page.goto(href);
@@ -561,7 +561,7 @@ test.describe('ARB Member Permissions', () => {
 
     await page.goto('/arb/requests');
 
-    const requestLink = page.locator('[data-testid="request-item"] a').first();
+    const requestLink = page.locator('[data-testid="request-item"]').locator('..').locator('a').first();
     await expect(requestLink).toBeVisible();
     const href = await requestLink.getAttribute('href');
     await page.goto(href);
@@ -617,7 +617,7 @@ test.describe('ARB Audit Trail', () => {
   test('should show full audit trail for request', async ({ page }) => {
     await page.goto('/arb/requests');
 
-    const requestLink = page.locator('[data-testid="request-item"] a').first();
+    const requestLink = page.locator('[data-testid="request-item"]').locator('..').locator('a').first();
     await expect(requestLink).toBeVisible();
     const href = await requestLink.getAttribute('href');
     await page.goto(href);
@@ -630,7 +630,7 @@ test.describe('ARB Audit Trail', () => {
   test('should export audit trail', async ({ page }) => {
     await page.goto('/arb/requests');
 
-    const requestLink = page.locator('[data-testid="request-item"] a').first();
+    const requestLink = page.locator('[data-testid="request-item"]').locator('..').locator('a').first();
     await expect(requestLink).toBeVisible();
     const href = await requestLink.getAttribute('href');
     await page.goto(href);
@@ -684,7 +684,7 @@ test.describe('ARB Templates and Reuse', () => {
   test('should save request as template', async ({ page }) => {
     await page.goto('/arb/requests');
 
-    const requestLink = page.locator('[data-testid="request-item"] a').first();
+    const requestLink = page.locator('[data-testid="request-item"]').locator('..').locator('a').first();
     await expect(requestLink).toBeVisible();
     const href = await requestLink.getAttribute('href');
     await page.goto(href);
@@ -765,7 +765,7 @@ test.describe('ARB Integration with Cards', () => {
     await page.goto('/arb/requests');
 
     // Find a request with decision
-    const requestWithDecisionLink = page.locator('[data-testid="request-item"][data-status="decision_made"] a').first();
+    const requestWithDecisionLink = page.locator('[data-testid="request-item"][data-status="decision_made"]').locator('..').locator('a').first();
     const count = await requestWithDecisionLink.count();
 
     if (count === 0) {
