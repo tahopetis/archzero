@@ -246,8 +246,9 @@ test.describe('ARB Review Process', () => {
 
     await page.locator('[data-testid="decision-conditional"]').click();
 
-    // Add conditions (UI only has one textarea for conditions, not two)
-    await page.locator('[data-testid="approval-conditions"]').fill('Condition 1\nCondition 2');
+    // Add conditions (UI has two textareas for conditions)
+    await page.locator('[data-testid="condition-1"]').fill('Condition 1');
+    await page.locator('[data-testid="condition-2"]').fill('Condition 2');
 
     await page.locator('button:has-text("Confirm Conditional Approval")').click();
 
