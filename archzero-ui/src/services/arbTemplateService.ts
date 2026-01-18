@@ -1,4 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { api } from '../lib/api';
 
 export interface ARBTemplate {
   id: string;
@@ -34,52 +35,32 @@ export interface UpdateTemplateRequest {
 // API functions
 export const arbTemplateService = {
   listTemplates: async (): Promise<ARBTemplate[]> => {
-    const response = await fetch('/api/v1/arb/templates');
-    if (!response.ok) throw new Error('Failed to fetch templates');
-    return response.json();
+    const response = await api.get('/arb/templates');
+    return response.data;
   },
 
   getTemplate: async (id: string): Promise<ARBTemplate> => {
-    const response = await fetch(`/api/v1/arb/templates/${id}`);
-    if (!response.ok) throw new Error('Failed to fetch template');
-    return response.json();
+    const response = await api.get(`/arb/templates/${id}`);
+    return response.data;
   },
 
   createTemplate: async (data: CreateTemplateRequest): Promise<ARBTemplate> => {
-    const response = await fetch('/api/v1/arb/templates', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(data),
-    });
-    if (!response.ok) throw new Error('Failed to create template');
-    return response.json();
+    const response = await api.post('/arb/templates', data);
+    return response.data;
   },
 
   updateTemplate: async (id: string, data: UpdateTemplateRequest): Promise<ARBTemplate> => {
-    const response = await fetch(`/api/v1/arb/templates/${id}`, {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(data),
-    });
-    if (!response.ok) throw new Error('Failed to update template');
-    return response.json();
+    const response = await api.put(`/arb/templates/${id}`, data);
+    return response.data;
   },
 
   deleteTemplate: async (id: string): Promise<void> => {
-    const response = await fetch(`/api/v1/arb/templates/${id}`, {
-      method: 'DELETE',
-    });
-    if (!response.ok) throw new Error('Failed to delete template');
+    await api.delete(`/arb/templates/${id}`);
   },
 
   createFromTemplate: async (data: CreateFromTemplateRequest) => {
-    const response = await fetch('/api/v1/arb/templates/from-template', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(data),
-    });
-    if (!response.ok) throw new Error('Failed to create submission from template');
-    return response.json();
+    const response = await api.post('/arb/templates/from-template', data);
+    return response.data;
   },
 };
 

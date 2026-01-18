@@ -4,7 +4,7 @@ use axum::{
     http::StatusCode,
 };
 use uuid::Uuid;
-use chrono::{Utc, NaiveDate};
+use chrono::{Utc, NaiveDate, DateTime};
 use serde::Deserialize;
 
 use crate::{
@@ -723,7 +723,15 @@ pub async fn create_submission(
 
     // The ARB submission is always owned by the authenticated user creating it
     let submitted_by = user_id;
-    let submitted_at = Utc::now();
+    // Use submitted_at from request if provided (for testing), otherwise use current time
+    let submitted_at = if let Some(submitted_at_str) = &req.submitted_at {
+        // Parse ISO 8601 datetime string
+        DateTime::parse_from_rfc3339(submitted_at_str)
+            .map(|dt| dt.with_timezone(&Utc))
+            .unwrap_or_else(|_| Utc::now())
+    } else {
+        Utc::now()
+    };
     let unique_id = Uuid::new_v4().to_string();
     let unique_suffix = unique_id.split('-').next().unwrap_or("xxxx");
 

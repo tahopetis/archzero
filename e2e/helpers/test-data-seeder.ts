@@ -665,6 +665,92 @@ class TestDataFactory {
    */
   static createTestARBSubmissions() {
     return [
+      // Draft submissions - for testing conditional approval and template save
+      // Multiple draft entries to support parallel test execution across 3 browsers
+      {
+        type: 'ArchitectureReview',
+        title: 'Draft: Microservices Pattern Review',
+        rationale: 'Review microservices patterns for system architecture',
+        priority: 'High',
+        isDraft: true,
+      },
+      {
+        type: 'ArchitectureReview',
+        title: 'Draft: API Design Patterns',
+        rationale: 'Review API design patterns and best practices',
+        priority: 'Medium',
+        isDraft: true,
+      },
+      {
+        type: 'ArchitectureReview',
+        title: 'Draft: Database Sharding Strategy',
+        rationale: 'Evaluate database sharding approach for scalability',
+        priority: 'High',
+        isDraft: true,
+      },
+      {
+        type: 'NewTechnologyProposal',
+        title: 'Draft: Event Streaming Platform',
+        rationale: 'Proposal to adopt Apache Kafka for event streaming',
+        priority: 'Medium',
+        isDraft: true,
+      },
+      {
+        type: 'NewTechnologyProposal',
+        title: 'Draft: Container Registry',
+        rationale: 'Proposal for private container registry implementation',
+        priority: 'Low',
+        isDraft: true,
+      },
+      {
+        type: 'NewTechnologyProposal',
+        title: 'Draft: Service Mesh Adoption',
+        rationale: 'Evaluate service mesh solutions for microservices',
+        priority: 'Medium',
+        isDraft: true,
+      },
+      {
+        type: 'ExceptionRequest',
+        title: 'Draft: TLS Protocol Exception',
+        rationale: 'Request for TLS version exception for legacy system',
+        priority: 'Critical',
+        isDraft: true,
+      },
+      {
+        type: 'ExceptionRequest',
+        title: 'Draft: Password Policy Exception',
+        rationale: 'Exception request for password policy requirements',
+        priority: 'High',
+        isDraft: true,
+      },
+      {
+        type: 'ExceptionRequest',
+        title: 'Draft: Backup Retention Policy',
+        rationale: 'Request for exception to standard backup retention policy',
+        priority: 'Medium',
+        isDraft: true,
+      },
+      {
+        type: 'PolicyViolation',
+        title: 'Draft: Unauthorized API Access',
+        rationale: 'Report of unauthorized API access attempt',
+        priority: 'Critical',
+        isDraft: true,
+      },
+      {
+        type: 'PolicyViolation',
+        title: 'Draft: Encryption Standards Violation',
+        rationale: 'Report of non-compliant encryption implementation',
+        priority: 'High',
+        isDraft: true,
+      },
+      {
+        type: 'PolicyViolation',
+        title: 'Draft: Data Residency Issue',
+        rationale: 'Report of data storage in non-compliant region',
+        priority: 'High',
+        isDraft: true,
+      },
       // Pending submissions (no meeting, no decision)
       {
         type: 'ArchitectureReview',

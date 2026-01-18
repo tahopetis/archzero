@@ -128,6 +128,7 @@ pub struct CreateARBSubmissionRequest {
     pub priority: ARBPriority,
     pub related_policy_id: Option<Uuid>,
     pub is_draft: Option<bool>,
+    pub submitted_at: Option<String>, // ISO 8601 datetime string
 }
 
 /// Request to update an ARB submission
