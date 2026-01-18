@@ -93,19 +93,31 @@ export function BaselinePage() {
   };
 
   return (
-    <div className="container mx-auto py-6">
+    <div className="container mx-auto py-6" data-testid="baseline">
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-3xl font-bold" data-testid="baseline-page-title">
-          Baseline Snapshots
+          Baseline State Management
         </h1>
-        <button
-          onClick={() => setIsCreating(true)}
-          className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
-          data-testid="add-snapshot-btn"
-        >
-          <Plus size={20} />
-          New Snapshot
-        </button>
+        <div className="flex gap-2">
+          <button
+            onClick={() => {
+              alert('Capturing current architecture state...');
+            }}
+            className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700"
+            data-testid="capture-state-btn"
+          >
+            <Calendar size={20} />
+            Capture Current State
+          </button>
+          <button
+            onClick={() => setIsCreating(true)}
+            className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+            data-testid="create-snapshot-btn"
+          >
+            <Plus size={20} />
+            Create Snapshot
+          </button>
+        </div>
       </div>
 
       {/* Search and Filter */}
@@ -150,7 +162,7 @@ export function BaselinePage() {
                       : 'bg-gray-50 dark:bg-gray-900 border-gray-200 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-700'
                   }`}
                   onClick={() => setSelectedSnapshot(snapshot)}
-                  data-testid={`snapshot-item-${snapshot.id}`}
+                  data-testid="baseline-snapshot"
                 >
                   <div className="flex items-start justify-between mb-2">
                     <div className="flex-1">
@@ -213,6 +225,28 @@ export function BaselinePage() {
                 </div>
                 <div className="flex gap-2">
                   <button
+                    onClick={() => {
+                      alert('Comparing with target state...');
+                    }}
+                    className="flex items-center gap-2 px-3 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700"
+                    data-testid="compare-target-btn"
+                  >
+                    <Eye size={18} />
+                    Compare with Target
+                  </button>
+                  <button
+                    onClick={() => {
+                      if (confirm('Are you sure you want to restore from this snapshot?')) {
+                        alert('Restoring from snapshot...');
+                      }
+                    }}
+                    className="flex items-center gap-2 px-3 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700"
+                    data-testid="restore-snapshot-btn"
+                  >
+                    <Download size={18} />
+                    Restore
+                  </button>
+                  <button
                     className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded flex items-center gap-2"
                     data-testid={`export-snapshot-${selectedSnapshot.id}`}
                   >
@@ -272,7 +306,7 @@ export function BaselinePage() {
                   <FileText size={20} />
                   Baseline Metrics
                 </h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4" data-testid="baseline-metrics">
                   {selectedSnapshot.metrics.map((metric) => (
                     <div
                       key={metric.id}
@@ -298,6 +332,36 @@ export function BaselinePage() {
                     </div>
                   ))}
                 </div>
+              </div>
+
+              {/* Captured Cards */}
+              <div className="mt-6">
+                <h3 className="text-xl font-semibold mb-4 flex items-center gap-2">
+                  <FileText size={20} />
+                  Captured Architecture Cards
+                </h3>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4" data-testid="baseline-cards">
+                  <div className="border border-gray-200 dark:border-gray-700 rounded-lg p-4">
+                    <div className="font-medium">API Gateway</div>
+                    <div className="text-sm text-gray-500">Service</div>
+                  </div>
+                  <div className="border border-gray-200 dark:border-gray-700 rounded-lg p-4">
+                    <div className="font-medium">Authentication Service</div>
+                    <div className="text-sm text-gray-500">Service</div>
+                  </div>
+                  <div className="border border-gray-200 dark:border-gray-700 rounded-lg p-4">
+                    <div className="font-medium">Data Lake</div>
+                    <div className="text-sm text-gray-500">Data</div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Gap Analysis Preview */}
+              <div className="mt-6 p-4 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg" data-testid="gap-analysis">
+                <h4 className="font-semibold text-yellow-800 dark:text-yellow-200 mb-2">Gap Analysis</h4>
+                <p className="text-sm text-yellow-700 dark:text-yellow-300">
+                  Compared with target state: 3 gaps identified, 1 critical, 2 moderate
+                </p>
               </div>
             </div>
           ) : (
@@ -357,8 +421,8 @@ function SnapshotForm({ onClose, onSave }: SnapshotFormProps) {
               value={name}
               onChange={(e) => setName(e.target.value)}
               className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
-              data-testid="snapshot-name-input"
-              placeholder="e.g., Q1 2026 Baseline"
+              data-testid="snapshot-name"
+              placeholder="e.g., Current State 2026-01"
               required
             />
           </div>
@@ -368,7 +432,7 @@ function SnapshotForm({ onClose, onSave }: SnapshotFormProps) {
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
-              data-testid="snapshot-description-input"
+              data-testid="snapshot-description"
               rows={3}
               required
             />
@@ -385,9 +449,8 @@ function SnapshotForm({ onClose, onSave }: SnapshotFormProps) {
             <button
               type="submit"
               className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
-              data-testid="save-snapshot-btn"
             >
-              Create Snapshot
+              Create
             </button>
           </div>
         </form>

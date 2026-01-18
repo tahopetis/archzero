@@ -90,6 +90,8 @@ export function TargetStatePage() {
   ]);
   const [selectedModel, setSelectedModel] = useState<TargetStateModel | null>(models[0] || null);
   const [isCreating, setIsCreating] = useState(false);
+  const [showDependencyView, setShowDependencyView] = useState(false);
+  const [isAddingCard, setIsAddingCard] = useState(false);
 
   const getIconForType = (type: ArchitectureComponent['type']) => {
     switch (type) {
@@ -118,18 +120,18 @@ export function TargetStatePage() {
   };
 
   return (
-    <div className="container mx-auto py-6">
+    <div className="container mx-auto py-6" data-testid="target-state">
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-3xl font-bold" data-testid="target-state-page-title">
-          Target Architecture Modeling
+          Target State Architecture
         </h1>
         <button
           onClick={() => setIsCreating(true)}
           className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
-          data-testid="add-model-btn"
+          data-testid="create-model-btn"
         >
           <Plus size={20} />
-          New Model
+          Create Model
         </button>
       </div>
 
@@ -150,7 +152,7 @@ export function TargetStatePage() {
                       ? 'bg-blue-100 dark:bg-blue-900 border-2 border-blue-600'
                       : 'bg-gray-50 dark:bg-gray-900 hover:bg-gray-100 dark:hover:bg-gray-700'
                   }`}
-                  data-testid={`model-item-${model.id}`}
+                  data-testid="target-state-model"
                 >
                   <div className="font-medium" data-testid={`model-name-${model.id}`}>
                     {model.name}
@@ -183,6 +185,22 @@ export function TargetStatePage() {
                 </div>
                 <div className="flex gap-2">
                   <button
+                    onClick={() => setIsAddingCard(true)}
+                    className="flex items-center gap-2 px-3 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700"
+                    data-testid="add-card-btn"
+                  >
+                    <Plus size={18} />
+                    Add Card
+                  </button>
+                  <button
+                    onClick={() => setShowDependencyView(!showDependencyView)}
+                    className="flex items-center gap-2 px-3 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700"
+                    data-testid="dependency-view"
+                  >
+                    <Network size={18} />
+                    Dependencies
+                  </button>
+                  <button
                     className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded"
                     data-testid={`edit-model-${selectedModel.id}`}
                   >
@@ -204,13 +222,35 @@ export function TargetStatePage() {
               </div>
 
               {/* Architecture Diagram Placeholder */}
-              <div className="mb-6 p-6 bg-gray-50 dark:bg-gray-900 rounded-lg border-2 border-dashed border-gray-300 dark:border-gray-700">
-                <div className="text-center text-gray-500 dark:text-gray-400" data-testid="architecture-diagram-placeholder">
-                  <Network size={48} className="mx-auto mb-2" />
-                  <p>Interactive Architecture Diagram</p>
-                  <p className="text-sm">Visual representation of components and dependencies</p>
+              {showDependencyView ? (
+                <div className="mb-6 p-6 bg-gray-50 dark:bg-gray-900 rounded-lg border-2 border-dashed border-gray-300 dark:border-gray-700" data-testid="dependency-graph">
+                  <div className="text-center text-gray-500 dark:text-gray-400">
+                    <Network size={48} className="mx-auto mb-2" />
+                    <p className="font-semibold">Dependency Graph</p>
+                    <p className="text-sm">Visual representation of component dependencies</p>
+                    <div className="mt-4 grid grid-cols-2 gap-4 text-left">
+                      {selectedModel.components.map((component) => (
+                        <div key={component.id} className="bg-white dark:bg-gray-800 p-3 rounded border">
+                          <div className="font-medium">{component.name}</div>
+                          {component.dependencies.length > 0 && (
+                            <div className="text-sm text-gray-500 mt-1">
+                              Depends on: {component.dependencies.join(', ')}
+                            </div>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
                 </div>
-              </div>
+              ) : (
+                <div className="mb-6 p-6 bg-gray-50 dark:bg-gray-900 rounded-lg border-2 border-dashed border-gray-300 dark:border-gray-700">
+                  <div className="text-center text-gray-500 dark:text-gray-400" data-testid="architecture-diagram-placeholder">
+                    <Network size={48} className="mx-auto mb-2" />
+                    <p>Interactive Architecture Diagram</p>
+                    <p className="text-sm">Visual representation of components and dependencies</p>
+                  </div>
+                </div>
+              )}
 
               {/* Components List */}
               <div>
@@ -278,6 +318,21 @@ export function TargetStatePage() {
           }}
         />
       )}
+      {isAddingCard && selectedModel && (
+        <AddCardForm
+          onClose={() => setIsAddingCard(false)}
+          onSave={(component) => {
+            const updatedModels = models.map(m =>
+              m.id === selectedModel.id
+                ? { ...m, components: [...m.components, { ...component, id: Date.now().toString() }] }
+                : m
+            );
+            setModels(updatedModels);
+            setSelectedModel(updatedModels.find(m => m.id === selectedModel.id) || null);
+            setIsAddingCard(false);
+          }}
+        />
+      )}
     </div>
   );
 }
@@ -290,15 +345,15 @@ interface ModelFormProps {
 function ModelForm({ onClose, onSave }: ModelFormProps) {
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
-  const [version, setVersion] = useState('');
+  const [targetDate, setTargetDate] = useState('');
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     onSave({
       name,
       description,
-      version,
-      lastUpdated: new Date().toISOString().split('T')[0],
+      version: '1.0',
+      lastUpdated: targetDate || new Date().toISOString().split('T')[0],
     });
   };
 
@@ -314,8 +369,8 @@ function ModelForm({ onClose, onSave }: ModelFormProps) {
               value={name}
               onChange={(e) => setName(e.target.value)}
               className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
-              data-testid="model-name-input"
-              placeholder="e.g., Q2 2026 Target Architecture"
+              data-testid="model-name"
+              placeholder="e.g., 2026 Target Architecture"
               required
             />
           </div>
@@ -325,20 +380,19 @@ function ModelForm({ onClose, onSave }: ModelFormProps) {
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
-              data-testid="model-description-input"
+              data-testid="model-description"
               rows={3}
               required
             />
           </div>
           <div className="mb-4">
-            <label className="block text-sm font-medium mb-1">Version</label>
+            <label className="block text-sm font-medium mb-1">Target Date</label>
             <input
-              type="text"
-              value={version}
-              onChange={(e) => setVersion(e.target.value)}
+              type="date"
+              value={targetDate}
+              onChange={(e) => setTargetDate(e.target.value)}
               className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
-              data-testid="model-version-input"
-              placeholder="e.g., 2.0"
+              data-testid="model-target-date"
               required
             />
           </div>
@@ -354,9 +408,70 @@ function ModelForm({ onClose, onSave }: ModelFormProps) {
             <button
               type="submit"
               className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
-              data-testid="save-model-btn"
             >
-              Create Model
+              Create
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+}
+
+interface AddCardFormProps {
+  onClose: () => void;
+  onSave: (component: Omit<ArchitectureComponent, 'id'>) => void;
+}
+
+function AddCardForm({ onClose, onSave }: AddCardFormProps) {
+  const [selectedCard, setSelectedCard] = useState('');
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    onSave({
+      name: selectedCard || 'New Card',
+      type: 'service',
+      description: 'Added card from library',
+      status: 'planned',
+      dependencies: [],
+    });
+  };
+
+  return (
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50" data-testid="add-card-modal">
+      <div className="bg-white dark:bg-gray-800 rounded-lg p-6 w-full max-w-md">
+        <h2 className="text-2xl font-bold mb-4">Add Card to Target State</h2>
+        <form onSubmit={handleSubmit} data-testid="add-card-form">
+          <div className="mb-4">
+            <label className="block text-sm font-medium mb-1">Select Card</label>
+            <select
+              value={selectedCard}
+              onChange={(e) => setSelectedCard(e.target.value)}
+              className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
+              data-testid="card-select"
+              required
+            >
+              <option value="">Select a card...</option>
+              <option value="api-gateway">API Gateway</option>
+              <option value="auth-service">Authentication Service</option>
+              <option value="data-service">Data Service</option>
+              <option value="event-bus">Event Bus</option>
+            </select>
+          </div>
+          <div className="flex gap-2 justify-end">
+            <button
+              type="button"
+              onClick={onClose}
+              className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700"
+              data-testid="cancel-add-card-btn"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+            >
+              Add
             </button>
           </div>
         </form>

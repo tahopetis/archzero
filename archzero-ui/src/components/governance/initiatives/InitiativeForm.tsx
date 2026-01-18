@@ -269,6 +269,7 @@ export function InitiativeForm({ initiative, onSuccess, onCancel }: InitiativeFo
           </button>
         </div>
       </form>
+      </div>
     </div>
   );
 }

@@ -1,0 +1,140 @@
+
+> archzero-e2e@1.0.0 test:chromium
+> playwright test --project=chromium strategic-planning --reporter=json
+
+🚀 Arc Zero E2E Test Suite - Global Setup
+============================================
+📝 Frontend URL: http://localhost:5173
+🔧 Backend API: http://localhost:3000
+🌍 Test Environment: development
+👤 Test Admin User: admin@archzero.local
+🏥 Checking backend health...
+✅ Backend is healthy: healthy - archzero-api v0.1.0
+🔐 Verifying test admin user exists...
+✅ Test admin user verified and can authenticate
+✅ Authentication token obtained
+🧹 Cleaning up ALL old test data from database...
+✅ Database cleanup complete: 69 cards removed
+👥 Seeding ARB test users...
+✅ ARB test users seeded: 3 users
+🌱 Seeding test data...
+🌱 Starting test data seeding...
+📦 Seeding cards...
+  ✅ Created card: Pagination Test Card 1
+  ✅ Created card: Pagination Test Card 2
+  ✅ Created card: Pagination Test Card 3
+  ✅ Created card: Pagination Test Card 4
+  ✅ Created card: Pagination Test Card 5
+  ✅ Created card: Pagination Test Card 6
+  ✅ Created card: Pagination Test Card 7
+  ✅ Created card: Pagination Test Card 8
+  ✅ Created card: Pagination Test Card 9
+  ✅ Created card: Pagination Test Card 10
+  ✅ Created card: Pagination Test Card 11
+  ✅ Created card: Pagination Test Card 12
+  ✅ Created card: Pagination Test Card 13
+  ✅ Created card: Pagination Test Card 14
+  ✅ Created card: Pagination Test Card 15
+  ✅ Created card: Pagination Test Card 16
+  ✅ Created card: Pagination Test Card 17
+  ✅ Created card: Pagination Test Card 18
+  ✅ Created card: Pagination Test Card 19
+  ✅ Created card: Pagination Test Card 20
+  ✅ Created card: Test-Application
+  ✅ Created card: Customer-Portal
+  ✅ Created card: Inventory-Management-System
+  ✅ Created card: Order-Management
+  ✅ Created card: Customer-Analytics
+  ✅ Created card: PostgreSQL-Database
+  ✅ Created card: Redis-Cache
+  ✅ Created card: Payment-Gateway-API
+  ✅ Created card: Shipping-Provider-Integration
+  ✅ Created card: Improve-System-Performance
+  ✅ Created card: Cloud-Platform
+✅ Created 31 cards, 0 already existed
+🔗 Seeding relationships...
+📋 Found 31 cards for relationship mapping
+🗂️  Card map: [
+  'Cloud-Platform',
+  'Improve-System-Performance',
+  'Shipping-Provider-Integration',
+  'Payment-Gateway-API',
+  'Redis-Cache',
+  'PostgreSQL-Database',
+  'Customer-Analytics',
+  'Order-Management',
+  'Inventory-Management-System',
+  'Customer-Portal',
+  'Test-Application',
+  'Pagination Test Card 20',
+  'Pagination Test Card 19',
+  'Pagination Test Card 18',
+  'Pagination Test Card 17',
+  'Pagination Test Card 16',
+  'Pagination Test Card 15',
+  'Pagination Test Card 14',
+  'Pagination Test Card 13',
+  'Pagination Test Card 12',
+  'Pagination Test Card 11',
+  'Pagination Test Card 10',
+  'Pagination Test Card 9',
+  'Pagination Test Card 8',
+  'Pagination Test Card 7',
+  'Pagination Test Card 6',
+  'Pagination Test Card 5',
+  'Pagination Test Card 4',
+  'Pagination Test Card 3',
+  'Pagination Test Card 2',
+  'Pagination Test Card 1'
+]
+✅ Created 4 relationships, 0 already existed
+🎯 Seeding initiatives...
+  ✅ Created initiative: Cloud Migration Initiative
+  ✅ Created initiative: Digital Transformation Program
+  ✅ Created initiative: Customer Experience Enhancement
+  ✅ Created initiative: Legacy System Modernization
+  ✅ Created initiative: Data Analytics Platform
+  ✅ Created initiative: Security Enhancement Program
+  ✅ Created initiative: API Gateway Implementation
+  ✅ Created initiative: Mobile Application Development
+✅ Created 8 initiatives, 0 already existed
+📅 Seeding ARB meetings...
+  ✅ Created ARB meeting: ARB Review - January 2026
+  ✅ Created ARB meeting: ARB Review - February 2026
+✅ Created 2 ARB meetings, 0 already existed
+📝 Seeding ARB submissions...
+  ✅ Created ARB submission: Draft: Microservices Pattern Review [pending]
+  ✅ Created ARB submission: Draft: API Design Patterns [pending]
+  ✅ Created ARB submission: Draft: Database Sharding Strategy [pending]
+  ✅ Created ARB submission: Draft: Event Streaming Platform [pending]
+  ✅ Created ARB submission: Draft: Container Registry [pending]
+  ✅ Created ARB submission: Draft: Service Mesh Adoption [pending]
+  ✅ Created ARB submission: Draft: TLS Protocol Exception [pending]
+  ✅ Created ARB submission: Draft: Password Policy Exception [pending]
+  ✅ Created ARB submission: Draft: Backup Retention Policy [pending]
+  ✅ Created ARB submission: Draft: Unauthorized API Access [pending]
+  ✅ Created ARB submission: Draft: Encryption Standards Violation [pending]
+  ✅ Created ARB submission: Draft: Data Residency Issue [pending]
+  ✅ Created ARB submission: Payment Processing System Review [pending]
+  ✅ Created ARB submission: React Native for Mobile Development [pending]
+  ✅ Created ARB submission: Database Migration Exception [pending]
+  ✅ Created ARB submission: Direct Database Access [pending]
+  ✅ Created ARB submission: API Gateway Architecture [pending]
+  ✅ Created ARB submission: GraphQL Implementation [pending]
+  ✅ Created ARB submission: Emergency Deployment Exception [pending]
+  ✅ Created ARB submission: Event-Driven Architecture [pending]
+  ✅ Created ARB submission: Shadow IT Discovery [pending]
+  ✅ Created ARB submission: Kubernetes Adoption [pending]
+  ✅ Created ARB submission: Overdue Security Review [pending]
+  ✅ Created ARB submission: Overdue Policy Exception [pending]
+  ✅ Created ARB submission: Overdue Tech Proposal [pending]
+  ✅ Created ARB submission: Cloud Migration Strategy [with meeting]
+  ✅ Created ARB submission: Microservices Architecture [with meeting]
+  ✅ Created ARB submission: Security Protocol Exception [with meeting]
+✅ Created 28 ARB submissions, 0 already existed
+✅ Test data seeding complete
+✅ Test data seeding complete
+🧹 Clearing stale authentication state...
+⚠️  Auth reset endpoint not available (may not be implemented yet)
+✅ Global setup complete
+============================================

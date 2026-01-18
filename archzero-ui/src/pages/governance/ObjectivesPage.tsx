@@ -52,10 +52,10 @@ export function ObjectivesPage() {
   const [editingObjective, setEditingObjective] = useState<Objective | null>(null);
 
   return (
-    <div className="container mx-auto py-6">
+    <div className="container mx-auto py-6" data-testid="objectives-list">
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-3xl font-bold" data-testid="objectives-page-title">
-          Objectives & Key Results
+        <h1 className="text-3xl font-bold">
+          Objectives
         </h1>
         <button
           onClick={() => setIsCreating(true)}
@@ -72,23 +72,24 @@ export function ObjectivesPage() {
           <div
             key={objective.id}
             className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6"
-            data-testid={`objective-item-${objective.id}`}
+            data-testid="objective-item"
+            data-id={objective.id}
           >
             <div className="flex items-start justify-between mb-4">
               <div className="flex-1">
                 <div className="flex items-center gap-3 mb-2">
                   <Target size={24} className="text-blue-600" />
-                  <h3 className="text-2xl font-semibold" data-testid={`objective-title-${objective.id}`}>
+                  <h3 className="text-2xl font-semibold" data-testid="objective-title">
                     {objective.title}
                   </h3>
-                  <span className="text-sm px-3 py-1 bg-gray-100 dark:bg-gray-700 rounded-full" data-testid={`objective-period-${objective.id}`}>
+                  <span className="text-sm px-3 py-1 bg-gray-100 dark:bg-gray-700 rounded-full" data-testid="objective-period">
                     {objective.period}
                   </span>
                 </div>
-                <p className="text-gray-600 dark:text-gray-400 mb-3" data-testid={`objective-description-${objective.id}`}>
+                <p className="text-gray-600 dark:text-gray-400 mb-3" data-testid="objective-description">
                   {objective.description}
                 </p>
-                <div className="text-sm text-gray-500 dark:text-gray-500" data-testid={`objective-initiatives-${objective.id}`}>
+                <div className="text-sm text-gray-500 dark:text-gray-500">
                   {objective.initiativesCount} initiatives linked
                 </div>
               </div>
@@ -96,7 +97,7 @@ export function ObjectivesPage() {
                 <button
                   onClick={() => setEditingObjective(objective)}
                   className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded"
-                  data-testid={`edit-objective-${objective.id}`}
+                  data-testid="edit-objective-btn"
                 >
                   <Edit size={18} />
                 </button>
@@ -107,7 +108,7 @@ export function ObjectivesPage() {
                     }
                   }}
                   className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded text-red-600"
-                  data-testid={`delete-objective-${objective.id}`}
+                  data-testid="delete-objective-btn"
                 >
                   <Trash2 size={18} />
                 </button>
@@ -118,53 +119,73 @@ export function ObjectivesPage() {
             <div className="mb-4">
               <div className="flex justify-between text-sm mb-1">
                 <span>Overall Progress</span>
-                <span data-testid={`objective-progress-${objective.id}`}>{objective.progress}%</span>
+                <span data-testid="objective-progress">{objective.progress}%</span>
               </div>
               <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-3">
                 <div
                   className="bg-blue-600 h-3 rounded-full transition-all"
                   style={{ width: `${objective.progress}%` }}
-                  data-testid={`objective-progress-bar-${objective.id}`}
                 />
               </div>
             </div>
 
             {/* Key Results */}
             <div className="border-t border-gray-200 dark:border-gray-700 pt-4">
-              <h4 className="text-lg font-semibold mb-3 flex items-center gap-2">
-                <TrendingUp size={18} />
-                Key Results
-              </h4>
+              <div className="flex justify-between items-center mb-3">
+                <h4 className="text-lg font-semibold flex items-center gap-2">
+                  <TrendingUp size={18} />
+                  Key Results
+                </h4>
+                <button
+                  type="button"
+                  onClick={() => setEditingObjective(objective)}
+                  className="text-blue-600 hover:text-blue-700 text-sm"
+                  data-testid="add-key-result-btn"
+                >
+                  + Add Key Result
+                </button>
+              </div>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 {objective.keyResults.map((kr) => (
                   <div
                     key={kr.id}
                     className="bg-gray-50 dark:bg-gray-900 rounded-lg p-4"
-                    data-testid={`kr-item-${kr.id}`}
+                    data-testid="key-result-item"
                   >
-                    <div className="font-medium mb-2" data-testid={`kr-name-${kr.id}`}>
+                    <div className="font-medium mb-2" data-testid="key-result-title">
                       {kr.name}
                     </div>
                     <div className="flex items-baseline gap-2 mb-2">
-                      <span className="text-2xl font-bold text-blue-600" data-testid={`kr-current-${kr.id}`}>
+                      <span className="text-2xl font-bold text-blue-600" data-testid="key-result-current">
                         {kr.currentValue}
                       </span>
                       <span className="text-gray-500">/</span>
-                      <span className="text-lg text-gray-600 dark:text-gray-400" data-testid={`kr-target-${kr.id}`}>
+                      <span className="text-lg text-gray-600 dark:text-gray-400" data-testid="key-result-target">
                         {kr.targetValue}
                       </span>
-                      <span className="text-sm text-gray-500">{kr.unit}</span>
+                      <span className="text-sm text-gray-500" data-testid="key-result-unit">{kr.unit}</span>
                     </div>
                     <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
                       <div
                         className="bg-green-600 h-2 rounded-full"
                         style={{ width: `${Math.min((kr.currentValue / kr.targetValue) * 100, 100)}%` }}
-                        data-testid={`kr-progress-bar-${kr.id}`}
                       />
                     </div>
                   </div>
                 ))}
               </div>
+            </div>
+
+            {/* Link Initiative Button */}
+            <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
+              <button
+                onClick={() => setEditingObjective(objective)}
+                className="text-blue-600 hover:text-blue-700 text-sm flex items-center gap-2"
+                data-testid="link-initiative-btn"
+              >
+                <Plus size={16} />
+                Link Initiative
+              </button>
             </div>
           </div>
         ))}
@@ -243,7 +264,7 @@ function ObjectiveForm({ objective, onClose, onSave }: ObjectiveFormProps) {
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
-              data-testid="objective-title-input"
+              data-testid="objective-title"
               required
             />
           </div>
@@ -253,7 +274,7 @@ function ObjectiveForm({ objective, onClose, onSave }: ObjectiveFormProps) {
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
-              data-testid="objective-description-input"
+              data-testid="objective-description"
               rows={3}
               required
             />
@@ -264,7 +285,7 @@ function ObjectiveForm({ objective, onClose, onSave }: ObjectiveFormProps) {
               value={period}
               onChange={(e) => setPeriod(e.target.value)}
               className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
-              data-testid="objective-period-select"
+              data-testid="objective-period"
             >
               <option value="Q1 2026">Q1 2026</option>
               <option value="Q2 2026">Q2 2026</option>
@@ -280,7 +301,7 @@ function ObjectiveForm({ objective, onClose, onSave }: ObjectiveFormProps) {
                 type="button"
                 onClick={addKeyResult}
                 className="text-blue-600 hover:text-blue-700 text-sm"
-                data-testid="add-kr-btn"
+                data-testid="add-key-result-btn"
               >
                 + Add Key Result
               </button>
@@ -295,7 +316,7 @@ function ObjectiveForm({ objective, onClose, onSave }: ObjectiveFormProps) {
                       value={kr.name}
                       onChange={(e) => updateKeyResult(kr.id, 'name', e.target.value)}
                       className="w-full px-3 py-1 border border-gray-300 dark:border-gray-600 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white text-sm"
-                      data-testid={`kr-name-input-${index}`}
+                      data-testid={`key-result-title`}
                       required
                     />
                     <div className="flex gap-2">
@@ -305,7 +326,7 @@ function ObjectiveForm({ objective, onClose, onSave }: ObjectiveFormProps) {
                         value={kr.currentValue}
                         onChange={(e) => updateKeyResult(kr.id, 'currentValue', parseFloat(e.target.value) || 0)}
                         className="w-1/3 px-3 py-1 border border-gray-300 dark:border-gray-600 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white text-sm"
-                        data-testid={`kr-current-input-${index}`}
+                        data-testid={`key-result-current`}
                         required
                       />
                       <input
@@ -314,7 +335,7 @@ function ObjectiveForm({ objective, onClose, onSave }: ObjectiveFormProps) {
                         value={kr.targetValue}
                         onChange={(e) => updateKeyResult(kr.id, 'targetValue', parseFloat(e.target.value) || 0)}
                         className="w-1/3 px-3 py-1 border border-gray-300 dark:border-gray-600 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white text-sm"
-                        data-testid={`kr-target-input-${index}`}
+                        data-testid={`key-result-target`}
                         required
                       />
                       <input
@@ -323,7 +344,7 @@ function ObjectiveForm({ objective, onClose, onSave }: ObjectiveFormProps) {
                         value={kr.unit}
                         onChange={(e) => updateKeyResult(kr.id, 'unit', e.target.value)}
                         className="w-1/3 px-3 py-1 border border-gray-300 dark:border-gray-600 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white text-sm"
-                        data-testid={`kr-unit-input-${index}`}
+                        data-testid={`key-result-unit`}
                       />
                     </div>
                   </div>
@@ -331,7 +352,6 @@ function ObjectiveForm({ objective, onClose, onSave }: ObjectiveFormProps) {
                     type="button"
                     onClick={() => removeKeyResult(kr.id)}
                     className="text-red-600 hover:text-red-700 p-1"
-                    data-testid={`remove-kr-${index}`}
                   >
                     <Trash2 size={16} />
                   </button>

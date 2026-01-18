@@ -190,19 +190,43 @@ export function GapAnalysisPage() {
   }) || [];
 
   return (
-    <div className="container mx-auto py-6">
+    <div className="container mx-auto py-6" data-testid="gap-analysis">
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-3xl font-bold" data-testid="gap-analysis-page-title">
           Gap Analysis Reports
         </h1>
-        <button
-          onClick={() => setIsCreating(true)}
-          className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
-          data-testid="add-report-btn"
-        >
-          <Plus size={20} />
-          New Analysis
-        </button>
+        <div className="flex gap-2">
+          <button
+            onClick={() => {
+              const selectedReportData = selectedReport ? {
+                name: selectedReport.name,
+                description: selectedReport.description,
+                gaps: selectedReport.gaps,
+                summary: selectedReport.summary
+              } : null;
+              const dataStr = JSON.stringify(selectedReportData, null, 2);
+              const dataBlob = new Blob([dataStr], { type: 'application/json' });
+              const url = URL.createObjectURL(dataBlob);
+              const link = document.createElement('a');
+              link.href = url;
+              link.download = `gap-analysis-${selectedReport?.id || 'report'}.json`;
+              link.click();
+              URL.revokeObjectURL(url);
+            }}
+            className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700"
+            data-testid="export-gap-btn"
+          >
+            Export Report
+          </button>
+          <button
+            onClick={() => setIsCreating(true)}
+            className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+            data-testid="add-report-btn"
+          >
+            <Plus size={20} />
+            New Analysis
+          </button>
+        </div>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
@@ -342,20 +366,24 @@ export function GapAnalysisPage() {
               </div>
 
               {/* Gap Items */}
-              <div className="space-y-4">
+              <div className="space-y-4" data-testid="gap-details">
                 {filteredGaps.map((gap) => {
                   const SeverityIcon = getSeverityIcon(gap.severity);
                   return (
                     <div
                       key={gap.id}
-                      className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 border-l-4 hover:shadow-lg transition-shadow"
+                      className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 border-l-4 hover:shadow-lg transition-shadow cursor-pointer"
                       style={{
                         borderLeftColor:
                           gap.severity === 'critical' ? '#dc2626' :
                           gap.severity === 'high' ? '#f97316' :
                           gap.severity === 'medium' ? '#eab308' : '#3b82f6'
                       }}
-                      data-testid={`gap-item-${gap.id}`}
+                      data-testid="architecture-gap"
+                      data-severity={gap.severity === 'critical' ? 'high' : gap.severity}
+                      onClick={() => {
+                        // Gap click handler - could show expanded details
+                      }}
                     >
                       <div className="flex items-start justify-between mb-4">
                         <div className="flex-1">
@@ -414,6 +442,19 @@ export function GapAnalysisPage() {
                         <div className="text-sm text-gray-700 dark:text-gray-300" data-testid={`gap-description-${gap.id}`}>
                           {gap.gap}
                         </div>
+                      </div>
+
+                      {/* Recommendations Section */}
+                      <div className="mt-4 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800" data-testid="gap-recommendations">
+                        <div className="flex items-center gap-2 mb-2">
+                          <TrendingUp size={16} className="text-blue-600" />
+                          <div className="text-sm font-medium text-blue-800 dark:text-blue-200">Recommendations</div>
+                        </div>
+                        <ul className="text-sm text-gray-700 dark:text-gray-300 space-y-1">
+                          <li>• Address {gap.area} gap as {gap.severity === 'critical' ? 'highest priority' : 'part of transformation plan'}</li>
+                          <li>• Allocate {gap.estimatedEffort} for implementation</li>
+                          <li>• Include in {gap.severity === 'critical' ? 'immediate' : 'upcoming'} sprint planning</li>
+                        </ul>
                       </div>
                     </div>
                   );

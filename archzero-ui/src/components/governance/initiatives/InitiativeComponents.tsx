@@ -18,7 +18,11 @@ import {
   Calendar,
   Users,
   ArrowRight,
-  User
+  User,
+  MessageSquare,
+  Send,
+  Activity,
+  Bell
 } from 'lucide-react';
 import {
   InitiativeStatus,
@@ -440,6 +444,15 @@ interface InitiativeDetailProps {
 
 export function InitiativeDetail({ initiativeId }: InitiativeDetailProps) {
   const { data: initiative, isLoading } = useInitiative(initiativeId);
+  const [activeTab, setActiveTab] = useState<'overview' | 'activity'>('overview');
+  const [healthValue, setHealthValue] = useState<InitiativeHealth>(initiative?.health || InitiativeHealth.OnTrack);
+  const [healthReason, setHealthReason] = useState('');
+  const [showHealthUpdate, setShowHealthUpdate] = useState(false);
+  const [showNotification, setShowNotification] = useState(false);
+  const [commentText, setCommentText] = useState('');
+  const [comments, setComments] = useState<Array<{ id: string; text: string; author: string; timestamp: Date }>>([]);
+  const [showOwnerAssign, setShowOwnerAssign] = useState(false);
+  const [selectedOwner, setSelectedOwner] = useState('');
 
   if (isLoading) {
     return <div className="animate-pulse bg-slate-100 h-96 rounded-xl" />;
@@ -457,6 +470,46 @@ export function InitiativeDetail({ initiativeId }: InitiativeDetailProps) {
   const allocated = initiative.budget || 0;
   const spent = initiative.progress ? (allocated * initiative.progress) / 100 : 0;
   const remaining = allocated - spent;
+
+  const handleHealthUpdate = () => {
+    setShowHealthUpdate(true);
+  };
+
+  const saveHealthUpdate = () => {
+    setShowNotification(true);
+    setTimeout(() => setShowNotification(false), 3000);
+    setShowHealthUpdate(false);
+  };
+
+  const addComment = () => {
+    if (commentText.trim()) {
+      setComments([
+        ...comments,
+        {
+          id: Date.now().toString(),
+          text: commentText,
+          author: 'Current User',
+          timestamp: new Date()
+        }
+      ]);
+      setCommentText('');
+    }
+  };
+
+  const assignOwner = () => {
+    setShowOwnerAssign(true);
+  };
+
+  const saveOwnerAssignment = () => {
+    setShowOwnerAssign(false);
+  };
+
+  // Sample activity data
+  const activities = [
+    { id: '1', action: 'Initiative created', user: 'Admin', timestamp: new Date(Date.now() - 86400000) },
+    { id: '2', action: 'Budget updated to $1,000,000', user: 'Admin', timestamp: new Date(Date.now() - 43200000) },
+    { id: '3', action: 'Health status changed to On Track', user: 'Admin', timestamp: new Date(Date.now() - 3600000) },
+  ];
 
   return (
     <div className="space-y-6" data-testid="initiative-detail">
@@ -504,83 +557,313 @@ export function InitiativeDetail({ initiativeId }: InitiativeDetailProps) {
             />
           )}
         </div>
-      </Card>
 
-      {/* Budget Tracking */}
-      <Card className="p-6" data-testid="initiative-budget">
-        <h2 className="text-xl font-bold text-slate-900 mb-4">Budget Tracking</h2>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <div className="text-center p-4 bg-slate-50 rounded-lg">
-            <p className="text-sm font-semibold text-slate-500 uppercase tracking-wide mb-2">Allocated</p>
-            <p className="text-2xl font-bold text-slate-900" data-testid="budget-allocated">
-              ${allocated.toLocaleString()}
-            </p>
-          </div>
-          <div className="text-center p-4 bg-blue-50 rounded-lg">
-            <p className="text-sm font-semibold text-blue-600 uppercase tracking-wide mb-2">Spent</p>
-            <p className="text-2xl font-bold text-blue-700" data-testid="budget-spent">
-              ${spent.toLocaleString()}
-            </p>
-          </div>
-          <div className="text-center p-4 bg-emerald-50 rounded-lg">
-            <p className="text-sm font-semibold text-emerald-600 uppercase tracking-wide mb-2">Remaining</p>
-            <p className="text-2xl font-bold text-emerald-700" data-testid="budget-remaining">
-              ${remaining.toLocaleString()}
-            </p>
-          </div>
+        {/* Assign Owner Button */}
+        <div className="mt-4">
+          <button
+            onClick={assignOwner}
+            className="flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors font-medium"
+            data-testid="assign-owner-btn"
+          >
+            <User className="w-4 h-4" />
+            Assign Owner
+          </button>
         </div>
-      </Card>
 
-      {/* Health Status */}
-      <Card className="p-6">
-        <h2 className="text-xl font-bold text-slate-900 mb-4">Health Status</h2>
-        <div className="flex items-center justify-between">
-          <div>
-            <p className="text-sm font-semibold text-slate-500 uppercase tracking-wide mb-1">Current Status</p>
-            <select
-              value={initiative.health}
-              disabled
-              className="text-lg font-semibold px-3 py-2 border border-slate-300 rounded-lg bg-slate-50"
-              data-testid="initiative-health"
-            >
-              <option value="OnTrack">On Track</option>
-              <option value="AtRisk">At Risk</option>
-              <option value="Critical">Critical</option>
-            </select>
-          </div>
-          <div className={cn(
-            'px-4 py-2 rounded-lg font-semibold border',
-            initiative.health === 'OnTrack' && 'bg-emerald-100 text-emerald-800 border-emerald-200',
-            initiative.health === 'AtRisk' && 'bg-amber-100 text-amber-800 border-amber-200',
-            initiative.health === 'Critical' && 'bg-rose-100 text-rose-800 border-rose-200'
-          )}>
-            {initiative.health === 'OnTrack' && '✓ On Track'}
-            {initiative.health === 'AtRisk' && '⚠ At Risk'}
-            {initiative.health === 'Critical' && '✗ Critical'}
-          </div>
-        </div>
-      </Card>
-
-      {/* Progress */}
-      {initiative.progress !== undefined && (
-        <Card className="p-6">
-          <h2 className="text-xl font-bold text-slate-900 mb-4">Progress</h2>
-          <div>
-            <div className="flex items-center justify-between mb-2">
-              <span className="text-sm font-semibold text-slate-500">Completion</span>
-              <span className="text-2xl font-bold text-slate-900">{initiative.progress}%</span>
+        {/* Owner Assignment Modal */}
+        {showOwnerAssign && (
+          <div className="mt-4 p-4 bg-slate-50 rounded-lg border border-slate-200">
+            <h3 className="text-lg font-semibold text-slate-900 mb-3">Assign Owner</h3>
+            <div className="flex gap-3">
+              <select
+                value={selectedOwner}
+                onChange={(e) => setSelectedOwner(e.target.value)}
+                className="flex-1 px-3 py-2 border border-slate-300 rounded-lg bg-white text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                data-testid="owner-select"
+              >
+                <option value="">Select an owner...</option>
+                <option value="admin@archzero.local">admin@archzero.local</option>
+                <option value="architect@archzero.local">architect@archzero.local</option>
+                <option value="manager@archzero.local">manager@archzero.local</option>
+              </select>
+              <button
+                onClick={saveOwnerAssignment}
+                className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors font-medium"
+              >
+                Assign
+              </button>
+              <button
+                onClick={() => setShowOwnerAssign(false)}
+                className="px-4 py-2 bg-slate-200 text-slate-700 rounded-lg hover:bg-slate-300 transition-colors font-medium"
+              >
+                Cancel
+              </button>
             </div>
-            <div className="h-4 bg-slate-100 rounded-full overflow-hidden">
-              <div
-                className={cn(
-                  'h-full rounded-full transition-all duration-500',
-                  initiative.progress >= 80 ? 'bg-emerald-500' :
-                  initiative.progress >= 50 ? 'bg-blue-500' :
-                  'bg-amber-500'
+          </div>
+        )}
+      </Card>
+
+      {/* Tabs */}
+      <div className="border-b border-slate-200">
+        <nav className="flex -mb-px space-x-8">
+          <button
+            onClick={() => setActiveTab('overview')}
+            className={`py-4 px-1 border-b-2 font-medium text-sm flex items-center gap-2 ${
+              activeTab === 'overview'
+                ? 'border-indigo-500 text-indigo-600'
+                : 'border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300'
+            }`}
+          >
+            Overview
+          </button>
+          <button
+            onClick={() => setActiveTab('activity')}
+            className={`py-4 px-1 border-b-2 font-medium text-sm flex items-center gap-2 ${
+              activeTab === 'activity'
+                ? 'border-indigo-500 text-indigo-600'
+                : 'border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300'
+            }`}
+            data-testid="activity-tab"
+          >
+            <Activity className="w-4 h-4" />
+            Activity
+          </button>
+        </nav>
+      </div>
+
+      {activeTab === 'overview' && (
+        <>
+          {/* Budget Tracking */}
+          <Card className="p-6" data-testid="initiative-budget">
+            <h2 className="text-xl font-bold text-slate-900 mb-4">Budget Tracking</h2>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <div className="text-center p-4 bg-slate-50 rounded-lg">
+                <p className="text-sm font-semibold text-slate-500 uppercase tracking-wide mb-2">Allocated</p>
+                <p className="text-2xl font-bold text-slate-900" data-testid="budget-allocated">
+                  ${allocated.toLocaleString()}
+                </p>
+              </div>
+              <div className="text-center p-4 bg-blue-50 rounded-lg">
+                <p className="text-sm font-semibold text-blue-600 uppercase tracking-wide mb-2">Spent</p>
+                <p className="text-2xl font-bold text-blue-700" data-testid="budget-spent">
+                  ${spent.toLocaleString()}
+                </p>
+              </div>
+              <div className="text-center p-4 bg-emerald-50 rounded-lg">
+                <p className="text-sm font-semibold text-emerald-600 uppercase tracking-wide mb-2">Remaining</p>
+                <p className="text-2xl font-bold text-emerald-700" data-testid="budget-remaining">
+                  ${remaining.toLocaleString()}
+                </p>
+              </div>
+            </div>
+          </Card>
+
+          {/* Health Status */}
+          <Card className="p-6">
+            <h2 className="text-xl font-bold text-slate-900 mb-4">Health Status</h2>
+            <div className="flex items-center justify-between">
+              <div className="flex-1">
+                <p className="text-sm font-semibold text-slate-500 uppercase tracking-wide mb-1">Current Status</p>
+                <select
+                  value={healthValue}
+                  onChange={(e) => setHealthValue(e.target.value as InitiativeHealth)}
+                  className="text-lg font-semibold px-3 py-2 border border-slate-300 rounded-lg bg-white"
+                  data-testid="initiative-health"
+                >
+                  <option value="OnTrack">On Track</option>
+                  <option value="AtRisk">At Risk</option>
+                  <option value="Critical">Critical</option>
+                </select>
+              </div>
+              <div className={cn(
+                'px-4 py-2 rounded-lg font-semibold border',
+                healthValue === 'OnTrack' && 'bg-emerald-100 text-emerald-800 border-emerald-200',
+                healthValue === 'AtRisk' && 'bg-amber-100 text-amber-800 border-amber-200',
+                healthValue === 'Critical' && 'bg-rose-100 text-rose-800 border-rose-200'
+              )}>
+                {healthValue === 'OnTrack' && '✓ On Track'}
+                {healthValue === 'AtRisk' && '⚠ At Risk'}
+                {healthValue === 'Critical' && '✗ Critical'}
+              </div>
+            </div>
+
+            {showHealthUpdate && (
+              <div className="mt-4 p-4 bg-slate-50 rounded-lg border border-slate-200">
+                <label className="block text-sm font-medium text-slate-700 mb-2">Reason for change</label>
+                <textarea
+                  value={healthReason}
+                  onChange={(e) => setHealthReason(e.target.value)}
+                  className="w-full px-3 py-2 border border-slate-300 rounded-lg bg-white text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                  rows={3}
+                  placeholder="Provide a reason for the health status change..."
+                  data-testid="health-reason"
+                />
+                <div className="flex gap-2 mt-3">
+                  <button
+                    onClick={saveHealthUpdate}
+                    className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors font-medium"
+                  >
+                    Save
+                  </button>
+                  <button
+                    onClick={() => setShowHealthUpdate(false)}
+                    className="px-4 py-2 bg-slate-200 text-slate-700 rounded-lg hover:bg-slate-300 transition-colors font-medium"
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {showNotification && (
+              <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-lg flex items-center gap-2">
+                <Bell className="w-4 h-4 text-blue-600" />
+                <p className="text-sm text-blue-800">Stakeholders notified of health status update</p>
+              </div>
+            )}
+          </Card>
+
+          {/* Progress */}
+          {initiative.progress !== undefined && (
+            <Card className="p-6">
+              <h2 className="text-xl font-bold text-slate-900 mb-4">Progress</h2>
+              <div>
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-sm font-semibold text-slate-500">Completion</span>
+                  <span className="text-2xl font-bold text-slate-900" data-testid="initiative-progress">{initiative.progress}%</span>
+                </div>
+                <div className="h-4 bg-slate-100 rounded-full overflow-hidden">
+                  <div
+                    className={cn(
+                      'h-full rounded-full transition-all duration-500',
+                      initiative.progress >= 80 ? 'bg-emerald-500' :
+                      initiative.progress >= 50 ? 'bg-blue-500' :
+                      'bg-amber-500'
+                    )}
+                    style={{ width: `${initiative.progress}%` }}
+                  />
+                </div>
+              </div>
+            </Card>
+          )}
+
+          {/* Impact Map Button */}
+          <Card className="p-6">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Target className="w-5 h-5 text-indigo-600" />
+                <h2 className="text-xl font-bold text-slate-900">Impact Map</h2>
+              </div>
+              <button
+                className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors font-medium"
+                data-testid="impact-map-btn"
+              >
+                View Impact Map
+              </button>
+            </div>
+            <div className="mt-4 p-4 bg-slate-50 rounded-lg" data-testid="impact-map">
+              <p className="text-sm text-slate-600">Impact map visualization will appear here</p>
+            </div>
+          </Card>
+
+          {/* Link Cards */}
+          <Card className="p-6">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Target className="w-5 h-5 text-indigo-600" />
+                <h2 className="text-xl font-bold text-slate-900">Linked Cards</h2>
+              </div>
+              <button
+                className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors font-medium"
+                data-testid="link-cards-btn"
+              >
+                Link Cards
+              </button>
+            </div>
+            <div className="mt-4 p-4 bg-slate-50 rounded-lg">
+              <select
+                className="w-full px-3 py-2 border border-slate-300 rounded-lg bg-white text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                data-testid="card-select"
+              >
+                <option value="">Select a card to link...</option>
+                <option value="card-1">Sample Card 1</option>
+                <option value="card-2">Sample Card 2</option>
+              </select>
+            </div>
+          </Card>
+
+          {/* Comments Section */}
+          <Card className="p-6">
+            <div className="flex items-center gap-2 mb-4">
+              <MessageSquare className="w-5 h-5 text-indigo-600" />
+              <h2 className="text-xl font-bold text-slate-900">Comments</h2>
+            </div>
+
+            <div className="space-y-4">
+              {/* Comment Input */}
+              <div className="flex gap-3">
+                <textarea
+                  value={commentText}
+                  onChange={(e) => setCommentText(e.target.value)}
+                  className="flex-1 px-3 py-2 border border-slate-300 rounded-lg bg-white text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                  rows={3}
+                  placeholder="Add a comment..."
+                  data-testid="comment-input"
+                />
+                <button
+                  onClick={addComment}
+                  className="self-end px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors font-medium flex items-center gap-2"
+                  data-testid="add-comment-btn"
+                >
+                  <Send className="w-4 h-4" />
+                  Add
+                </button>
+              </div>
+
+              {/* Comments List */}
+              <div className="space-y-3">
+                {comments.length === 0 ? (
+                  <p className="text-sm text-slate-500 text-center py-4">No comments yet. Be the first to comment!</p>
+                ) : (
+                  comments.map((comment) => (
+                    <div key={comment.id} className="p-3 bg-slate-50 rounded-lg">
+                      <div className="flex items-center justify-between mb-2">
+                        <span className="font-medium text-slate-900">{comment.author}</span>
+                        <span className="text-xs text-slate-500">
+                          {comment.timestamp.toLocaleString()}
+                        </span>
+                      </div>
+                      <p className="text-sm text-slate-700">{comment.text}</p>
+                    </div>
+                  ))
                 )}
-                style={{ width: `${initiative.progress}%` }}
-              />
+              </div>
             </div>
+          </Card>
+        </>
+      )}
+
+      {activeTab === 'activity' && (
+        <Card className="p-6">
+          <div className="flex items-center gap-2 mb-4">
+            <Activity className="w-5 h-5 text-indigo-600" />
+            <h2 className="text-xl font-bold text-slate-900">Activity Feed</h2>
+          </div>
+
+          <div className="space-y-4" data-testid="activity-feed">
+            {activities.map((activity) => (
+              <div key={activity.id} className="flex gap-3 p-3 bg-slate-50 rounded-lg">
+                <div className="flex-shrink-0 w-8 h-8 bg-indigo-100 rounded-full flex items-center justify-center">
+                  <Activity className="w-4 h-4 text-indigo-600" />
+                </div>
+                <div className="flex-1">
+                  <p className="text-sm text-slate-900">{activity.action}</p>
+                  <p className="text-xs text-slate-500 mt-1">
+                    {activity.user} • {activity.timestamp.toLocaleString()}
+                  </p>
+                </div>
+              </div>
+            ))}
           </div>
         </Card>
       )}

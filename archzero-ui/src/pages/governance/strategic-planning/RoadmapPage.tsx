@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Plus, Edit, Trash2, Calendar, MapPin, ChevronRight, Circle, CheckCircle2, Clock } from 'lucide-react';
+import { Plus, Edit, Trash2, Calendar, MapPin, ChevronRight, Circle, CheckCircle2, Clock, GitBranch, Filter } from 'lucide-react';
 
 interface Milestone {
   id: string;
@@ -156,6 +156,10 @@ export function RoadmapPage() {
   const [selectedRoadmap, setSelectedRoadmap] = useState<Roadmap | null>(roadmaps[0] || null);
   const [isCreating, setIsCreating] = useState(false);
   const [selectedPhase, setSelectedPhase] = useState<RoadmapPhase | null>(null);
+  const [isGenerating, setIsGenerating] = useState(false);
+  const [showDependencyView, setShowDependencyView] = useState(false);
+  const [isAddingMilestone, setIsAddingMilestone] = useState(false);
+  const [phaseFilter, setPhaseFilter] = useState<string>('all');
 
   const getStatusIcon = (status: Milestone['status']) => {
     switch (status) {
@@ -191,19 +195,29 @@ export function RoadmapPage() {
   };
 
   return (
-    <div className="container mx-auto py-6">
+    <div className="container mx-auto py-6" data-testid="transformation-roadmap">
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-3xl font-bold" data-testid="roadmap-page-title">
           Transformation Roadmap
         </h1>
-        <button
-          onClick={() => setIsCreating(true)}
-          className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
-          data-testid="add-roadmap-btn"
-        >
-          <Plus size={20} />
-          New Roadmap
-        </button>
+        <div className="flex gap-2">
+          <button
+            onClick={() => setIsGenerating(true)}
+            className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700"
+            data-testid="generate-roadmap-btn"
+          >
+            <GitBranch size={20} />
+            Generate Roadmap
+          </button>
+          <button
+            onClick={() => setIsCreating(true)}
+            className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+            data-testid="add-roadmap-btn"
+          >
+            <Plus size={20} />
+            New Roadmap
+          </button>
+        </div>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
@@ -294,18 +308,84 @@ export function RoadmapPage() {
               </div>
 
               {/* Timeline Visualization */}
-              <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
-                <h3 className="text-xl font-semibold mb-6 flex items-center gap-2">
-                  <Calendar size={20} />
-                  Timeline View
-                </h3>
+              <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6" data-testid="roadmap-timeline">
+                <div className="flex justify-between items-center mb-6">
+                  <h3 className="text-xl font-semibold flex items-center gap-2">
+                    <Calendar size={20} />
+                    Timeline View
+                  </h3>
+                  <div className="flex gap-2">
+                    <select
+                      value={phaseFilter}
+                      onChange={(e) => setPhaseFilter(e.target.value)}
+                      className="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
+                      data-testid="phase-filter"
+                    >
+                      <option value="all">All Phases</option>
+                      {selectedRoadmap.phases.map((phase) => (
+                        <option key={phase.id} value={phase.id}>
+                          {phase.name}
+                        </option>
+                      ))}
+                    </select>
+                    <button
+                      onClick={() => setShowDependencyView(!showDependencyView)}
+                      className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-colors ${
+                        showDependencyView
+                          ? 'bg-purple-600 text-white hover:bg-purple-700'
+                          : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600'
+                      }`}
+                      data-testid="dependency-view"
+                    >
+                      <GitBranch size={20} />
+                      Dependencies
+                    </button>
+                    <button
+                      onClick={() => setIsAddingMilestone(true)}
+                      className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+                      data-testid="add-milestone-btn"
+                    >
+                      <Plus size={20} />
+                      Add Milestone
+                    </button>
+                  </div>
+                </div>
 
                 <div className="relative">
                   {/* Timeline Line */}
                   <div className="absolute left-8 top-0 bottom-0 w-0.5 bg-gray-300 dark:bg-gray-700" />
 
+                  {/* Dependency View */}
+                  {showDependencyView && (
+                    <div className="mb-6 p-6 bg-purple-50 dark:bg-purple-900/20 rounded-lg" data-testid="roadmap-dependencies">
+                      <h4 className="text-lg font-semibold mb-4">Dependency Graph</h4>
+                      <div className="space-y-2">
+                        {selectedRoadmap.phases.flatMap((phase) =>
+                          phase.milestones.filter((m) => m.dependencies.length > 0).map((milestone) => (
+                            <div key={milestone.id} className="flex items-center gap-2 text-sm">
+                              <span className="font-medium" data-testid="roadmap-milestone">{milestone.name}</span>
+                              <span className="text-gray-500">depends on:</span>
+                              {milestone.dependencies.map((depId) => {
+                                const depMilestone = selectedRoadmap.phases
+                                  .flatMap((p) => p.milestones)
+                                  .find((m) => m.id === depId);
+                                return depMilestone ? (
+                                  <span key={depId} className="px-2 py-1 bg-white dark:bg-gray-800 rounded text-xs">
+                                    {depMilestone.name}
+                                  </span>
+                                ) : null;
+                              })}
+                            </div>
+                          ))
+                        )}
+                      </div>
+                    </div>
+                  )}
+
                   <div className="space-y-8">
-                    {selectedRoadmap.phases.map((phase, phaseIndex) => (
+                    {selectedRoadmap.phases
+                      .filter((phase) => phaseFilter === 'all' || phaseFilter === phase.id)
+                      .map((phase, phaseIndex) => (
                       <div key={phase.id} className="relative pl-16">
                         {/* Phase Marker */}
                         <div
@@ -362,7 +442,7 @@ export function RoadmapPage() {
                                     <div
                                       key={milestone.id}
                                       className="flex items-start gap-3 p-3 bg-white dark:bg-gray-800 rounded-lg hover:shadow-sm transition-shadow"
-                                      data-testid={`milestone-item-${milestone.id}`}
+                                      data-testid="roadmap-milestone"
                                     >
                                       <StatusIcon
                                         size={20}
@@ -458,6 +538,44 @@ export function RoadmapPage() {
           }}
         />
       )}
+
+      {isGenerating && (
+        <GenerateRoadmapModal
+          onClose={() => setIsGenerating(false)}
+          onGenerate={(newRoadmap) => {
+            setRoadmaps([...roadmaps, newRoadmap]);
+            setIsGenerating(false);
+          }}
+        />
+      )}
+
+      {isAddingMilestone && selectedRoadmap && (
+        <AddMilestoneModal
+          onClose={() => setIsAddingMilestone(false)}
+          onAdd={(milestone) => {
+            // Add milestone to the first phase for simplicity
+            if (selectedRoadmap.phases.length > 0) {
+              const updatedRoadmaps = roadmaps.map((r) => {
+                if (r.id === selectedRoadmap.id) {
+                  const updatedPhases = [...r.phases];
+                  updatedPhases[0] = {
+                    ...updatedPhases[0],
+                    milestones: [
+                      ...updatedPhases[0].milestones,
+                      { ...milestone, id: Date.now().toString(), status: 'pending' as const, dependencies: [] }
+                    ]
+                  };
+                  return { ...r, phases: updatedPhases };
+                }
+                return r;
+              });
+              setRoadmaps(updatedRoadmaps);
+              setSelectedRoadmap(updatedRoadmaps.find((r) => r.id === selectedRoadmap.id) || null);
+            }
+            setIsAddingMilestone(false);
+          }}
+        />
+      )}
     </div>
   );
 }
@@ -523,6 +641,178 @@ function RoadmapForm({ onClose, onSave }: RoadmapFormProps) {
               data-testid="save-roadmap-btn"
             >
               Create Roadmap
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+}
+
+interface GenerateRoadmapModalProps {
+  onClose: () => void;
+  onGenerate: (roadmap: Roadmap) => void;
+}
+
+function GenerateRoadmapModal({ onClose, onGenerate }: GenerateRoadmapModalProps) {
+  const [baseline, setBaseline] = useState('');
+  const [target, setTarget] = useState('');
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    // Generate a sample roadmap based on baseline and target
+    const newRoadmap: Roadmap = {
+      id: Date.now().toString(),
+      name: `Roadmap from ${baseline} to ${target}`,
+      description: `Generated transformation roadmap from ${baseline} to ${target}`,
+      createdAt: new Date().toISOString().split('T')[0],
+      phases: [
+        {
+          id: 'p1',
+          name: 'Phase 1: Assessment',
+          description: 'Assess current state and define requirements',
+          startDate: new Date().toISOString().split('T')[0],
+          endDate: new Date(Date.now() + 90 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+          status: 'not-started',
+          color: '#3b82f6',
+          milestones: [],
+        },
+      ],
+    };
+    onGenerate(newRoadmap);
+  };
+
+  return (
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50" data-testid="generate-roadmap-modal">
+      <div className="bg-white dark:bg-gray-800 rounded-lg p-6 w-full max-w-md">
+        <h2 className="text-2xl font-bold mb-4">Generate Roadmap</h2>
+        <form onSubmit={handleSubmit} data-testid="generate-roadmap-form">
+          <div className="mb-4">
+            <label className="block text-sm font-medium mb-1">Baseline State</label>
+            <select
+              value={baseline}
+              onChange={(e) => setBaseline(e.target.value)}
+              className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
+              data-testid="baseline-select"
+              required
+            >
+              <option value="">Select baseline...</option>
+              <option value="current">Current State</option>
+              <option value="legacy">Legacy System</option>
+              <option value="on-premise">On-Premise Infrastructure</option>
+            </select>
+          </div>
+          <div className="mb-4">
+            <label className="block text-sm font-medium mb-1">Target State</label>
+            <select
+              value={target}
+              onChange={(e) => setTarget(e.target.value)}
+              className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
+              data-testid="target-select"
+              required
+            >
+              <option value="">Select target...</option>
+              <option value="cloud-native">Cloud-Native Architecture</option>
+              <option value="microservices">Microservices-based</option>
+              <option value="serverless">Serverless Architecture</option>
+            </select>
+          </div>
+          <div className="flex gap-2 justify-end">
+            <button
+              type="button"
+              onClick={onClose}
+              className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700"
+              data-testid="cancel-generate-btn"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700"
+              data-testid="confirm-generate-btn"
+            >
+              Generate
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+}
+
+interface AddMilestoneModalProps {
+  onClose: () => void;
+  onAdd: (milestone: Omit<Milestone, 'id' | 'status' | 'dependencies'>) => void;
+}
+
+function AddMilestoneModal({ onClose, onAdd }: AddMilestoneModalProps) {
+  const [name, setName] = useState('');
+  const [date, setDate] = useState('');
+  const [description, setDescription] = useState('');
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    onAdd({
+      name,
+      date,
+      description,
+    });
+  };
+
+  return (
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50" data-testid="add-milestone-modal">
+      <div className="bg-white dark:bg-gray-800 rounded-lg p-6 w-full max-w-md">
+        <h2 className="text-2xl font-bold mb-4">Add Milestone</h2>
+        <form onSubmit={handleSubmit} data-testid="milestone-form">
+          <div className="mb-4">
+            <label className="block text-sm font-medium mb-1">Milestone Name</label>
+            <input
+              type="text"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
+              data-testid="milestone-name"
+              placeholder="e.g., Cloud Migration Complete"
+              required
+            />
+          </div>
+          <div className="mb-4">
+            <label className="block text-sm font-medium mb-1">Target Date</label>
+            <input
+              type="date"
+              value={date}
+              onChange={(e) => setDate(e.target.value)}
+              className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
+              data-testid="milestone-date"
+              required
+            />
+          </div>
+          <div className="mb-4">
+            <label className="block text-sm font-medium mb-1">Description</label>
+            <textarea
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
+              data-testid="milestone-description"
+              rows={3}
+              required
+            />
+          </div>
+          <div className="flex gap-2 justify-end">
+            <button
+              type="button"
+              onClick={onClose}
+              className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700"
+              data-testid="cancel-milestone-btn"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+              data-testid="save-milestone-btn"
+            >
+              Add
             </button>
           </div>
         </form>

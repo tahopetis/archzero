@@ -12,6 +12,8 @@ export * from './CompliancePage';
 export * from './ARBPage';
 export * from './ThemesPage';
 export * from './ObjectivesPage';
+export * from './AnalyticsPage';
+export * from './ReportsPage';
 export * from './strategic-planning';
 
 // Advanced Risk Pages
