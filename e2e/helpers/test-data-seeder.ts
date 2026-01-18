@@ -697,6 +697,20 @@ class TestDataFactory {
         priority: 'High',
         submittedAt: new Date(Date.now() - 10 * 24 * 60 * 60 * 1000).toISOString(), // 10 days ago
       },
+      {
+        type: 'ExceptionRequest',
+        title: 'Overdue Policy Exception',
+        rationale: 'Policy exception request that is now overdue',
+        priority: 'Critical',
+        submittedAt: new Date(Date.now() - 12 * 24 * 60 * 60 * 1000).toISOString(), // 12 days ago
+      },
+      {
+        type: 'NewTechnologyProposal',
+        title: 'Overdue Tech Proposal',
+        rationale: 'Technology proposal that is now overdue',
+        priority: 'Medium',
+        submittedAt: new Date(Date.now() - 15 * 24 * 60 * 60 * 1000).toISOString(), // 15 days ago
+      },
       // Submissions with assigned meetings (pending_review status)
       // These will be assigned to meetings created by seedARBMeetings
       {
