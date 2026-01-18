@@ -90,8 +90,12 @@ test.describe('ARB Review Requests', () => {
     // Find draft request item
     const draftRequestItem = page.locator('[data-testid="request-item"][data-status="draft"]').first();
     await expect(draftRequestItem).toBeVisible();
-    const submissionId = await draftRequestItem.getAttribute('data-id');
-    await page.goto(`/arb/submissions/${submissionId}`);
+
+    // Click to navigate to detail page
+    await Promise.all([
+      page.waitForURL(/\/arb\/submissions\//),
+      draftRequestItem.click()
+    ]);
 
     // Click edit button
     await page.locator('[data-testid="edit-request-btn"]').click();
@@ -162,8 +166,12 @@ test.describe('ARB Review Process', () => {
     // Find draft request link
     const draftRequestItem = page.locator('[data-testid="request-item"][data-status="draft"]').first();
     await expect(draftRequestItem).toBeVisible();
-    const submissionId = await draftRequestItem.getAttribute('data-id');
-    await page.goto(`/arb/submissions/${submissionId}`);
+
+    // Click to navigate to detail page
+    await Promise.all([
+      page.waitForURL(/\/arb\/submissions\//),
+      draftRequestItem.click()
+    ]);
 
     await page.locator('[data-testid="start-review-btn"]').click();
 
@@ -188,8 +196,12 @@ test.describe('ARB Review Process', () => {
   test('should approve request', async ({ page }) => {
     const requestItem = page.locator('[data-testid="request-item"]').first();
     await expect(requestItem).toBeVisible();
-    const submissionId = await requestItem.getAttribute('data-id');
-    await page.goto(`/arb/submissions/${submissionId}`);
+
+    // Click to navigate to detail page
+    await Promise.all([
+      page.waitForURL(/\/arb\/submissions\//),
+      requestItem.click()
+    ]);
 
     await page.locator('[data-testid="decision-approve"]').click();
 
@@ -204,8 +216,12 @@ test.describe('ARB Review Process', () => {
   test('should reject request', async ({ page }) => {
     const requestItem = page.locator('[data-testid="request-item"]').first();
     await expect(requestItem).toBeVisible();
-    const submissionId = await requestItem.getAttribute('data-id');
-    await page.goto(`/arb/submissions/${submissionId}`);
+
+    // Click to navigate to detail page
+    await Promise.all([
+      page.waitForURL(/\/arb\/submissions\//),
+      requestItem.click()
+    ]);
 
     await page.locator('[data-testid="decision-reject"]').click();
 
@@ -240,8 +256,12 @@ test.describe('ARB Review Process', () => {
   test('should defer request for more information', async ({ page }) => {
     const requestItem = page.locator('[data-testid="request-item"]').first();
     await expect(requestItem).toBeVisible();
-    const submissionId = await requestItem.getAttribute('data-id');
-    await page.goto(`/arb/submissions/${submissionId}`);
+
+    // Click to navigate to detail page
+    await Promise.all([
+      page.waitForURL(/\/arb\/submissions\//),
+      requestItem.click()
+    ]);
 
     await page.locator('[data-testid="decision-defer"]').click();
 
@@ -258,8 +278,12 @@ test.describe('ARB Review Process', () => {
 
     const requestItem = page.locator('[data-testid="request-item"]').first();
     await expect(requestItem).toBeVisible();
-    const submissionId = await requestItem.getAttribute('data-id');
-    await page.goto(`/arb/submissions/${submissionId}`);
+
+    // Click to navigate to detail page
+    await Promise.all([
+      page.waitForURL(/\/arb\/submissions\//),
+      requestItem.click()
+    ]);
 
     // Audit trail is always visible, no need to click tab
     const historyList = page.locator('[data-testid="decision-history"]');
@@ -490,8 +514,12 @@ test.describe('ARB Notifications', () => {
 
     const requestItem = page.locator('[data-testid="request-item"]').first();
     await expect(requestItem).toBeVisible();
-    const submissionId = await requestItem.getAttribute('data-id');
-    await page.goto(`/arb/submissions/${submissionId}`);
+
+    // Click to navigate to detail page
+    await Promise.all([
+      page.waitForURL(/\/arb\/submissions\//),
+      requestItem.click()
+    ]);
 
     await page.locator('[data-testid="assign-reviewer-btn"]').click();
 
@@ -508,8 +536,12 @@ test.describe('ARB Notifications', () => {
 
     const requestItem = page.locator('[data-testid="request-item"]').first();
     await expect(requestItem).toBeVisible();
-    const submissionId = await requestItem.getAttribute('data-id');
-    await page.goto(`/arb/submissions/${submissionId}`);
+
+    // Click to navigate to detail page
+    await Promise.all([
+      page.waitForURL(/\/arb\/submissions\//),
+      requestItem.click()
+    ]);
 
     await page.locator('[data-testid="decision-approve"]').click();
     await page.locator('button:has-text("Confirm Approval")').click();
@@ -634,8 +666,12 @@ test.describe('ARB Audit Trail', () => {
 
     const requestItem = page.locator('[data-testid="request-item"]').first();
     await expect(requestItem).toBeVisible();
-    const submissionId = await requestItem.getAttribute('data-id');
-    await page.goto(`/arb/submissions/${submissionId}`);
+
+    // Click to navigate to detail page
+    await Promise.all([
+      page.waitForURL(/\/arb\/submissions\//),
+      requestItem.click()
+    ]);
 
     // Audit trail is always visible (no tab needed)
     const auditTrail = page.locator('[data-testid="decision-history"]');
@@ -647,8 +683,12 @@ test.describe('ARB Audit Trail', () => {
 
     const requestItem = page.locator('[data-testid="request-item"]').first();
     await expect(requestItem).toBeVisible();
-    const submissionId = await requestItem.getAttribute('data-id');
-    await page.goto(`/arb/submissions/${submissionId}`);
+
+    // Click to navigate to detail page
+    await Promise.all([
+      page.waitForURL(/\/arb\/submissions\//),
+      requestItem.click()
+    ]);
 
     // Verify audit trail is visible (export feature not yet implemented)
     const auditTrail = page.locator('[data-testid="decision-history"]');
@@ -793,8 +833,12 @@ test.describe('ARB Integration with Cards', () => {
     }
 
     await expect(requestWithDecisionItem).toBeVisible();
-    const submissionId = await requestWithDecisionItem.getAttribute('data-id');
-    await page.goto(`/arb/submissions/${submissionId}`);
+
+    // Click to navigate to detail page
+    await Promise.all([
+      page.waitForURL(/\/arb\/submissions\//),
+      requestWithDecisionItem.click()
+    ]);
 
     // Navigate to linked card (if it exists)
     const viewCardBtn = page.locator('[data-testid="view-card-btn"]');
