@@ -692,6 +692,42 @@ class TestDataFactory {
       },
       {
         type: 'ArchitectureReview',
+        title: 'API Gateway Architecture',
+        rationale: 'Review proposed API Gateway implementation for microservices communication',
+        priority: 'High',
+      },
+      {
+        type: 'NewTechnologyProposal',
+        title: 'GraphQL Implementation',
+        rationale: 'Proposal to adopt GraphQL for frontend-backend communication',
+        priority: 'Medium',
+      },
+      {
+        type: 'ExceptionRequest',
+        title: 'Emergency Deployment Exception',
+        rationale: 'Request for emergency deployment bypassing standard review process',
+        priority: 'Critical',
+      },
+      {
+        type: 'ArchitectureReview',
+        title: 'Event-Driven Architecture',
+        rationale: 'Review proposal for event-driven architecture using message queues',
+        priority: 'High',
+      },
+      {
+        type: 'PolicyViolation',
+        title: 'Shadow IT Discovery',
+        rationale: 'Report of unauthorized software usage in department',
+        priority: 'Medium',
+      },
+      {
+        type: 'NewTechnologyProposal',
+        title: 'Kubernetes Adoption',
+        rationale: 'Proposal to migrate container orchestration to Kubernetes',
+        priority: 'High',
+      },
+      {
+        type: 'ArchitectureReview',
         title: 'Overdue Security Review',
         rationale: 'Security review that is now overdue',
         priority: 'High',

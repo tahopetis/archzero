@@ -757,8 +757,8 @@ test.describe('ARB Templates and Reuse', () => {
     await saveTemplateBtn.click();
 
     // Fill in template name and save
-    await page.locator('[data-testid="template-name-input"]').fill('New Application Template');
-    await page.locator('button:has-text("Save"), button:has-text("Confirm")').first().click();
+    await page.locator('[data-testid="template-name"]').fill('New Application Template');
+    await page.locator('button:has-text("Save")').click();
 
     await expect(page.locator('[data-testid="success-message"]:has-text("Template saved")')).toBeVisible({ timeout: 5000 });
   });
