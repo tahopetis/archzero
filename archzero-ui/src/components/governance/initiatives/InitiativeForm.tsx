@@ -84,7 +84,7 @@ export function InitiativeForm({ initiative, onSuccess, onCancel }: InitiativeFo
             className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
             placeholder="e.g., Cloud Migration Program"
             required
-            data-testid="initiative-name-input"
+            data-testid="initiative-name"
           />
         </div>
 
@@ -98,7 +98,7 @@ export function InitiativeForm({ initiative, onSuccess, onCancel }: InitiativeFo
             rows={3}
             className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
             placeholder="Describe the initiative goals..."
-            data-testid="initiative-description-input"
+            data-testid="initiative-description"
           />
         </div>
 
@@ -112,7 +112,7 @@ export function InitiativeForm({ initiative, onSuccess, onCancel }: InitiativeFo
               onChange={(e) => setInitiativeType(e.target.value as InitiativeType)}
               className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
               required
-              data-testid="initiative-type-select"
+              data-testid="initiative-type"
             >
               {Object.values(InitiativeType).map((t) => (
                 <option key={t} value={t}>{t}</option>
@@ -166,7 +166,7 @@ export function InitiativeForm({ initiative, onSuccess, onCancel }: InitiativeFo
               onChange={(e) => setBudget(e.target.value)}
               className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
               placeholder="100000"
-              data-testid="initiative-budget-input"
+              data-testid="initiative-budget"
             />
           </div>
 
@@ -179,7 +179,7 @@ export function InitiativeForm({ initiative, onSuccess, onCancel }: InitiativeFo
               value={startDate}
               onChange={(e) => setStartDate(e.target.value)}
               className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-              data-testid="initiative-startDate-input"
+              data-testid="initiative-start-date"
             />
           </div>
 
@@ -192,7 +192,7 @@ export function InitiativeForm({ initiative, onSuccess, onCancel }: InitiativeFo
               value={endDate}
               onChange={(e) => setEndDate(e.target.value)}
               className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-              data-testid="initiative-endDate-input"
+              data-testid="initiative-end-date"
             />
           </div>
         </div>
@@ -234,7 +234,7 @@ export function InitiativeForm({ initiative, onSuccess, onCancel }: InitiativeFo
             type="submit"
             disabled={createMutation.isPending || updateMutation.isPending}
             className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors font-medium disabled:opacity-50"
-            data-testid="initiative-save-button"
+            data-testid="save-initiative-btn"
           >
             {createMutation.isPending || updateMutation.isPending
               ? 'Saving...'

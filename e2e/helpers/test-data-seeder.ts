@@ -27,6 +27,7 @@ export class TestDataSeeder {
       // Seed in the correct order
       await this.seedCards();
       await this.seedRelationships();
+      await this.seedInitiatives();
       const meetingIds = await this.seedARBMeetings();
       await this.seedARBSubmissions(meetingIds);
 
@@ -199,6 +200,45 @@ export class TestDataSeeder {
     }
 
     console.log(`✅ Created ${createdCount} relationships, ${skippedCount} already existed`);
+  }
+
+  /**
+   * Seed initiatives for strategic planning tests
+   */
+  async seedInitiatives() {
+    console.log('🎯 Seeding initiatives...');
+
+    // Get test initiatives from TestDataFactory
+    const initiatives = TestDataFactory.createTestInitiatives();
+
+    let createdCount = 0;
+    let skippedCount = 0;
+
+    for (const initiative of initiatives) {
+      try {
+        const response = await this.request.post(`${this.baseURL}/api/v1/governance/initiatives`, {
+          headers: {
+            'Authorization': `Bearer ${this.authToken}`,
+          },
+          data: initiative,
+        });
+
+        if (response.ok()) {
+          createdCount++;
+          console.log(`  ✅ Created initiative: ${initiative.name}`);
+        } else if (response.status() === 409) {
+          skippedCount++;
+          console.log(`  ⏭️  Skipped existing initiative: ${initiative.name}`);
+        } else {
+          const errorText = await response.text();
+          console.warn(`⚠️  Failed to create initiative ${initiative.name}: ${response.status()} - ${errorText}`);
+        }
+      } catch (error) {
+        console.warn(`⚠️  Error creating initiative ${initiative.name}:`, error);
+      }
+    }
+
+    console.log(`✅ Created ${createdCount} initiatives, ${skippedCount} already existed`);
   }
 
   /**
@@ -855,6 +895,102 @@ class TestDataFactory {
         rationale: 'Temporary exception to security protocols for emergency fix deployment',
         priority: 'Critical',
         meetingId: 'ASSIGN_TO_SECOND_MEETING',
+      },
+    ];
+  }
+
+  /**
+   * Create test initiatives for strategic planning E2E tests
+   */
+  static createTestInitiatives() {
+    return [
+      {
+        name: 'Cloud Migration Initiative',
+        description: 'Migrate all on-premise systems to cloud infrastructure',
+        initiativeType: 'Modernization',
+        status: 'InProgress',
+        health: 'OnTrack',
+        budget: 1000000,
+        startDate: '2026-01-01',
+        endDate: '2026-12-31',
+        progress: 45,
+      },
+      {
+        name: 'Digital Transformation Program',
+        description: 'Comprehensive digital transformation across all business units',
+        initiativeType: 'Strategic',
+        status: 'InProgress',
+        health: 'AtRisk',
+        budget: 2500000,
+        startDate: '2025-06-01',
+        endDate: '2027-12-31',
+        progress: 30,
+      },
+      {
+        name: 'Customer Experience Enhancement',
+        description: 'Improve customer experience through better UX and personalization',
+        initiativeType: 'Customer',
+        status: 'Proposed',
+        health: 'OnTrack',
+        budget: 500000,
+        startDate: '2026-03-01',
+        endDate: '2026-09-30',
+        progress: 0,
+      },
+      {
+        name: 'Legacy System Modernization',
+        description: 'Modernize legacy systems for better performance and maintainability',
+        initiativeType: 'Modernization',
+        status: 'Approved',
+        health: 'Critical',
+        budget: 1500000,
+        startDate: '2026-02-01',
+        endDate: '2027-06-30',
+        progress: 15,
+      },
+      {
+        name: 'Data Analytics Platform',
+        description: 'Build comprehensive data analytics and reporting platform',
+        initiativeType: 'Strategic',
+        status: 'InProgress',
+        health: 'OnTrack',
+        budget: 800000,
+        startDate: '2025-09-01',
+        endDate: '2026-08-31',
+        progress: 60,
+      },
+      {
+        name: 'Security Enhancement Program',
+        description: 'Enhance security posture across all systems and processes',
+        initiativeType: 'Compliance',
+        status: 'InProgress',
+        health: 'OnTrack',
+        budget: 600000,
+        startDate: '2026-01-01',
+        endDate: '2026-06-30',
+        progress: 75,
+      },
+      {
+        name: 'API Gateway Implementation',
+        description: 'Implement centralized API gateway for all services',
+        initiativeType: 'Infrastructure',
+        status: 'OnHold',
+        health: 'AtRisk',
+        budget: 400000,
+        startDate: '2026-04-01',
+        endDate: '2026-10-31',
+        progress: 20,
+      },
+      {
+        name: 'Mobile Application Development',
+        description: 'Develop native mobile applications for iOS and Android',
+        initiativeType: 'Customer',
+        status: 'Proposed',
+        health: 'OnTrack',
+        budget: 900000,
+        startDate: '2026-05-01',
+        endDate: '2026-12-31',
+        progress: 0,
       },
     ];
   }

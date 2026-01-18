@@ -4,7 +4,7 @@
 
 import { useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { InitiativeDashboard, type Initiative } from '@/components/governance/initiatives';
+import { InitiativeDashboard, InitiativeDetail, type Initiative } from '@/components/governance/initiatives';
 import { InitiativeForm } from '@/components/governance/initiatives/InitiativeForm';
 
 type ViewMode = 'dashboard' | 'kanban';
@@ -19,16 +19,7 @@ export function InitiativesPage() {
     return (
       <div className="min-h-screen bg-slate-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          {/* InitiativeDetail with ImpactMap */}
-          <div className="space-y-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <h1 className="text-2xl font-bold text-slate-900">Initiative Details</h1>
-                <p className="text-slate-600">View initiative details and impact map</p>
-              </div>
-            </div>
-            {/* Detail view would go here */}
-          </div>
+          <InitiativeDetail initiativeId={id} />
         </div>
       </div>
     );
@@ -45,8 +36,9 @@ export function InitiativesPage() {
           <button
             onClick={() => setIsFormOpen(true)}
             className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors font-medium"
+            data-testid="add-initiative-btn"
           >
-            New Initiative
+            Add Initiative
           </button>
         </div>
 
@@ -74,6 +66,34 @@ export function InitiativesPage() {
               Kanban Board
             </button>
           </nav>
+        </div>
+
+        {/* Filters */}
+        <div className="mb-6 flex gap-4">
+          <select
+            className="px-3 py-2 border border-slate-300 rounded-lg bg-white text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+            data-testid="initiative-type-filter"
+          >
+            <option value="">All Types</option>
+            <option value="Strategic">Strategic</option>
+            <option value="Modernization">Modernization</option>
+            <option value="Customer">Customer</option>
+            <option value="Infrastructure">Infrastructure</option>
+            <option value="Compliance">Compliance</option>
+          </select>
+
+          <select
+            className="px-3 py-2 border border-slate-300 rounded-lg bg-white text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+            data-testid="initiative-status-filter"
+          >
+            <option value="">All Statuses</option>
+            <option value="Proposed">Proposed</option>
+            <option value="Approved">Approved</option>
+            <option value="InProgress">In Progress</option>
+            <option value="OnHold">On Hold</option>
+            <option value="Completed">Completed</option>
+            <option value="Cancelled">Cancelled</option>
+          </select>
         </div>
 
         {isFormOpen && (

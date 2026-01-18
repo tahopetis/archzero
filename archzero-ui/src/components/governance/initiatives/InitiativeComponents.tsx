@@ -17,7 +17,8 @@ import {
   DollarSign,
   Calendar,
   Users,
-  ArrowRight
+  ArrowRight,
+  User
 } from 'lucide-react';
 import {
   InitiativeStatus,
@@ -26,7 +27,7 @@ import {
   type Initiative,
   type InitiativeImpactMap
 } from '@/types/governance';
-import { useInitiatives, useInitiativeImpactMap } from '@/lib/governance-hooks';
+import { useInitiatives, useInitiative, useInitiativeImpactMap } from '@/lib/governance-hooks';
 import {
   Card,
   StatusBadge,
@@ -66,7 +67,7 @@ export function InitiativeCard({ initiative, onEdit, onDelete }: InitiativeCardP
   };
 
   return (
-    <Card variant="bordered" className="group hover:shadow-lg transition-all" data-testid={`initiative-item-${initiative.id}`}>
+    <Card variant="bordered" className="group hover:shadow-lg transition-all" data-testid="initiative-item">
       <div className="flex items-start justify-between mb-3">
         <div className="flex-1">
           <div className="flex items-center gap-2 mb-2 flex-wrap">
@@ -430,6 +431,167 @@ export function InitiativeDashboard() {
         <h2 className="text-lg font-bold text-slate-900 mb-4">All Initiatives</h2>
         <InitiativesList />
       </Card>
+    </div>
+  );
+}
+
+// ============================================================================
+// INITIATIVE DETAIL
+// ============================================================================
+
+interface InitiativeDetailProps {
+  initiativeId: string;
+}
+
+export function InitiativeDetail({ initiativeId }: InitiativeDetailProps) {
+  const { data: initiative, isLoading } = useInitiative(initiativeId);
+
+  if (isLoading) {
+    return <div className="animate-pulse bg-slate-100 h-96 rounded-xl" />;
+  }
+
+  if (!initiative) {
+    return (
+      <div className="text-center py-12">
+        <p className="text-slate-500">Initiative not found</p>
+      </div>
+    );
+  }
+
+  // Calculate budget breakdown
+  const allocated = initiative.budget || 0;
+  const spent = initiative.progress ? (allocated * initiative.progress) / 100 : 0;
+  const remaining = allocated - spent;
+
+  return (
+    <div className="space-y-6" data-testid="initiative-detail">
+      {/* Header */}
+      <Card className="p-6">
+        <div className="flex items-start justify-between mb-4">
+          <div>
+            <h1 className="text-3xl font-bold text-slate-900 mb-2">{initiative.name}</h1>
+            {initiative.description && (
+              <p className="text-slate-600">{initiative.description}</p>
+            )}
+          </div>
+          <div className="flex gap-2">
+            <StatusBadge variant={initiative.status === 'InProgress' ? 'inProgress' : 'proposed' as any}>
+              {initiative.status}
+            </StatusBadge>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <MetadataItem
+            label="Type"
+            value={initiative.initiativeType}
+            icon={Target}
+          />
+          {initiative.startDate && (
+            <MetadataItem
+              label="Start Date"
+              value={new Date(initiative.startDate).toLocaleDateString()}
+              icon={Calendar}
+            />
+          )}
+          {initiative.endDate && (
+            <MetadataItem
+              label="End Date"
+              value={new Date(initiative.endDate).toLocaleDateString()}
+              icon={Calendar}
+            />
+          )}
+          {initiative.ownerId && (
+            <MetadataItem
+              label="Owner"
+              value={initiative.ownerId}
+              icon={User}
+            />
+          )}
+        </div>
+      </Card>
+
+      {/* Budget Tracking */}
+      <Card className="p-6" data-testid="initiative-budget">
+        <h2 className="text-xl font-bold text-slate-900 mb-4">Budget Tracking</h2>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="text-center p-4 bg-slate-50 rounded-lg">
+            <p className="text-sm font-semibold text-slate-500 uppercase tracking-wide mb-2">Allocated</p>
+            <p className="text-2xl font-bold text-slate-900" data-testid="budget-allocated">
+              ${allocated.toLocaleString()}
+            </p>
+          </div>
+          <div className="text-center p-4 bg-blue-50 rounded-lg">
+            <p className="text-sm font-semibold text-blue-600 uppercase tracking-wide mb-2">Spent</p>
+            <p className="text-2xl font-bold text-blue-700" data-testid="budget-spent">
+              ${spent.toLocaleString()}
+            </p>
+          </div>
+          <div className="text-center p-4 bg-emerald-50 rounded-lg">
+            <p className="text-sm font-semibold text-emerald-600 uppercase tracking-wide mb-2">Remaining</p>
+            <p className="text-2xl font-bold text-emerald-700" data-testid="budget-remaining">
+              ${remaining.toLocaleString()}
+            </p>
+          </div>
+        </div>
+      </Card>
+
+      {/* Health Status */}
+      <Card className="p-6">
+        <h2 className="text-xl font-bold text-slate-900 mb-4">Health Status</h2>
+        <div className="flex items-center justify-between">
+          <div>
+            <p className="text-sm font-semibold text-slate-500 uppercase tracking-wide mb-1">Current Status</p>
+            <select
+              value={initiative.health}
+              disabled
+              className="text-lg font-semibold px-3 py-2 border border-slate-300 rounded-lg bg-slate-50"
+              data-testid="initiative-health"
+            >
+              <option value="OnTrack">On Track</option>
+              <option value="AtRisk">At Risk</option>
+              <option value="Critical">Critical</option>
+            </select>
+          </div>
+          <div className={cn(
+            'px-4 py-2 rounded-lg font-semibold border',
+            initiative.health === 'OnTrack' && 'bg-emerald-100 text-emerald-800 border-emerald-200',
+            initiative.health === 'AtRisk' && 'bg-amber-100 text-amber-800 border-amber-200',
+            initiative.health === 'Critical' && 'bg-rose-100 text-rose-800 border-rose-200'
+          )}>
+            {initiative.health === 'OnTrack' && '✓ On Track'}
+            {initiative.health === 'AtRisk' && '⚠ At Risk'}
+            {initiative.health === 'Critical' && '✗ Critical'}
+          </div>
+        </div>
+      </Card>
+
+      {/* Progress */}
+      {initiative.progress !== undefined && (
+        <Card className="p-6">
+          <h2 className="text-xl font-bold text-slate-900 mb-4">Progress</h2>
+          <div>
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-sm font-semibold text-slate-500">Completion</span>
+              <span className="text-2xl font-bold text-slate-900">{initiative.progress}%</span>
+            </div>
+            <div className="h-4 bg-slate-100 rounded-full overflow-hidden">
+              <div
+                className={cn(
+                  'h-full rounded-full transition-all duration-500',
+                  initiative.progress >= 80 ? 'bg-emerald-500' :
+                  initiative.progress >= 50 ? 'bg-blue-500' :
+                  'bg-amber-500'
+                )}
+                style={{ width: `${initiative.progress}%` }}
+              />
+            </div>
+          </div>
+        </Card>
+      )}
+
+      {/* Impact Map */}
+      <ImpactMap initiativeId={initiative.id} />
     </div>
   );
 }
