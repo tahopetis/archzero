@@ -9,7 +9,6 @@
 |----|------|---|-------|------|
 | #2477 | 5:27 PM | 🟣 | E2E test implementation completed with 1,395 tests across 3 browsers | ~446 |
 | #2312 | 3:25 PM | 🔵 | E2E test constants and configuration documented | ~329 |
-| #1953 | 9:24 AM | 🟣 | Complete E2E Testing Infrastructure Implemented | ~405 |
 
 ### Jan 15, 2026
 
@@ -71,6 +70,7 @@
 
 | ID | Time | T | Title | Read |
 |----|------|---|-------|------|
+| #3746 | 9:05 AM | 🔵 | ARB Submission Seeding Process Analysis | ~321 |
 | #3742 | 8:37 AM | 🟣 | Expanded ARB test data with 7 additional realistic submissions | ~365 |
 | #3734 | 8:21 AM | 🟣 | Added Additional Overdue ARB Submissions to Test Data | ~306 |
 | #3733 | " | 🔵 | Test data seeder creates comprehensive ARB submission test data | ~255 |
