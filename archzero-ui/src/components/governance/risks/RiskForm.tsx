@@ -18,6 +18,7 @@ export function RiskForm({ risk, onSuccess, onCancel }: RiskFormProps) {
   const updateMutation = useUpdateRisk();
 
   const [name, setName] = useState(risk?.name || '');
+  const [description, setDescription] = useState(risk?.description || '');
   const [riskType, setRiskType] = useState<RiskType>(risk?.riskType || RiskType.Operational);
   const [likelihood, setLikelihood] = useState(risk?.likelihood?.toString() || '3');
   const [impact, setImpact] = useState(risk?.impact?.toString() || '3');
@@ -33,6 +34,7 @@ export function RiskForm({ risk, onSuccess, onCancel }: RiskFormProps) {
 
     const data = {
       name,
+      description,
       riskType,
       likelihood: parseInt(likelihood),
       impact: parseInt(impact),
@@ -47,6 +49,7 @@ export function RiskForm({ risk, onSuccess, onCancel }: RiskFormProps) {
         id: risk.id,
         data: {
           name,
+          description,
           riskType,
           likelihood: parseInt(likelihood),
           impact: parseInt(impact),
@@ -82,6 +85,20 @@ export function RiskForm({ risk, onSuccess, onCancel }: RiskFormProps) {
             placeholder="e.g., Database Single Point of Failure"
             required
             data-testid="risk-title"
+          />
+        </div>
+
+        <div>
+          <label className="block text-sm font-semibold text-slate-700 mb-1">
+            Description
+          </label>
+          <textarea
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
+            rows={3}
+            className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+            placeholder="Describe the risk in detail..."
+            data-testid="risk-description"
           />
         </div>
 

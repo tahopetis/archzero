@@ -525,6 +525,7 @@ export enum RiskStatus {
 export interface Risk {
   id: string;
   name: string;
+  description?: string;
   riskType: RiskType;
   likelihood: number; // 1-5
   impact: number; // 1-5
@@ -540,6 +541,7 @@ export interface Risk {
 
 export interface CreateRiskRequest {
   name: string;
+  description?: string;
   riskType: RiskType;
   likelihood: number;
   impact: number;
@@ -551,6 +553,7 @@ export interface CreateRiskRequest {
 
 export interface UpdateRiskRequest {
   name?: string;
+  description?: string;
   riskType?: RiskType;
   likelihood?: number;
   impact?: number;
