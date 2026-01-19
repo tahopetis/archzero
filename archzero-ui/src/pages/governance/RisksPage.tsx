@@ -14,7 +14,7 @@ export function RisksPage() {
   const [isFormOpen, setIsFormOpen] = useState(false);
 
   return (
-    <div className="min-h-screen bg-slate-50">
+    <div className="min-h-screen bg-slate-50" data-testid="risk-register">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="flex items-center justify-between mb-6">
           <div>
@@ -24,6 +24,7 @@ export function RisksPage() {
           <button
             onClick={() => setIsFormOpen(true)}
             className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors font-medium"
+            data-testid="add-risk-btn"
           >
             New Risk
           </button>

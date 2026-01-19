@@ -219,7 +219,7 @@ export function RiskHeatMap({ onSelectRisks }: { onSelectRisks?: (risks: Risk[])
   const { data: heatMapData, isLoading } = useRiskHeatMap();
 
   if (isLoading) {
-    return <div className="animate-pulse bg-slate-100 h-96 rounded-xl" />;
+    return <div className="animate-pulse bg-slate-100 h-96 rounded-xl" data-testid="risk-heatmap" />;
   }
 
   if (!heatMapData) {
@@ -245,7 +245,7 @@ export function RiskHeatMap({ onSelectRisks }: { onSelectRisks?: (risks: Risk[])
   }
 
   return (
-    <Card className="p-6">
+    <Card className="p-6" data-testid="risk-heatmap">
       <div className="flex items-center justify-between mb-6">
         <div>
           <h2 className="text-xl font-bold text-slate-900">Risk Heat Map</h2>
@@ -318,12 +318,12 @@ export function TopRisks() {
   const { data: topRisks, isLoading } = useTopRisks();
 
   if (isLoading) {
-    return <div className="animate-pulse bg-slate-100 h-64 rounded-xl" />;
+    return <div className="animate-pulse bg-slate-100 h-64 rounded-xl" data-testid="top-risks" />;
   }
 
   if (!topRisks || topRisks.risks.length === 0) {
     return (
-      <Card className="p-6">
+      <Card className="p-6" data-testid="top-risks">
         <div className="text-center py-8">
           <Shield className="w-12 h-12 text-slate-300 mx-auto mb-2" />
           <p className="text-slate-500">No risks found</p>
@@ -333,7 +333,7 @@ export function TopRisks() {
   }
 
   return (
-    <Card className="p-6">
+    <Card className="p-6" data-testid="top-risks">
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-2">
           <AlertTriangle className="w-5 h-5 text-rose-600" />
@@ -347,12 +347,13 @@ export function TopRisks() {
         </Link>
       </div>
 
-      <div className="space-y-3">
+      <div className="space-y-3" data-testid="top-risks-container">
         {topRisks.risks.map((risk, idx) => (
           <Link
             key={risk.id}
             to={`/governance/risks/${risk.id}`}
             className="block p-3 bg-slate-50 rounded-lg hover:bg-slate-100 transition-colors"
+            data-testid="risk-item"
           >
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
@@ -385,7 +386,7 @@ export function TopRisks() {
 
 export function RiskDashboard() {
   return (
-    <div className="space-y-6">
+    <div className="space-y-6" data-testid="risk-dashboard">
       <div>
         <h1 className="text-2xl font-bold text-slate-900 mb-2">Risk Management</h1>
         <p className="text-slate-600">Monitor and mitigate technical and operational risks</p>
