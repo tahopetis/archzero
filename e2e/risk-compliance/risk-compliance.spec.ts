@@ -183,7 +183,7 @@ test.describe('Compliance Framework', () => {
   test('should display compliance dashboard', async ({ page }) => {
     await page.goto('/governance/compliance');
 
-    await expect(page.locator('[data-testid="compliance-dashboard"], h1:has-text("Compliance")')).toBeVisible({ timeout: 10000 });
+    await expect(page.locator('[data-testid="compliance-dashboard"]')).toBeVisible({ timeout: 10000 });
   });
 
   test('should setup compliance framework', async ({ page }) => {
