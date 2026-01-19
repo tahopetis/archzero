@@ -31,6 +31,7 @@ export class TestDataSeeder {
       const meetingIds = await this.seedARBMeetings();
       await this.seedARBSubmissions(meetingIds);
       await this.seedRisksAndCompliance();
+      await this.seedAudits();
 
       console.log('✅ Test data seeding complete');
     } catch (error) {
@@ -409,6 +410,50 @@ export class TestDataSeeder {
       console.log(`✅ Created ${createdRequirements} compliance requirements, ${skippedRequirements} already existed`);
     } catch (error) {
       console.error('❌ Failed to seed risk and compliance data:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Seed audit records
+   */
+  async seedAudits() {
+    console.log('📅 Seeding audit records...');
+
+    try {
+      const audits = TestDataFactory.createSampleAudits();
+      let createdAudits = 0;
+      let skippedAudits = 0;
+
+      for (const audit of audits) {
+        try {
+          const response = await this.request.post(`${this.baseURL}/api/v1/compliance-audits`, {
+            headers: {
+              'Authorization': `Bearer ${this.authToken}`,
+            },
+            data: audit,
+          });
+
+          if (response.ok()) {
+            createdAudits++;
+            console.log(`  ✅ Created audit: ${audit.title}`);
+          } else if (response.status() === 409) {
+            skippedAudits++;
+            console.log(`  ⏭️  Skipped existing audit: ${audit.title}`);
+          } else {
+            // Endpoint might not exist yet, log warning but don't fail
+            const errorText = await response.text();
+            console.warn(`⚠️  Could not create audit ${audit.title}: ${response.status()} - ${errorText}`);
+            // Continue with next audit
+          }
+        } catch (error) {
+          console.warn(`⚠️  Error creating audit ${audit.title}:`, error);
+        }
+      }
+
+      console.log(`✅ Created ${createdAudits} audits, ${skippedAudits} already existed`);
+    } catch (error) {
+      console.error('❌ Failed to seed audit data:', error);
       throw error;
     }
   }
@@ -1211,7 +1256,7 @@ class TestDataFactory {
     return [
       {
         name: 'GDPR Article 32 - Data Security',
-        framework: 'gDPR',
+        framework: 'GDPR',
         description: 'Technical and organizational measures to ensure data security',
         applicableCardTypes: ['Application', 'Database', 'API'],
         requiredControls: [
@@ -1225,7 +1270,7 @@ class TestDataFactory {
       },
       {
         name: 'GDPR Article 25 - Data Protection by Design',
-        framework: 'gDPR',
+        framework: 'GDPR',
         description: 'Data protection measures must be implemented into the development of business processes',
         applicableCardTypes: ['Application', 'Database'],
         requiredControls: [
@@ -1238,7 +1283,7 @@ class TestDataFactory {
       },
       {
         name: 'SOX Section 404 - Internal Controls',
-        framework: 'sOX',
+        framework: 'SOX',
         description: 'Internal control over financial reporting requirements',
         applicableCardTypes: ['Application', 'Database', 'Infrastructure'],
         requiredControls: [
@@ -1252,7 +1297,7 @@ class TestDataFactory {
       },
       {
         name: 'HIPAA Security Rule',
-        framework: 'hIPAA',
+        framework: 'HIPAA',
         description: 'Protected health information (PHI) security requirements',
         applicableCardTypes: ['Application', 'Database', 'API'],
         requiredControls: [
@@ -1266,7 +1311,7 @@ class TestDataFactory {
       },
       {
         name: 'ISO 27001 A.9 Access Control',
-        framework: 'ISO27001',
+        framework: 'ISO 27001',
         description: 'Information access control policy and procedures',
         applicableCardTypes: ['Application', 'Database', 'API', 'Infrastructure'],
         requiredControls: [
@@ -1280,7 +1325,7 @@ class TestDataFactory {
       },
       {
         name: 'ISO 27001 A.12 Operations Security',
-        framework: 'ISO27001',
+        framework: 'ISO 27001',
         description: 'Procedures and responsibilities to ensure correct and secure operations',
         applicableCardTypes: ['Application', 'Infrastructure', 'Database'],
         requiredControls: [
@@ -1294,7 +1339,7 @@ class TestDataFactory {
       },
       {
         name: 'PCI DSS Requirement 8',
-        framework: 'PCI-DSS',
+        framework: 'PCI DSS',
         description: 'Identify and authenticate access to system components',
         applicableCardTypes: ['Application', 'Database', 'API'],
         requiredControls: [
@@ -1305,6 +1350,57 @@ class TestDataFactory {
           'Account lockout mechanisms'
         ],
         auditFrequency: 'Quarterly',
+      },
+    ];
+  }
+
+  /**
+   * Create sample audit records
+   */
+  static createSampleAudits() {
+    // Get dates for upcoming audits
+    const now = new Date();
+    const nextMonth = new Date(now);
+    nextMonth.setDate(now.getDate() + 30);
+
+    const twoMonths = new Date(now);
+    twoMonths.setDate(now.getDate() + 60);
+
+    const threeMonths = new Date(now);
+    threeMonths.setDate(now.getDate() + 90);
+
+    return [
+      {
+        title: 'Q2 2026 GDPR Compliance Audit',
+        date: nextMonth.toISOString().split('T')[0],
+        framework: 'GDPR',
+        auditor: 'External Audit Firm LLC',
+        status: 'scheduled',
+        notes: 'Annual GDPR compliance assessment',
+      },
+      {
+        title: 'ISO 27001 Surveillance Audit',
+        date: twoMonths.toISOString().split('T')[0],
+        framework: 'ISO 27001',
+        auditor: 'Certification Body Inc',
+        status: 'scheduled',
+        notes: 'Surveillance audit for ISO 27001 certification',
+      },
+      {
+        title: 'SOX Compliance Review Q1 2026',
+        date: threeMonths.toISOString().split('T')[0],
+        framework: 'SOX',
+        auditor: 'Internal Audit Team',
+        status: 'scheduled',
+        notes: 'Quarterly SOX internal control review',
+      },
+      {
+        title: 'HIPAA Security Assessment 2026',
+        date: nextMonth.toISOString().split('T')[0],
+        framework: 'HIPAA',
+        auditor: 'Healthcare Compliance Solutions',
+        status: 'scheduled',
+        notes: 'Annual HIPAA security rule assessment',
       },
     ];
   }
