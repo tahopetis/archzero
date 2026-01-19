@@ -3,6 +3,7 @@
  */
 
 import { useState } from 'react';
+import { Download } from 'lucide-react';
 import { RiskDashboard, RiskHeatMap, RisksList, type Risk } from '@/components/governance/risks';
 import { RiskForm } from '@/components/governance/risks/RiskForm';
 import { RiskType, RiskStatus } from '@/types/governance';
@@ -18,6 +19,18 @@ export function RisksPage() {
   const [selectedRiskType, setSelectedRiskType] = useState<string>('all');
   const [selectedStatus, setSelectedStatus] = useState<string>('all');
 
+  const handleExport = async (format: 'csv' | 'pdf' | 'xlsx') => {
+    // Implement export functionality
+    console.log(`Exporting risk register as ${format}`);
+    // TODO: Call backend API to generate export
+    // Example:
+    // const response = await fetch(`/api/v1/risks/export?format=${format}`, {
+    //   method: 'GET',
+    //   headers: { 'Authorization': `Bearer ${token}` }
+    // });
+    // Handle download...
+  };
+
   return (
     <div className="min-h-screen bg-slate-50" data-testid="risk-register">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -26,13 +39,23 @@ export function RisksPage() {
             <h1 className="text-3xl font-bold text-slate-900">Risk Management</h1>
             <p className="text-slate-600 mt-1">Monitor and mitigate technical and operational risks</p>
           </div>
-          <button
-            onClick={() => setIsFormOpen(true)}
-            className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors font-medium"
-            data-testid="add-risk-btn"
-          >
-            Add Risk
-          </button>
+          <div className="flex items-center gap-3">
+            <button
+              onClick={() => handleExport('csv')}
+              className="flex items-center gap-2 px-4 py-2 bg-teal-600 text-white rounded-lg hover:bg-teal-700 transition-colors font-medium"
+              data-testid="export-risks-btn"
+            >
+              <Download className="w-4 h-4" />
+              Export
+            </button>
+            <button
+              onClick={() => setIsFormOpen(true)}
+              className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors font-medium"
+              data-testid="add-risk-btn"
+            >
+              Add Risk
+            </button>
+          </div>
         </div>
 
         {/* Risk Type and Status Filters */}

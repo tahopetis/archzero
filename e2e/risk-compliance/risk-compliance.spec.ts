@@ -2,17 +2,6 @@ import { test, expect } from '@playwright/test';
 import { LoginPage } from '../pages/index';
 import { API_URL } from '../helpers/index';
 
-// Authenticate via API before all tests
-test.beforeAll(async ({ request }) => {
-  try {
-    await request.post(`${API_URL}/api/v1/auth/login`, {
-      data: { email: 'admin@archzero.local', password: 'changeme123' }
-    });
-  } catch (error) {
-    console.warn('Auth setup failed:', error);
-  }
-});
-
 test.describe('Risk Register', () => {
   let loginPage: LoginPage;
 
