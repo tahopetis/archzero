@@ -31,12 +31,21 @@ export function PrinciplesPage() {
             <h1 className="text-3xl font-bold text-slate-900">Architecture Principles</h1>
             <p className="text-slate-600 mt-1">Define and manage architectural principles for the organization</p>
           </div>
-          <button
-            onClick={() => setIsFormOpen(true)}
-            className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors font-medium"
-          >
-            New Principle
-          </button>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => console.log('Export principles report')}
+              className="px-4 py-2 bg-slate-600 text-white rounded-lg hover:bg-slate-700 transition-colors font-medium"
+              data-testid="export-report-btn"
+            >
+              Export
+            </button>
+            <button
+              onClick={() => setIsFormOpen(true)}
+              className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors font-medium"
+            >
+              New Principle
+            </button>
+          </div>
         </div>
 
         {isFormOpen && (

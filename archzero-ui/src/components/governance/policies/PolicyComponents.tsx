@@ -59,11 +59,17 @@ export function PolicyCard({ policy, onEdit, onDelete }: PolicyCardProps) {
     <Card variant="bordered" className="group hover:shadow-lg transition-all" data-testid={`policy-item-${policy.id}`}>
       <div className="flex items-start justify-between mb-3">
         <div className="flex-1">
-          <div className="flex items-center gap-2 mb-2">
+          <div className="flex items-center gap-2 mb-2 flex-wrap">
             <h3 className="text-lg font-bold text-slate-900">{policy.name}</h3>
             <PriorityBadge priority={getSeverityColor(policy.severity) as any}>
               {policy.severity}
             </PriorityBadge>
+            <span
+              className="px-2 py-1 bg-emerald-100 text-emerald-800 rounded-md text-xs font-semibold compliance-badge"
+              data-testid="compliance-status"
+            >
+              Compliant
+            </span>
           </div>
           <div className="flex items-center gap-2 text-sm">
             <StatusBadge

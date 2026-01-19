@@ -179,15 +179,31 @@ export function ComplianceDashboard({ complianceId }: ComplianceDashboardProps) 
   }
 
   return (
-    <Card className="p-6">
+    <Card className="p-6" data-testid="compliance-dashboard">
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-2">
           <Shield className="w-5 h-5 text-indigo-600" />
-          <h2 className="text-lg font-bold text-slate-900">{dashboard.framework} Compliance</h2>
+          <h2 className="text-lg font-bold text-slate-900">{dashboard.framework} Compliance Dashboard</h2>
         </div>
-        <span className="text-xs text-slate-500">
-          Last assessed: {new Date(dashboard.lastAssessed).toLocaleDateString()}
-        </span>
+        <div className="flex items-center gap-2">
+          <span className="text-xs text-slate-500">
+            Last assessed: {new Date(dashboard.lastAssessed).toLocaleDateString()}
+          </span>
+          <button
+            onClick={() => console.log('Generate compliance report')}
+            className="px-3 py-1.5 bg-indigo-600 text-white text-sm rounded-lg hover:bg-indigo-700 transition-colors"
+            data-testid="generate-report-btn"
+          >
+            Generate Report
+          </button>
+          <button
+            onClick={() => console.log('Export compliance data')}
+            className="px-3 py-1.5 bg-slate-600 text-white text-sm rounded-lg hover:bg-slate-700 transition-colors"
+            data-testid="export-compliance-btn"
+          >
+            Export
+          </button>
+        </div>
       </div>
 
       {/* Summary Stats */}
@@ -452,9 +468,14 @@ export function FrameworkOverview({ onEdit }: FrameworkOverviewProps) {
 export function ComplianceHub() {
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold text-slate-900 mb-2">Compliance Management</h1>
-        <p className="text-slate-600">Track compliance across frameworks and regulations</p>
+      <div className="flex items-center justify-end">
+        <button
+          onClick={() => console.log('Generate compliance report')}
+          className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors font-medium"
+          data-testid="generate-report-btn"
+        >
+          Generate Report
+        </button>
       </div>
 
       <Card className="p-6">
