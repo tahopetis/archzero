@@ -52,19 +52,20 @@ impl ArbTemplateService {
         user_id: Uuid,
     ) -> Result<ARBTemplate, AppError> {
         // Get the submission to copy data from
-        let submission = sqlx::query!(
+        let submission: Option<(serde_json::Value, Option<String>)> = sqlx::query_as(
             "SELECT c.attributes, c.attributes->>'submissionType' as submission_type
              FROM cards c
-             WHERE c.id = $1",
-            req.submission_id
+             WHERE c.id = $1"
         )
+        .bind(req.submission_id)
         .fetch_optional(&self.pool)
         .await
-        .map_err(|e| AppError::Internal(anyhow::anyhow!("Database error: {}", e)))?
-        .ok_or_else(|| AppError::NotFound("Submission not found".to_string()))?;
+        .map_err(|e| AppError::Internal(anyhow::anyhow!("Database error: {}", e)))?;
 
-        let submission_type = submission.submission_type.unwrap_or("application".to_string());
-        let template_data = submission.attributes;
+        let (template_data, submission_type) = submission
+            .ok_or_else(|| AppError::NotFound("Submission not found".to_string()))?;
+
+        let submission_type = submission_type.unwrap_or("application".to_string());
 
         let template_id = Uuid::new_v4();
         let now = Utc::now();

@@ -13,6 +13,7 @@
 
 | ID | Time | T | Title | Read |
 |----|------|---|-------|------|
+| #3582 | 5:12 PM | 🟣 | Added ARBNotificationService to services module exports | ~98 |
 | #3443 | 2:39 PM | 🔴 | Fixed card type deserialization in ARB template service | ~117 |
 | #3440 | 2:37 PM | 🔴 | Changed sqlx::query! to sqlx::query for type casting flexibility | ~248 |
 | #3426 | 2:33 PM | 🔴 | Fixed card insertion to use owner_id instead of created_by | ~224 |
