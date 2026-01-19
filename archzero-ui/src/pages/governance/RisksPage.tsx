@@ -47,6 +47,9 @@ export function RisksPage() {
   const [viewMode, setViewMode] = useState<ViewMode>('dashboard');
   const [selectedRisk, setSelectedRisk] = useState<Risk | null>(null);
   const [isFormOpen, setIsFormOpen] = useState(false);
+  const [isApprovalModalOpen, setIsApprovalModalOpen] = useState(false);
+  const [isEscalationModalOpen, setIsEscalationModalOpen] = useState(false);
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
   // Filter states
   const [selectedRiskType, setSelectedRiskType] = useState<string>('all');
@@ -111,9 +114,72 @@ export function RisksPage() {
     setIsFormOpen(true);
   }, []);
 
+  const handleApprove = useCallback((risk: Risk) => {
+    setSelectedRisk(risk);
+    setIsApprovalModalOpen(true);
+  }, []);
+
+  const handleEscalate = useCallback((risk: Risk) => {
+    setSelectedRisk(risk);
+    setIsEscalationModalOpen(true);
+  }, []);
+
+  const handleApprovalSubmit = async (comments: string) => {
+    try {
+      if (!selectedRisk) return;
+
+      const token = localStorage.getItem('auth_token');
+      await fetch(`/api/v1/risks/${selectedRisk.id}/approve`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ comments }),
+      });
+
+      setSuccessMessage('Risk approved');
+      setTimeout(() => setSuccessMessage(null), 3000);
+      setIsApprovalModalOpen(false);
+      setSelectedRisk(null);
+    } catch (error) {
+      console.error('Approval failed:', error);
+    }
+  };
+
+  const handleEscalationSubmit = async (level: string, reason: string) => {
+    try {
+      if (!selectedRisk) return;
+
+      const token = localStorage.getItem('auth_token');
+      await fetch(`/api/v1/risks/${selectedRisk.id}/escalate`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ level, reason }),
+      });
+
+      setSuccessMessage('Risk escalated');
+      setTimeout(() => setSuccessMessage(null), 3000);
+      setIsEscalationModalOpen(false);
+      setSelectedRisk(null);
+    } catch (error) {
+      console.error('Escalation failed:', error);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-slate-50" data-testid="risk-register">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* Success Message */}
+        {successMessage && (
+          <div className="mb-4 p-4 bg-green-50 border border-green-200 rounded-lg">
+            <p className="text-green-800 font-medium">{successMessage}</p>
+          </div>
+        )}
+
         <RiskPageHeader onExport={handleExport} onAddRisk={handleAddRisk} />
 
         {/* Risk Type and Status Filters */}
@@ -223,7 +289,158 @@ export function RisksPage() {
                 console.log('Delete risk:', id);
                 // TODO: Implement delete
               }}
+              onApprove={handleApprove}
+              onEscalate={handleEscalate}
             />
+          </div>
+        )}
+
+        {/* Approval Modal */}
+        {isApprovalModalOpen && selectedRisk && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+            <div className="bg-white rounded-lg shadow-xl max-w-md w-full mx-4">
+              <div className="p-6">
+                <div className="flex items-center justify-between mb-4">
+                  <h2 className="text-2xl font-bold text-slate-900">Approve Risk</h2>
+                  <button
+                    onClick={() => setIsApprovalModalOpen(false)}
+                    className="text-slate-400 hover:text-slate-600"
+                  >
+                    ×
+                  </button>
+                </div>
+
+                <div className="mb-4">
+                  <p className="text-sm text-slate-600 mb-2">
+                    Risk: <span className="font-semibold text-slate-900">{selectedRisk.name}</span>
+                  </p>
+                  <p className="text-sm text-slate-600">
+                    Score: <span className="font-semibold text-slate-900">{selectedRisk.riskScore}</span>
+                  </p>
+                </div>
+
+                <form onSubmit={(e) => {
+                  e.preventDefault();
+                  const formData = new FormData(e.currentTarget);
+                  const comments = formData.get('comments') as string;
+                  handleApprovalSubmit(comments);
+                }}>
+                  <div className="mb-4">
+                    <label className="block text-sm font-medium text-slate-700 mb-1">
+                      Approval Comments
+                    </label>
+                    <textarea
+                      id="approval-comments"
+                      data-testid="approval-comments"
+                      className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                      rows={3}
+                      placeholder="Add comments about this risk approval..."
+                      required
+                    />
+                  </div>
+
+                  <div className="flex gap-3">
+                    <button
+                      type="submit"
+                      className="flex-1 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-medium"
+                    >
+                      Confirm Approval
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setIsApprovalModalOpen(false)}
+                      className="px-4 py-2 border border-slate-300 text-slate-700 rounded-lg hover:bg-slate-50 transition-colors font-medium"
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                </form>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Escalation Modal */}
+        {isEscalationModalOpen && selectedRisk && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+            <div className="bg-white rounded-lg shadow-xl max-w-md w-full mx-4">
+              <div className="p-6">
+                <div className="flex items-center justify-between mb-4">
+                  <h2 className="text-2xl font-bold text-slate-900">Escalate Risk</h2>
+                  <button
+                    onClick={() => setIsEscalationModalOpen(false)}
+                    className="text-slate-400 hover:text-slate-600"
+                  >
+                    ×
+                  </button>
+                </div>
+
+                <div className="mb-4">
+                  <p className="text-sm text-slate-600 mb-2">
+                    Risk: <span className="font-semibold text-slate-900">{selectedRisk.name}</span>
+                  </p>
+                  <p className="text-sm text-slate-600">
+                    Status: <span className="px-2 py-1 bg-red-100 text-red-800 rounded text-xs font-medium">Overdue</span>
+                  </p>
+                </div>
+
+                <form onSubmit={(e) => {
+                  e.preventDefault();
+                  const formData = new FormData(e.currentTarget);
+                  const level = formData.get('escalation-level') as string;
+                  const reason = formData.get('escalation-reason') as string;
+                  handleEscalationSubmit(level, reason);
+                }}>
+                  <div className="space-y-4 mb-4">
+                    <div>
+                      <label className="block text-sm font-medium text-slate-700 mb-1">
+                        Escalation Level
+                      </label>
+                      <select
+                        id="escalation-level"
+                        data-testid="escalation-level"
+                        className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                        required
+                      >
+                        <option value="">Select level</option>
+                        <option value="management">Management</option>
+                        <option value="executive">Executive</option>
+                        <option value="board">Board</option>
+                      </select>
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-slate-700 mb-1">
+                        Reason for Escalation
+                      </label>
+                      <textarea
+                        id="escalation-reason"
+                        className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                        rows={3}
+                        placeholder="Explain why this risk needs escalation..."
+                        required
+                      />
+                    </div>
+                  </div>
+
+                  <div className="flex gap-3">
+                    <button
+                      type="submit"
+                      className="flex-1 px-4 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition-colors font-medium"
+                    >
+                      Escalate
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setIsEscalationModalOpen(false)}
+                      className="px-4 py-2 border border-slate-300 text-slate-700 rounded-lg hover:bg-slate-50 transition-colors font-medium"
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                </form>
+              </div>
+            </div>
           </div>
         )}
       </div>

@@ -10,8 +10,6 @@
 | #2649 | 10:07 PM | 🟣 | Phase 1.1 completed and ARB UI components enhanced | ~460 |
 | #2632 | 5:48 AM | 🟣 | Phase 1.1 (Test Data Seeding) completed and marked as done | ~494 |
 | #2628 | 5:13 AM | 🔴 | Fixed backend soft delete issues and test data seeding for Phase 1.2 | ~353 |
-| #2624 | 4:54 AM | 🟣 | Test data seeder implementation in progress for Phase 1.1 | ~430 |
-| #2622 | 4:51 AM | 🔴 | Database cleanup logic implemented to handle deleted cards | ~285 |
 
 ### Jan 16, 2026
 
@@ -67,6 +65,8 @@
 
 | ID | Time | T | Title | Read |
 |----|------|---|-------|------|
+| #4917 | 6:32 PM | 🔵 | Ralph Loop Iterations 7-8 Achieved 65.9% Test Pass Rate Through Compliance Features and React Stability | ~528 |
+| #4912 | 6:31 PM | 🟣 | Ralph Loop Iterations 7-8: Compliance features achieve 65.9% test pass rate | ~662 |
 | #4721 | 2:00 PM | 🔴 | Fixed framework names in test data seeder to match backend API schema | ~229 |
 | #4711 | 1:50 PM | 🔵 | E2E test run completed - compliance requirements failed due to incorrect framework names | ~227 |
 | #4708 | 1:49 PM | 🔴 | Reverted SOX framework name in audit records to match backend schema | ~152 |

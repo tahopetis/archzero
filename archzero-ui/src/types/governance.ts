@@ -537,6 +537,10 @@ export interface Risk {
   type: string; // Always "Risk"
   createdAt: string;
   updatedAt: string;
+  approvalStatus?: 'pending' | 'approved' | 'rejected';
+  approvedBy?: string;
+  approvedAt?: string;
+  isOverdue?: boolean;
 }
 
 export interface CreateRiskRequest {

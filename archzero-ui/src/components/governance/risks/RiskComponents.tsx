@@ -34,9 +34,11 @@ interface RiskCardProps {
   risk: Risk;
   onEdit?: (risk: Risk) => void;
   onDelete?: (id: string) => void;
+  onApprove?: (risk: Risk) => void;
+  onEscalate?: (risk: Risk) => void;
 }
 
-export function RiskCard({ risk, onEdit, onDelete }: RiskCardProps) {
+export function RiskCard({ risk, onEdit, onDelete, onApprove, onEscalate }: RiskCardProps) {
   const getScoreColor = (score: number) => {
     if (score >= 15) return 'bg-rose-500';
     if (score >= 10) return 'bg-orange-500';
@@ -51,15 +53,46 @@ export function RiskCard({ risk, onEdit, onDelete }: RiskCardProps) {
     return 'Low';
   };
 
+  // Determine if risk requires approval (high score or critical)
+  const requiresApproval = risk.riskScore >= 15 || risk.impact >= 4;
+  const isPending = risk.approvalStatus === 'pending';
+  const isOverdue = risk.isOverdue || false;
+
   return (
-    <Card variant="bordered" className="risk-item group hover:shadow-lg transition-all" data-testid="risk-item">
+    <Card
+      variant="bordered"
+      className="risk-item group hover:shadow-lg transition-all"
+      data-testid="risk-item"
+      data-status={risk.approvalStatus || risk.status}
+      data-overdue={isOverdue ? 'true' : undefined}
+    >
       <div className="flex items-start justify-between mb-3">
         <div className="flex-1">
-          <div className="flex items-center gap-2 mb-2">
+          <div className="flex items-center gap-2 mb-2 flex-wrap">
             <h3 className="text-lg font-bold text-slate-900">{risk.name}</h3>
             <StatusBadge variant={risk.status === 'Open' ? 'open' : 'closed'}>
               {risk.status}
             </StatusBadge>
+            {requiresApproval && !risk.approvalStatus && (
+              <span className="px-2 py-1 bg-amber-100 text-amber-800 rounded text-xs font-medium">
+                Requires Approval
+              </span>
+            )}
+            {isPending && (
+              <span className="px-2 py-1 bg-yellow-100 text-yellow-800 rounded text-xs font-medium">
+                Pending Approval
+              </span>
+            )}
+            {risk.approvalStatus === 'approved' && (
+              <span className="px-2 py-1 bg-green-100 text-green-800 rounded text-xs font-medium">
+                Approved
+              </span>
+            )}
+            {isOverdue && (
+              <span className="px-2 py-1 bg-red-100 text-red-800 rounded text-xs font-medium">
+                Overdue
+              </span>
+            )}
           </div>
           <p className="text-sm text-slate-500">{risk.riskType}</p>
         </div>
@@ -126,7 +159,7 @@ export function RiskCard({ risk, onEdit, onDelete }: RiskCardProps) {
         )}
       </div>
 
-      <div className="flex items-center gap-2 mt-3 pt-3 border-t border-slate-100">
+      <div className="flex items-center gap-2 mt-3 pt-3 border-t border-slate-100 flex-wrap">
         {onEdit && (
           <button
             onClick={() => onEdit(risk)}
@@ -134,6 +167,26 @@ export function RiskCard({ risk, onEdit, onDelete }: RiskCardProps) {
           >
             <Edit3 className="w-4 h-4" />
             Edit
+          </button>
+        )}
+        {isPending && onApprove && (
+          <button
+            onClick={() => onApprove(risk)}
+            className="flex items-center gap-1 px-3 py-1.5 text-sm text-green-600 hover:text-green-700 hover:bg-green-50 rounded-lg transition-colors"
+            data-testid="approve-risk-btn"
+          >
+            <Shield className="w-4 h-4" />
+            Approve
+          </button>
+        )}
+        {isOverdue && onEscalate && (
+          <button
+            onClick={() => onEscalate(risk)}
+            className="flex items-center gap-1 px-3 py-1.5 text-sm text-orange-600 hover:text-orange-700 hover:bg-orange-50 rounded-lg transition-colors"
+            data-testid="escalate-risk-btn"
+          >
+            <AlertTriangle className="w-4 h-4" />
+            Escalate
           </button>
         )}
         {onDelete && (
@@ -159,9 +212,11 @@ interface RisksListProps {
   status?: RiskStatus;
   onEdit?: (risk: Risk) => void;
   onDelete?: (id: string) => void;
+  onApprove?: (risk: Risk) => void;
+  onEscalate?: (risk: Risk) => void;
 }
 
-export function RisksList({ riskType, status, onEdit, onDelete }: RisksListProps) {
+export function RisksList({ riskType, status, onEdit, onDelete, onApprove, onEscalate }: RisksListProps) {
   const { data: risks, isLoading } = useRisks({ riskType, status });
 
   if (isLoading) {
@@ -171,7 +226,14 @@ export function RisksList({ riskType, status, onEdit, onDelete }: RisksListProps
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4" data-testid="risks-list">
       {risks?.data.map((risk) => (
-        <RiskCard key={risk.id} risk={risk} onEdit={onEdit} onDelete={onDelete} />
+        <RiskCard
+          key={risk.id}
+          risk={risk}
+          onEdit={onEdit}
+          onDelete={onDelete}
+          onApprove={onApprove}
+          onEscalate={onEscalate}
+        />
       ))}
     </div>
   );

@@ -15,7 +15,6 @@
 | #3397 | " | 🔵 | ARB meeting creation handler uses card system | ~283 |
 | #3390 | 2:22 PM | 🟣 | ARB Templates Backend Handlers Implemented | ~307 |
 | #3068 | 5:36 AM | 🔵 | ARB submissions routes not found in router | ~203 |
-| #3067 | 5:35 AM | 🔵 | Located ARB backend GET handlers in arb.rs | ~185 |
 
 ### Jan 19, 2026
 
