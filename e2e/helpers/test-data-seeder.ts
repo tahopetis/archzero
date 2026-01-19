@@ -30,6 +30,7 @@ export class TestDataSeeder {
       await this.seedInitiatives();
       const meetingIds = await this.seedARBMeetings();
       await this.seedARBSubmissions(meetingIds);
+      await this.seedRisksAndCompliance();
 
       console.log('✅ Test data seeding complete');
     } catch (error) {
@@ -336,6 +337,80 @@ export class TestDataSeeder {
     }
 
     console.log(`✅ Created ${createdCount} ARB submissions, ${skippedCount} already existed`);
+  }
+
+  /**
+   * Seed risk and compliance data
+   */
+  async seedRisksAndCompliance() {
+    console.log('📊 Seeding risk and compliance data...');
+
+    try {
+      // Seed risks
+      const risks = TestDataFactory.createSampleRisks();
+      let createdRisks = 0;
+      let skippedRisks = 0;
+
+      for (const risk of risks) {
+        try {
+          const response = await this.request.post(`${this.baseURL}/api/v1/risks`, {
+            headers: {
+              'Authorization': `Bearer ${this.authToken}`,
+            },
+            data: risk,
+          });
+
+          if (response.ok()) {
+            createdRisks++;
+            console.log(`  ✅ Created risk: ${risk.name}`);
+          } else if (response.status() === 409) {
+            skippedRisks++;
+            console.log(`  ⏭️  Skipped existing risk: ${risk.name}`);
+          } else {
+            const errorText = await response.text();
+            console.warn(`⚠️  Failed to create risk ${risk.name}: ${response.status()} - ${errorText}`);
+          }
+        } catch (error) {
+          console.warn(`⚠️  Error creating risk ${risk.name}:`, error);
+        }
+      }
+
+      console.log(`✅ Created ${createdRisks} risks, ${skippedRisks} already existed`);
+
+      // Seed compliance requirements
+      const requirements = TestDataFactory.createComplianceRequirements();
+      let createdRequirements = 0;
+      let skippedRequirements = 0;
+
+      for (const req of requirements) {
+        try {
+          const response = await this.request.post(`${this.baseURL}/api/v1/compliance-requirements`, {
+            headers: {
+              'Authorization': `Bearer ${this.authToken}`,
+            },
+            data: req,
+          });
+
+          if (response.ok()) {
+            createdRequirements++;
+            console.log(`  ✅ Created compliance requirement: ${req.name}`);
+          } else if (response.status() === 409) {
+            skippedRequirements++;
+            console.log(`  ⏭️  Skipped existing requirement: ${req.name}`);
+          } else {
+            const errorText = await response.text();
+            console.warn(`⚠️  Failed to create requirement ${req.name}: ${response.status()} - ${errorText}`);
+          }
+        } catch (error) {
+          console.warn(`⚠️  Error creating requirement ${req.name}:`, error);
+        }
+      }
+
+      console.log(`✅ Created ${createdRequirements} compliance requirements, ${skippedRequirements} already existed`);
+    } catch (error) {
+      console.error('❌ Failed to seed risk and compliance data:', error);
+      throw error;
+    }
   }
 
   /**
@@ -1007,6 +1082,229 @@ class TestDataFactory {
         owner: 'admin@archzero.local',
         status: 'Planning',
         health: 'OnTrack',
+      },
+    ];
+  }
+
+  /**
+   * Create sample risks for testing
+   */
+  static createSampleRisks() {
+    return [
+      {
+        name: 'Data Breach Risk',
+        description: 'Unauthorized access to customer PII data due to insufficient access controls',
+        riskType: 'Security',
+        likelihood: 4,
+        impact: 5,
+        status: 'Open',
+        mitigationPlan: 'Implement multi-factor authentication and enhance access logging',
+        owner: 'Security Team',
+        targetClosureDate: '2026-03-31',
+      },
+      {
+        name: 'System Outage Risk',
+        description: 'Single point of failure in primary load balancer',
+        riskType: 'Operational',
+        likelihood: 3,
+        impact: 4,
+        status: 'Open',
+        mitigationPlan: 'Add redundant load balancer configuration',
+        owner: 'Infrastructure Team',
+        targetClosureDate: '2026-02-28',
+      },
+      {
+        name: 'GDPR Non-Compliance',
+        description: 'Lack of documented DPIA processes for personal data processing',
+        riskType: 'Compliance',
+        likelihood: 4,
+        impact: 5,
+        status: 'Open',
+        mitigationPlan: 'Implement Data Protection Impact Assessment (DPIA) workflow',
+        owner: 'Compliance Officer',
+        targetClosureDate: '2026-04-15',
+      },
+      {
+        name: 'Legacy API Security',
+        description: 'Legacy APIs lack proper authentication and rate limiting',
+        riskType: 'Security',
+        likelihood: 3,
+        impact: 4,
+        status: 'Mitigating',
+        mitigationPlan: 'Implement OAuth2 and rate limiting on all legacy APIs',
+        owner: 'Platform Team',
+        targetClosureDate: '2026-03-15',
+      },
+      {
+        name: 'Database Performance',
+        description: 'Query performance degradation under high load',
+        riskType: 'Technical',
+        likelihood: 4,
+        impact: 3,
+        status: 'Open',
+        mitigationPlan: 'Optimize slow queries and add database indexing',
+        owner: 'Database Team',
+        targetClosureDate: '2026-02-15',
+      },
+      {
+        name: 'Third-Party Dependency',
+        description: 'Critical dependency on unmaintained open-source library',
+        riskType: 'Operational',
+        likelihood: 2,
+        impact: 5,
+        status: 'Closed',
+        mitigationPlan: 'Replace with maintained alternative or fork and maintain internally',
+        owner: 'Engineering Team',
+        targetClosureDate: '2025-12-31',
+      },
+      {
+        name: 'Cloud Cost Overrun',
+        description: 'Unexpected cloud infrastructure cost escalation',
+        riskType: 'Financial',
+        likelihood: 3,
+        impact: 3,
+        status: 'Monitoring',
+        mitigationPlan: 'Implement cost monitoring and alerting',
+        owner: 'FinOps Team',
+        targetClosureDate: '2026-01-31',
+      },
+      {
+        name: 'Insufficient Backup Testing',
+        description: 'Backup recovery procedures not regularly tested',
+        riskType: 'Operational',
+        likelihood: 3,
+        impact: 5,
+        status: 'Open',
+        mitigationPlan: 'Implement automated quarterly backup recovery drills',
+        owner: 'Operations Team',
+        targetClosureDate: '2026-03-31',
+      },
+      {
+        name: 'API Documentation Gaps',
+        description: 'Missing API documentation for external integrators',
+        riskType: 'Operational',
+        likelihood: 2,
+        impact: 2,
+        status: 'Open',
+        mitigationPlan: 'Complete API documentation using OpenAPI spec',
+        owner: 'Documentation Team',
+        targetClosureDate: '2026-02-28',
+      },
+      {
+        name: 'Skill Gap in Cloud Technologies',
+        description: 'Team lacks expertise in Kubernetes and container orchestration',
+        riskType: 'Human Resources',
+        likelihood: 3,
+        impact: 3,
+        status: 'Mitigating',
+        mitigationPlan: 'Provide training and hire experienced cloud engineers',
+        owner: 'HR Team',
+        targetClosureDate: '2026-06-30',
+      },
+    ];
+  }
+
+  /**
+   * Create compliance requirements for testing
+   */
+  static createComplianceRequirements() {
+    return [
+      {
+        name: 'GDPR Article 32 - Data Security',
+        framework: 'GDPR',
+        description: 'Technical and organizational measures to ensure data security',
+        applicableCardTypes: ['Application', 'Database', 'API'],
+        requiredControls: [
+          'Data encryption at rest',
+          'Data encryption in transit',
+          'Access control and authentication',
+          'Regular security testing',
+          'Incident response procedures'
+        ],
+        auditFrequency: 'Annual',
+      },
+      {
+        name: 'GDPR Article 25 - Data Protection by Design',
+        framework: 'GDPR',
+        description: 'Data protection measures must be implemented into the development of business processes',
+        applicableCardTypes: ['Application', 'Database'],
+        requiredControls: [
+          'Privacy impact assessments',
+          'Pseudonymization and encryption',
+          'Data minimization principles',
+          'Privacy by design patterns'
+        ],
+        auditFrequency: 'Annual',
+      },
+      {
+        name: 'SOX Section 404 - Internal Controls',
+        framework: 'SOX',
+        description: 'Internal control over financial reporting requirements',
+        applicableCardTypes: ['Application', 'Database', 'Infrastructure'],
+        requiredControls: [
+          'Change management procedures',
+          'Access controls and approvals',
+          'Audit trail logging',
+          'Segregation of duties',
+          'Regular control testing'
+        ],
+        auditFrequency: 'Quarterly',
+      },
+      {
+        name: 'HIPAA Security Rule',
+        framework: 'HIPAA',
+        description: 'Protected health information (PHI) security requirements',
+        applicableCardTypes: ['Application', 'Database', 'API'],
+        requiredControls: [
+          'Administrative safeguards',
+          'Physical safeguards',
+          'Technical safeguards',
+          'Business associate agreements',
+          'Security risk assessments'
+        ],
+        auditFrequency: 'Annual',
+      },
+      {
+        name: 'ISO 27001 A.9 Access Control',
+        framework: 'ISO 27001',
+        description: 'Information access control policy and procedures',
+        applicableCardTypes: ['Application', 'Database', 'API', 'Infrastructure'],
+        requiredControls: [
+          'User access management',
+          'User registration and deregistration',
+          'Privileged access management',
+          'Password management',
+          'Review of access rights'
+        ],
+        auditFrequency: 'Semi-Annual',
+      },
+      {
+        name: 'ISO 27001 A.12 Operations Security',
+        framework: 'ISO 27001',
+        description: 'Procedures and responsibilities to ensure correct and secure operations',
+        applicableCardTypes: ['Application', 'Infrastructure', 'Database'],
+        requiredControls: [
+          'Operating procedures documentation',
+          'Change management',
+          'Capacity management',
+          'Backup and recovery procedures',
+          'Malware protection'
+        ],
+        auditFrequency: 'Semi-Annual',
+      },
+      {
+        name: 'PCI DSS Requirement 8',
+        framework: 'PCI DSS',
+        description: 'Identify and authenticate access to system components',
+        applicableCardTypes: ['Application', 'Database', 'API'],
+        requiredControls: [
+          'Multi-factor authentication',
+          'Unique user IDs',
+          'Strong password policies',
+          'Session timeout controls',
+          'Account lockout mechanisms'
+        ],
+        auditFrequency: 'Quarterly',
       },
     ];
   }

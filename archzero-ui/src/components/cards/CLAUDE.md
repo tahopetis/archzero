@@ -9,4 +9,11 @@
 |----|------|---|-------|------|
 | #2331 | 3:56 PM | 🟣 | Added data-testid attributes to CardList pagination controls | ~247 |
 | #2266 | 12:43 PM | 🟣 | CardList component updated with data-testid attribute | ~340 |
+
+### Jan 17, 2026
+
+| ID | Time | T | Title | Read |
+|----|------|---|-------|------|
+| #3131 | 6:29 AM | 🔵 | CardDetail component displays card metadata | ~224 |
+| #3129 | " | 🔵 | CardDetail.tsx is 220 lines long | ~77 |
 </claude-mem-context>
