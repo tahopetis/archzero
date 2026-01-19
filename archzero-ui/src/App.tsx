@@ -33,6 +33,8 @@ import {
   ComplianceEvidencePage,
   ComplianceReportsPage,
 } from './pages/governance';
+import { RiskAnalyticsPage } from './pages/governance/RiskAnalyticsPage';
+import { ComplianceAnalyticsPage } from './pages/governance/ComplianceAnalyticsPage';
 // Import/Export Pages
 import { BulkImportPage } from './pages/import/BulkImportPage';
 import { ExportPage } from './pages/export/ExportPage';
@@ -340,6 +342,28 @@ function App() {
             <ProtectedRoute>
               <Layout>
                 <RiskMitigationPage />
+              </Layout>
+            </ProtectedRoute>
+          }
+        />
+
+        {/* Analytics Pages */}
+        <Route
+          path="/governance/risks/analytics"
+          element={
+            <ProtectedRoute>
+              <Layout>
+                <RiskAnalyticsPage />
+              </Layout>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/governance/compliance/analytics"
+          element={
+            <ProtectedRoute>
+              <Layout>
+                <ComplianceAnalyticsPage />
               </Layout>
             </ProtectedRoute>
           }
