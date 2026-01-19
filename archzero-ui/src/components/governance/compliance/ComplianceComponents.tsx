@@ -208,6 +208,19 @@ export function ComplianceDashboard({ complianceId }: ComplianceDashboardProps) 
       </div>
 
       {/* Summary Stats */}
+      <div className="mb-6 p-4 bg-indigo-50 rounded-lg border border-indigo-200" data-testid="compliance-score">
+        <div className="flex items-center justify-between">
+          <div>
+            <p className="text-sm font-semibold text-indigo-900">Overall Compliance Score</p>
+            <p className="text-xs text-indigo-700 mt-1">Based on all frameworks</p>
+          </div>
+          <div className="text-right">
+            <p className="text-3xl font-bold text-indigo-700">{dashboard.summary.complianceRate.toFixed(0)}%</p>
+            <p className="text-xs text-indigo-600">Compliance Rate</p>
+          </div>
+        </div>
+      </div>
+
       <div className="grid grid-cols-4 gap-4 mb-6">
         <div className="text-center p-4 bg-slate-50 rounded-lg">
           <p className="text-2xl font-bold text-slate-900">{dashboard.summary.totalApplicableCards}</p>
