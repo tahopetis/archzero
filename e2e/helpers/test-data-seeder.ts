@@ -1256,7 +1256,7 @@ class TestDataFactory {
     return [
       {
         name: 'GDPR Article 32 - Data Security',
-        framework: 'GDPR',
+        framework: 'gDPR',
         description: 'Technical and organizational measures to ensure data security',
         applicableCardTypes: ['Application', 'Database', 'API'],
         requiredControls: [
@@ -1270,7 +1270,7 @@ class TestDataFactory {
       },
       {
         name: 'GDPR Article 25 - Data Protection by Design',
-        framework: 'GDPR',
+        framework: 'gDPR',
         description: 'Data protection measures must be implemented into the development of business processes',
         applicableCardTypes: ['Application', 'Database'],
         requiredControls: [
@@ -1283,7 +1283,7 @@ class TestDataFactory {
       },
       {
         name: 'SOX Section 404 - Internal Controls',
-        framework: 'SOX',
+        framework: 'sOX',
         description: 'Internal control over financial reporting requirements',
         applicableCardTypes: ['Application', 'Database', 'Infrastructure'],
         requiredControls: [
@@ -1297,7 +1297,7 @@ class TestDataFactory {
       },
       {
         name: 'HIPAA Security Rule',
-        framework: 'HIPAA',
+        framework: 'hIPAA',
         description: 'Protected health information (PHI) security requirements',
         applicableCardTypes: ['Application', 'Database', 'API'],
         requiredControls: [
@@ -1311,7 +1311,7 @@ class TestDataFactory {
       },
       {
         name: 'ISO 27001 A.9 Access Control',
-        framework: 'ISO 27001',
+        framework: 'ISO27001',
         description: 'Information access control policy and procedures',
         applicableCardTypes: ['Application', 'Database', 'API', 'Infrastructure'],
         requiredControls: [
@@ -1325,7 +1325,7 @@ class TestDataFactory {
       },
       {
         name: 'ISO 27001 A.12 Operations Security',
-        framework: 'ISO 27001',
+        framework: 'ISO27001',
         description: 'Procedures and responsibilities to ensure correct and secure operations',
         applicableCardTypes: ['Application', 'Infrastructure', 'Database'],
         requiredControls: [
@@ -1339,7 +1339,7 @@ class TestDataFactory {
       },
       {
         name: 'PCI DSS Requirement 8',
-        framework: 'PCI DSS',
+        framework: 'PCI-DSS',
         description: 'Identify and authenticate access to system components',
         applicableCardTypes: ['Application', 'Database', 'API'],
         requiredControls: [
@@ -1373,7 +1373,7 @@ class TestDataFactory {
       {
         title: 'Q2 2026 GDPR Compliance Audit',
         date: nextMonth.toISOString().split('T')[0],
-        framework: 'GDPR',
+        framework: 'gDPR',
         auditor: 'External Audit Firm LLC',
         status: 'scheduled',
         notes: 'Annual GDPR compliance assessment',
@@ -1381,7 +1381,7 @@ class TestDataFactory {
       {
         title: 'ISO 27001 Surveillance Audit',
         date: twoMonths.toISOString().split('T')[0],
-        framework: 'ISO 27001',
+        framework: 'ISO27001',
         auditor: 'Certification Body Inc',
         status: 'scheduled',
         notes: 'Surveillance audit for ISO 27001 certification',
@@ -1389,7 +1389,7 @@ class TestDataFactory {
       {
         title: 'SOX Compliance Review Q1 2026',
         date: threeMonths.toISOString().split('T')[0],
-        framework: 'SOX',
+        framework: 'sOX',
         auditor: 'Internal Audit Team',
         status: 'scheduled',
         notes: 'Quarterly SOX internal control review',
@@ -1397,7 +1397,7 @@ class TestDataFactory {
       {
         title: 'HIPAA Security Assessment 2026',
         date: nextMonth.toISOString().split('T')[0],
-        framework: 'HIPAA',
+        framework: 'hIPAA',
         auditor: 'Healthcare Compliance Solutions',
         status: 'scheduled',
         notes: 'Annual HIPAA security rule assessment',
