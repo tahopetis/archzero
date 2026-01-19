@@ -2,7 +2,7 @@
  * Risk Management Page
  */
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { RiskDashboard, RiskHeatMap, RisksList, type Risk } from '@/components/governance/risks';
 import { RiskForm } from '@/components/governance/risks/RiskForm';
 import { RiskType, RiskStatus } from '@/types/governance';
@@ -13,10 +13,28 @@ export function RisksPage() {
   const [viewMode, setViewMode] = useState<ViewMode>('dashboard');
   const [selectedRisk, setSelectedRisk] = useState<Risk | null>(null);
   const [isFormOpen, setIsFormOpen] = useState(false);
+  const [isPageReady, setIsPageReady] = useState(false);
 
   // Filter states
   const [selectedRiskType, setSelectedRiskType] = useState<string>('all');
   const [selectedStatus, setSelectedStatus] = useState<string>('all');
+
+  // Mark page as ready after initial render
+  useEffect(() => {
+    setIsPageReady(true);
+  }, []);
+
+  if (!isPageReady) {
+    return (
+      <div className="min-h-screen bg-slate-50 flex items-center justify-center" data-testid="risk-register">
+        <div className="animate-pulse flex flex-col items-center gap-4">
+          <div className="w-16 h-16 bg-slate-200 rounded-lg" />
+          <div className="w-48 h-4 bg-slate-200 rounded" />
+          <div className="w-32 h-4 bg-slate-200 rounded" />
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-slate-50" data-testid="risk-register">
