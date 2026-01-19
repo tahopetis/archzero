@@ -9,6 +9,7 @@ import { ComplianceHub, ComplianceDashboard, ComplianceScoreCard, ComplianceAudi
 import { ComplianceForm } from '@/components/governance/compliance/ComplianceForm';
 import { ComplianceReportModal } from '@/components/governance/compliance/ComplianceReportModal';
 import { AuditScheduleModal } from '@/components/governance/compliance/AuditScheduleModal';
+import { FrameworkSetupModal } from '@/components/governance/compliance/FrameworkSetupModal';
 
 export function CompliancePage() {
   const { id } = useParams();
@@ -17,11 +18,28 @@ export function CompliancePage() {
   const [selectedFramework, setSelectedFramework] = useState<string>('all');
   const [isReportModalOpen, setIsReportModalOpen] = useState(false);
   const [isAuditModalOpen, setIsAuditModalOpen] = useState(false);
+  const [isFrameworkSetupOpen, setIsFrameworkSetupOpen] = useState(false);
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
   const handleExportReport = async (format: 'pdf' | 'csv') => {
     // Implement export functionality
     console.log(`Exporting compliance report as ${format}`);
     // TODO: Call backend API to generate report
+  };
+
+  const handleSetupFramework = async (framework: { type: string; name: string; description: string }) => {
+    // TODO: Call backend API to create framework
+    console.log('Setting up framework:', framework);
+
+    // For now, just close the modal
+    // In production, this would call the backend API
+    setIsFrameworkSetupOpen(false);
+
+    // Show success message
+    setSuccessMessage('Framework created');
+
+    // Clear success message after 3 seconds
+    setTimeout(() => setSuccessMessage(null), 3000);
   };
 
   if (id) {
@@ -46,6 +64,27 @@ export function CompliancePage() {
             <p className="text-slate-600 mt-1">Track compliance across frameworks and regulations</p>
           </div>
           <div className="flex items-center gap-3">
+            <button
+              onClick={() => setIsFrameworkSetupOpen(true)}
+              className="flex items-center gap-2 px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors font-medium"
+              data-testid="setup-framework-btn"
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+              </svg>
+              Setup Framework
+            </button>
+            <button
+              onClick={() => setIsFrameworkSetupOpen(true)}
+              className="flex items-center gap-2 px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors font-medium"
+              data-testid="add-framework-btn"
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+              </svg>
+              Add Framework
+            </button>
             <button
               onClick={() => setIsAuditModalOpen(true)}
               className="flex items-center gap-2 px-4 py-2 bg-slate-600 text-white rounded-lg hover:bg-slate-700 transition-colors font-medium"
@@ -72,6 +111,13 @@ export function CompliancePage() {
             </button>
           </div>
         </div>
+
+        {/* Success Message */}
+        {successMessage && (
+          <div className="mb-4 p-4 bg-green-50 border border-green-200 rounded-lg">
+            <p className="text-green-800 font-medium">{successMessage}</p>
+          </div>
+        )}
 
         {/* Compliance Score Cards */}
         <div className="mb-6">
@@ -120,7 +166,7 @@ export function CompliancePage() {
           </div>
         )}
 
-        <ComplianceHub framework={selectedFramework} />
+        <ComplianceHub />
 
         {/* Modals */}
         {isReportModalOpen && (
@@ -140,6 +186,13 @@ export function CompliancePage() {
               console.log('Scheduling audit:', audit);
               setIsAuditModalOpen(false);
             }}
+          />
+        )}
+
+        {isFrameworkSetupOpen && (
+          <FrameworkSetupModal
+            onClose={() => setIsFrameworkSetupOpen(false)}
+            onSetup={handleSetupFramework}
           />
         )}
       </div>

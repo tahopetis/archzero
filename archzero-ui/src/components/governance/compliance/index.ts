@@ -4,4 +4,5 @@ export { ComplianceScoreCard } from './ComplianceScoreCard';
 export { ComplianceAuditTimeline } from './ComplianceAuditTimeline';
 export { ComplianceReportModal } from './ComplianceReportModal';
 export { AuditScheduleModal } from './AuditScheduleModal';
+export { FrameworkSetupModal } from './FrameworkSetupModal';
 export type { ComplianceRequirement } from '@/types/governance';

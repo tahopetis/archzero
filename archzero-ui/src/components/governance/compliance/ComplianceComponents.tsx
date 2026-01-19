@@ -47,7 +47,7 @@ interface RequirementCardProps {
 
 export function RequirementCard({ requirement, onEdit, onDelete }: RequirementCardProps) {
   return (
-    <Card variant="bordered" className="group hover:shadow-lg transition-all" data-testid={`compliance-item-${requirement.id}`}>
+    <Card variant="bordered" className="group hover:shadow-lg transition-all" data-testid="requirement-item">
       <div className="flex items-start justify-between mb-3">
         <div className="flex-1">
           <div className="flex items-center gap-2 mb-2 flex-wrap">
@@ -438,7 +438,7 @@ export function FrameworkOverview({ onEdit }: FrameworkOverviewProps) {
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
       {Object.entries(byFramework).map(([framework, reqs]) => (
-        <Card key={framework} className="p-6">
+        <Card key={framework} className="p-6 hover:shadow-lg transition-shadow cursor-pointer" data-testid="framework-item">
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-2">
               <Award className="w-5 h-5 text-indigo-600" />
