@@ -5,6 +5,7 @@
 import { useState } from 'react';
 import { RiskDashboard, RiskHeatMap, RisksList, type Risk } from '@/components/governance/risks';
 import { RiskForm } from '@/components/governance/risks/RiskForm';
+import { RiskType, RiskStatus } from '@/types/governance';
 
 type ViewMode = 'dashboard' | 'heatmap' | 'list';
 
@@ -12,6 +13,10 @@ export function RisksPage() {
   const [viewMode, setViewMode] = useState<ViewMode>('dashboard');
   const [selectedRisk, setSelectedRisk] = useState<Risk | null>(null);
   const [isFormOpen, setIsFormOpen] = useState(false);
+
+  // Filter states
+  const [selectedRiskType, setSelectedRiskType] = useState<string>('all');
+  const [selectedStatus, setSelectedStatus] = useState<string>('all');
 
   return (
     <div className="min-h-screen bg-slate-50" data-testid="risk-register">
@@ -28,6 +33,39 @@ export function RisksPage() {
           >
             New Risk
           </button>
+        </div>
+
+        {/* Risk Type and Status Filters */}
+        <div className="mb-6 flex flex-wrap items-center gap-4">
+          <div>
+            <label className="block text-sm font-semibold text-slate-700 mb-2">Risk Type</label>
+            <select
+              value={selectedRiskType}
+              onChange={(e) => setSelectedRiskType(e.target.value)}
+              className="px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+              data-testid="risk-type-filter"
+            >
+              <option value="all">All Types</option>
+              {Object.values(RiskType).map((type) => (
+                <option key={type} value={type}>{type}</option>
+              ))}
+            </select>
+          </div>
+
+          <div>
+            <label className="block text-sm font-semibold text-slate-700 mb-2">Status</label>
+            <select
+              value={selectedStatus}
+              onChange={(e) => setSelectedStatus(e.target.value)}
+              className="px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+              data-testid="risk-status-filter"
+            >
+              <option value="all">All Statuses</option>
+              {Object.values(RiskStatus).map((status) => (
+                <option key={status} value={status}>{status}</option>
+              ))}
+            </select>
+          </div>
         </div>
 
         {/* View Mode Tabs */}
@@ -93,6 +131,8 @@ export function RisksPage() {
         {viewMode === 'list' && (
           <div className="space-y-6">
             <RisksList
+              riskType={selectedRiskType !== 'all' ? selectedRiskType as RiskType : undefined}
+              status={selectedStatus !== 'all' ? selectedStatus as RiskStatus : undefined}
               onEdit={(risk) => {
                 setSelectedRisk(risk);
                 setIsFormOpen(true);
