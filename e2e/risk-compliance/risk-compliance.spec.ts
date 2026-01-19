@@ -13,6 +13,13 @@ test.beforeAll(async ({ request }) => {
   }
 });
 
+// Helper function to wait for page stability after navigation
+async function navigateToPage(page: any, url: string) {
+  await page.goto(url);
+  await page.waitForLoadState('networkidle');
+  await page.waitForTimeout(500); // Additional wait for React hydration
+}
+
 test.describe('Risk Register', () => {
   let loginPage: LoginPage;
 
@@ -22,15 +29,15 @@ test.describe('Risk Register', () => {
   });
 
   test('should display risk register', async ({ page }) => {
-    await page.goto('/governance/risks');
+    await navigateToPage(page, '/governance/risks');
 
     await expect(page.locator('[data-testid="risk-register"], h1:has-text("Risks")')).toBeVisible({ timeout: 10000 });
   });
 
   test('should create new risk entry', async ({ page }) => {
-    await page.goto('/governance/risks');
+    await navigateToPage(page, '/governance/risks');
 
-    await page.locator('button:has-text("Add Risk"), [data-testid="add-risk-btn"]').click();
+    await page.locator('[data-testid="add-risk-btn"]').click();
 
     // Fill risk details
     await page.locator('[data-testid="risk-title"]').fill('Data Breach Risk');
@@ -40,15 +47,15 @@ test.describe('Risk Register', () => {
     await page.locator('[data-testid="risk-impact"]').selectOption('High');
 
     // Save
-    await page.locator('button:has-text("Save"), [data-testid="save-risk-btn"]').click();
+    await page.locator('[data-testid="save-risk-btn"]').click();
 
-    await expect(page.locator('text=Risk created, text=Success')).toBeVisible({ timeout: 5000 });
+    await expect(page.locator('[data-testid="success-message"]')).toBeVisible({ timeout: 5000 });
   });
 
   test('should calculate risk score (Likelihood × Impact)', async ({ page }) => {
-    await page.goto('/governance/risks');
+    await navigateToPage(page, '/governance/risks');
 
-    await page.locator('button:has-text("Add Risk")').click();
+    await page.locator('[data-testid="add-risk-btn"]').click();
 
     // Set probability (Likelihood) to High (4) and Impact to High (5)
     await page.locator('[data-testid="risk-title"]').fill('Test Risk Score');
@@ -63,7 +70,7 @@ test.describe('Risk Register', () => {
   });
 
   test('should display Risk Heat Map visualization', async ({ page }) => {
-    await page.goto('/governance/risks');
+    await navigateToPage(page, '/governance/risks');
 
     // Look for heat map visualization
     const heatMap = page.locator('[data-testid="risk-heatmap"], .risk-heatmap, [data-testid="risk-matrix"]');
@@ -71,7 +78,7 @@ test.describe('Risk Register', () => {
   });
 
   test('should show Top 10 Risks dashboard', async ({ page }) => {
-    await page.goto('/governance/risks');
+    await navigateToPage(page, '/governance/risks');
 
     const topRisks = page.locator('[data-testid="top-risks"], .top-risks-dashboard');
     await expect(topRisks.first()).toBeVisible();
@@ -84,32 +91,32 @@ test.describe('Risk Register', () => {
   });
 
   test('should categorize risks by type', async ({ page }) => {
-    await page.goto('/governance/risks');
+    await navigateToPage(page, '/governance/risks');
 
     // Create risks of different types
     const categories = ['Security', 'Compliance', 'Operational', 'Financial', 'Strategic'];
 
     for (const category of categories) {
-      await page.locator('button:has-text("Add Risk")').click();
+      await page.locator('[data-testid="add-risk-btn"]').click();
       await page.locator('[data-testid="risk-title"]').fill(`${category} Risk`);
       await page.locator('[data-testid="risk-category"]').selectOption(category);
       await page.locator('[data-testid="risk-probability"]').selectOption('Low');
       await page.locator('[data-testid="risk-impact"]').selectOption('Low');
-      await page.locator('button:has-text("Save")').click();
-      await page.waitForLoadState('networkidle');
+      await page.locator('[data-testid="save-risk-btn"]').click();
+      await page.waitForTimeout(1000); // Wait for form to close and list to refresh
     }
 
-    // Filter by category
-    const categoryFilter = page.locator('[data-testid="risk-category-filter"]');
-    await expect(categoryFilter.first()).toBeVisible();
+    // Filter by category using the correct testid
+    const categoryFilter = page.locator('[data-testid="risk-type-filter"]');
+    await expect(categoryFilter).toBeVisible();
     await categoryFilter.selectOption('Security');
 
     // Should show only Security risks
-    await page.waitForLoadState('networkidle');
+    await page.waitForTimeout(500);
   });
 
   test('should track risk mitigation plans', async ({ page }) => {
-    await page.goto('/governance/risks');
+    await navigateToPage(page, '/governance/risks');
 
     const firstRisk = page.locator('[data-testid="risk-item"]').first();
     await expect(firstRisk).toBeVisible();
@@ -128,7 +135,7 @@ test.describe('Risk Register', () => {
   });
 
   test('should show mitigation progress', async ({ page }) => {
-    await page.goto('/governance/risks');
+    await navigateToPage(page, '/governance/risks');
 
     const firstRisk = page.locator('[data-testid="risk-item"]').first();
     await expect(firstRisk).toBeVisible();
@@ -140,7 +147,7 @@ test.describe('Risk Register', () => {
   });
 
   test('should allow updating risk status', async ({ page }) => {
-    await page.goto('/governance/risks');
+    await navigateToPage(page, '/governance/risks');
 
     const firstRisk = page.locator('[data-testid="risk-item"]').first();
     await expect(firstRisk).toBeVisible();
@@ -149,13 +156,13 @@ test.describe('Risk Register', () => {
     // Update status
     await page.locator('[data-testid="risk-status"]').selectOption('Mitigated');
 
-    await page.locator('button:has-text("Save")').click();
+    await page.locator('[data-testid="save-risk-btn"]').click();
 
     await expect(page.locator('text=Risk updated')).toBeVisible({ timeout: 5000 });
   });
 
   test('should show risk history and timeline', async ({ page }) => {
-    await page.goto('/governance/risks');
+    await navigateToPage(page, '/governance/risks');
 
     const firstRisk = page.locator('[data-testid="risk-item"]').first();
     await expect(firstRisk).toBeVisible();
@@ -170,7 +177,7 @@ test.describe('Risk Register', () => {
   });
 
   test('should export risk register', async ({ page }) => {
-    await page.goto('/governance/risks');
+    await navigateToPage(page, '/governance/risks');
 
     const exportBtn = page.locator('button:has-text("Export"), [data-testid="export-risks-btn"]');
     await expect(exportBtn.first()).toBeVisible();
@@ -192,13 +199,13 @@ test.describe('Compliance Framework', () => {
   });
 
   test('should display compliance dashboard', async ({ page }) => {
-    await page.goto('/governance/compliance');
+    await navigateToPage(page, '/governance/compliance');
 
     await expect(page.locator('[data-testid="compliance-dashboard"], h1:has-text("Compliance")')).toBeVisible({ timeout: 10000 });
   });
 
   test('should setup compliance framework', async ({ page }) => {
-    await page.goto('/governance/compliance');
+    await navigateToPage(page, '/governance/compliance');
 
     const setupBtn = page.locator('button:has-text("Setup Framework"), [data-testid="setup-framework-btn"]');
     await expect(setupBtn.first()).toBeVisible();
@@ -212,13 +219,13 @@ test.describe('Compliance Framework', () => {
     await page.locator('[data-testid="framework-description"]').fill('General Data Protection Regulation compliance');
 
     // Save
-    await page.locator('button:has-text("Save"), [data-testid="save-framework-btn"]').click();
+    await page.locator('[data-testid="save-risk-btn"], [data-testid="save-framework-btn"]').click();
 
     await expect(page.locator('text=Framework created')).toBeVisible({ timeout: 5000 });
   });
 
   test('should support multiple frameworks (GDPR, SOX, HIPAA, ISO 27001)', async ({ page }) => {
-    await page.goto('/governance/compliance');
+    await navigateToPage(page, '/governance/compliance');
 
     const frameworks = ['GDPR', 'SOX', 'HIPAA', 'ISO 27001'];
 
@@ -227,7 +234,7 @@ test.describe('Compliance Framework', () => {
       await expect(addBtn.first()).toBeVisible();
       await addBtn.click();
       await page.locator('[data-testid="compliance-framework"]').selectOption(framework);
-      await page.locator('button:has-text("Save")').click();
+      await page.locator('[data-testid="save-risk-btn"]').click();
       await page.waitForLoadState('networkidle');
     }
 
@@ -240,7 +247,7 @@ test.describe('Compliance Framework', () => {
   });
 
   test('should track compliance requirements', async ({ page }) => {
-    await page.goto('/governance/compliance');
+    await navigateToPage(page, '/governance/compliance');
 
     // Select framework
     const framework = page.locator('[data-testid="framework-item"]').first();
@@ -257,7 +264,7 @@ test.describe('Compliance Framework', () => {
   });
 
   test('should perform compliance assessment', async ({ page }) => {
-    await page.goto('/governance/compliance');
+    await navigateToPage(page, '/governance/compliance');
 
     const framework = page.locator('[data-testid="framework-item"]').first();
     await expect(framework).toBeVisible();
@@ -282,7 +289,7 @@ test.describe('Compliance Framework', () => {
   });
 
   test('should show control-by-control assessment', async ({ page }) => {
-    await page.goto('/governance/compliance');
+    await navigateToPage(page, '/governance/compliance');
 
     const framework = page.locator('[data-testid="framework-item"]').first();
     await expect(framework).toBeVisible();
@@ -303,7 +310,7 @@ test.describe('Compliance Framework', () => {
   });
 
   test('should show compliance score/metrics', async ({ page }) => {
-    await page.goto('/governance/compliance');
+    await navigateToPage(page, '/governance/compliance');
 
     const complianceScore = page.locator('[data-testid="compliance-score"], .compliance-metric');
     await expect(complianceScore.first()).toBeVisible();
@@ -314,7 +321,7 @@ test.describe('Compliance Framework', () => {
   });
 
   test('should filter by compliance framework', async ({ page }) => {
-    await page.goto('/governance/compliance');
+    await navigateToPage(page, '/governance/compliance');
 
     const frameworkFilter = page.locator('[data-testid="framework-filter"], select[name="framework"]');
     await expect(frameworkFilter.first()).toBeVisible();
@@ -328,7 +335,7 @@ test.describe('Compliance Framework', () => {
   });
 
   test('should show audit timeline and countdown', async ({ page }) => {
-    await page.goto('/governance/compliance');
+    await navigateToPage(page, '/governance/compliance');
 
     // Look for audit timeline section
     const auditTimeline = page.locator('[data-testid="audit-timeline"], .audit-countdown');
@@ -340,7 +347,7 @@ test.describe('Compliance Framework', () => {
   });
 
   test('should schedule audit', async ({ page }) => {
-    await page.goto('/governance/compliance');
+    await navigateToPage(page, '/governance/compliance');
 
     const scheduleAuditBtn = page.locator('button:has-text("Schedule Audit"), [data-testid="schedule-audit-btn"]');
     await expect(scheduleAuditBtn.first()).toBeVisible();
@@ -359,7 +366,7 @@ test.describe('Compliance Framework', () => {
   });
 
   test('should generate compliance report', async ({ page }) => {
-    await page.goto('/governance/compliance');
+    await navigateToPage(page, '/governance/compliance');
 
     const reportBtn = page.locator('button:has-text("Generate Report"), [data-testid="generate-report-btn"]');
     await expect(reportBtn.first()).toBeVisible();
@@ -370,7 +377,7 @@ test.describe('Compliance Framework', () => {
     await page.locator('[data-testid="report-date-range"]').selectOption('last-quarter');
 
     // Generate
-    await page.locator('button:has-text("Generate")').click();
+    await page.locator('[data-testid="report-modal"] button:has-text("Generate")').click();
 
     // Should show report preview
     const reportPreview = page.locator('[data-testid="report-preview"]');
@@ -378,7 +385,7 @@ test.describe('Compliance Framework', () => {
   });
 
   test('should export compliance report', async ({ page }) => {
-    await page.goto('/governance/compliance');
+    await navigateToPage(page, '/governance/compliance');
 
     const exportBtn = page.locator('button:has-text("Export Report"), [data-testid="export-compliance-btn"]');
     await expect(exportBtn.first()).toBeVisible();
@@ -400,7 +407,7 @@ test.describe('Risk and Compliance Integration', () => {
   });
 
   test('should link compliance violations to risks', async ({ page }) => {
-    await page.goto('/governance/compliance');
+    await navigateToPage(page, '/governance/compliance');
 
     // Find compliance violation
     const violation = page.locator('[data-testid="violation-item"][data-severity="high"]').first();
@@ -414,13 +421,13 @@ test.describe('Risk and Compliance Integration', () => {
     const riskTitle = await page.locator('[data-testid="risk-title"]').inputValue();
     expect(riskTitle.length).toBeGreaterThan(0);
 
-    await page.locator('button:has-text("Save")').click();
+    await page.locator('[data-testid="save-risk-btn"]').click();
 
     await expect(page.locator('text=Risk created')).toBeVisible({ timeout: 5000 });
   });
 
   test('should show compliance status on risk cards', async ({ page }) => {
-    await page.goto('/governance/risks');
+    await navigateToPage(page, '/governance/risks');
 
     const firstRisk = page.locator('[data-testid="risk-item"]').first();
     await expect(firstRisk).toBeVisible();
@@ -458,14 +465,14 @@ test.describe('Risk Review and Approval', () => {
   });
 
   test('should require approval for high-risk items', async ({ page }) => {
-    await page.goto('/governance/risks');
+    await navigateToPage(page, '/governance/risks');
 
     // Create high-risk item
-    await page.locator('button:has-text("Add Risk")').click();
+    await page.locator('[data-testid="add-risk-btn"]').click();
     await page.locator('[data-testid="risk-title"]').fill('Critical Risk');
     await page.locator('[data-testid="risk-probability"]').selectOption('High');
     await page.locator('[data-testid="risk-impact"]').selectOption('Critical');
-    await page.locator('button:has-text("Save")').click();
+    await page.locator('[data-testid="save-risk-btn"]').click();
 
     // Should require approval
     const approvalMsg = page.locator('text=requires approval, text=pending approval');
@@ -473,7 +480,7 @@ test.describe('Risk Review and Approval', () => {
   });
 
   test('should allow risk manager to approve risks', async ({ page }) => {
-    await page.goto('/governance/risks');
+    await navigateToPage(page, '/governance/risks');
 
     const pendingRisk = page.locator('[data-testid="risk-item"][data-status="pending"]').first();
     await expect(pendingRisk).toBeVisible();
@@ -490,7 +497,7 @@ test.describe('Risk Review and Approval', () => {
   });
 
   test('should escalate overdue risks', async ({ page }) => {
-    await page.goto('/governance/risks');
+    await navigateToPage(page, '/governance/risks');
 
     const overdueRisk = page.locator('[data-testid="risk-item"][data-overdue="true"]').first();
     await expect(overdueRisk).toBeVisible();
@@ -543,7 +550,7 @@ test.describe('Compliance Workflows', () => {
   });
 
   test('should track training completion', async ({ page }) => {
-    await page.goto('/governance/compliance');
+    await navigateToPage(page, '/governance/compliance');
 
     const trainingSection = page.locator('[data-testid="training-section"]');
     await expect(trainingSection.first()).toBeVisible();
@@ -558,7 +565,7 @@ test.describe('Compliance Workflows', () => {
   });
 
   test('should assign compliance training', async ({ page }) => {
-    await page.goto('/governance/compliance');
+    await navigateToPage(page, '/governance/compliance');
 
     const assignTrainingBtn = page.locator('button:has-text("Assign Training"), [data-testid="assign-training-btn"]');
     await expect(assignTrainingBtn.first()).toBeVisible();
