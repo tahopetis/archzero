@@ -344,8 +344,15 @@ test.describe('Migration Advisor Report', () => {
   test('should allow comparing migration options', async ({ page }) => {
     await page.goto('/intelligence/migration');
 
-    // Look for comparison view
-    const compareView = page.locator('[data-testid="comparison-view"], .migration-compare');
+    // Click the "Compare Options" button to enable compare mode
+    const compareBtn = page.locator('button:has-text("Compare Options")');
+    await compareBtn.click();
+
+    // Wait for compare mode to activate
+    await page.waitForTimeout(500);
+
+    // Look for comparison view (should now be visible)
+    const compareView = page.locator('[data-testid="comparison-view"]');
     await expect(compareView.first()).toBeVisible();
   });
 });
@@ -718,9 +725,9 @@ test.describe('Custom Report Builder', () => {
     const palette = page.locator('[data-testid="sections-palette"], .report-sections');
     await expect(palette.first()).toBeVisible();
 
-    // Look for canvas/drop zone
-    const canvas = page.locator('[data-testid="report-canvas"], .drop-zone');
-    await expect(canvas.first()).toBeVisible();
+    // Look for canvas/drop zone (use first() to avoid strict mode violation)
+    const canvas = page.locator('[data-testid="report-canvas"]').first();
+    await expect(canvas).toBeVisible();
 
     // Try dragging a section
     const firstSection = palette.locator('[data-testid="section-item"]').first();
@@ -737,11 +744,31 @@ test.describe('Custom Report Builder', () => {
   test('should allow reordering sections', async ({ page }) => {
     await page.goto('/reports/builder');
 
-    // Look for existing sections in canvas
-    const canvasSections = page.locator('[data-testid="canvas-section"], .report-section');
+    // Look for existing sections in canvas (use more specific selector)
+    const canvas = page.locator('[data-testid="report-canvas"]');
+    const canvasSections = canvas.locator('[data-testid="canvas-section"]');
+
+    // Wait for sections to be present
+    await page.waitForTimeout(1000);
+
     const count = await canvasSections.count();
 
-    expect(count).toBeGreaterThanOrEqual(2);
+    // If less than 2 sections, add some first
+    if (count < 2) {
+      const palette = page.locator('[data-testid="sections-palette"]');
+      const firstSection = palette.locator('[data-testid="section-item"]').first();
+      const secondSection = palette.locator('[data-testid="section-item"]').nth(1);
+
+      // Click to add sections
+      await firstSection.click();
+      await page.waitForTimeout(200);
+      await secondSection.click();
+      await page.waitForTimeout(200);
+    }
+
+    // Get updated count
+    const updatedCount = await canvasSections.count();
+    expect(updatedCount).toBeGreaterThanOrEqual(2);
 
     // Drag first section to after second section
     await canvasSections.nth(0).dragTo(canvasSections.nth(1));
@@ -773,7 +800,8 @@ test.describe('Custom Report Builder', () => {
   test('should save custom report template', async ({ page }) => {
     await page.goto('/reports/builder');
 
-    const saveBtn = page.locator('button:has-text("Save Template"), [data-testid="save-template-btn"]');
+    // Use more specific selector for save template button
+    const saveBtn = page.locator('[data-testid="save-template-btn"]');
     await expect(saveBtn.first()).toBeVisible();
 
     await saveBtn.click();
@@ -783,7 +811,8 @@ test.describe('Custom Report Builder', () => {
     await expect(templateName.first()).toBeVisible();
     await templateName.fill('Executive Summary Report');
 
-    const confirmBtn = page.locator('button:has-text("Save"), [data-testid="confirm-save-btn"]');
+    // Use specific selector for confirm button to avoid matching other "Save" buttons
+    const confirmBtn = page.locator('[data-testid="confirm-save-btn"]');
     await expect(confirmBtn.first()).toBeVisible();
     await confirmBtn.click();
 

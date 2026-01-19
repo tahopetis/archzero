@@ -25,6 +25,7 @@ export function CustomReportBuilderPage() {
   ]);
   const [showTemplateModal, setShowTemplateModal] = useState(false);
   const [templateName, setTemplateName] = useState('');
+  const [successMessage, setSuccessMessage] = useState<string>('');
 
   const addSection = (sectionTemplate: typeof availableSections[0]) => {
     const newSection: ReportSection = {
@@ -50,9 +51,11 @@ export function CustomReportBuilderPage() {
     setShowTemplateModal(false);
     setTemplateName('');
     // Show success message
+    setSuccessMessage('Template saved');
+    // Clear success message after 3 seconds
     setTimeout(() => {
-      alert('Template saved');
-    }, 100);
+      setSuccessMessage('');
+    }, 3000);
   };
 
   const getSectionIcon = (type: string) => {
@@ -74,6 +77,13 @@ export function CustomReportBuilderPage() {
           Design and create custom reports by dragging and dropping sections
         </p>
       </div>
+
+      {/* Success Message */}
+      {successMessage && (
+        <div className="mb-4 p-4 bg-green-100 dark:bg-green-900 border border-green-400 dark:border-green-600 text-green-700 dark:text-green-200 rounded-lg">
+          {successMessage}
+        </div>
+      )}
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Sections Palette */}
