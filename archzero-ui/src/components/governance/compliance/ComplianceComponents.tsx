@@ -3,6 +3,7 @@
  * Including compliance dashboard and assessment results
  */
 
+import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import {
   Shield,
@@ -462,21 +463,143 @@ export function FrameworkOverview({ onEdit }: FrameworkOverviewProps) {
 }
 
 // ============================================================================
+// REPORT GENERATION MODAL
+// ============================================================================
+
+interface ReportGenerationModalProps {
+  onClose: () => void;
+}
+
+export function ReportGenerationModal({ onClose }: ReportGenerationModalProps) {
+  const [framework, setFramework] = useState('GDPR');
+  const [dateRange, setDateRange] = useState('last-quarter');
+  const [isGenerating, setIsGenerating] = useState(false);
+
+  const handleGenerate = async () => {
+    setIsGenerating(true);
+    // Simulate report generation
+    await new Promise(resolve => setTimeout(resolve, 2000));
+    setIsGenerating(false);
+    // In real implementation, this would generate and display the report
+  };
+
+  return (
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50" data-testid="report-modal">
+      <Card className="w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+        <div className="p-6">
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="text-2xl font-bold text-slate-900">Generate Compliance Report</h2>
+            <button
+              onClick={onClose}
+              className="text-slate-400 hover:text-slate-600"
+              data-testid="close-modal-btn"
+            >
+              ✕
+            </button>
+          </div>
+
+          <div className="space-y-6">
+            <div>
+              <label className="block text-sm font-semibold text-slate-700 mb-2">
+                Compliance Framework
+              </label>
+              <select
+                value={framework}
+                onChange={(e) => setFramework(e.target.value)}
+                className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                data-testid="report-framework"
+              >
+                <option value="GDPR">GDPR</option>
+                <option value="SOX">SOX</option>
+                <option value="HIPAA">HIPAA</option>
+                <option value="ISO 27001">ISO 27001</option>
+                <option value="PCI DSS">PCI DSS</option>
+                <option value="SOC 2">SOC 2</option>
+              </select>
+            </div>
+
+            <div>
+              <label className="block text-sm font-semibold text-slate-700 mb-2">
+                Report Period
+              </label>
+              <select
+                value={dateRange}
+                onChange={(e) => setDateRange(e.target.value)}
+                className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                data-testid="report-date-range"
+              >
+                <option value="last-month">Last Month</option>
+                <option value="last-quarter">Last Quarter</option>
+                <option value="last-year">Last Year</option>
+                <option value="custom">Custom Range</option>
+              </select>
+            </div>
+
+            <div className="bg-slate-50 p-4 rounded-lg" data-testid="report-preview">
+              <p className="text-sm text-slate-600 mb-2">Report Preview</p>
+              <div className="space-y-2">
+                <div className="flex items-center justify-between text-sm">
+                  <span className="text-slate-600">Framework:</span>
+                  <span className="font-medium text-slate-900">{framework}</span>
+                </div>
+                <div className="flex items-center justify-between text-sm">
+                  <span className="text-slate-600">Period:</span>
+                  <span className="font-medium text-slate-900">{dateRange}</span>
+                </div>
+                <div className="flex items-center justify-between text-sm">
+                  <span className="text-slate-600">Requirements:</span>
+                  <span className="font-medium text-slate-900">Loading...</span>
+                </div>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-3 justify-end pt-4">
+              <button
+                onClick={onClose}
+                className="px-4 py-2 bg-slate-100 text-slate-700 rounded-lg hover:bg-slate-200 transition-colors"
+                disabled={isGenerating}
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleGenerate}
+                disabled={isGenerating}
+                className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors font-medium disabled:opacity-50"
+              >
+                {isGenerating ? 'Generating...' : 'Generate'}
+              </button>
+            </div>
+          </div>
+        </div>
+      </Card>
+    </div>
+  );
+}
+
+// ============================================================================
 // COMPLIANCE HUB
 // ============================================================================
 
 export function ComplianceHub() {
+  const [isReportModalOpen, setIsReportModalOpen] = useState(false);
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-end">
         <button
-          onClick={() => console.log('Generate compliance report')}
+          onClick={() => setIsReportModalOpen(true)}
           className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors font-medium"
           data-testid="generate-report-btn"
         >
           Generate Report
         </button>
       </div>
+
+      {isReportModalOpen && (
+        <ReportGenerationModal
+          onClose={() => setIsReportModalOpen(false)}
+        />
+      )}
 
       <Card className="p-6">
         <h2 className="text-lg font-bold text-slate-900 mb-4">Frameworks Overview</h2>
