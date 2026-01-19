@@ -2,6 +2,8 @@ import { useState, useEffect } from 'react';
 import type { Card, CardTypeValue, LifecyclePhaseValue } from '@/types/api';
 import { cardApi } from '@/lib/cards';
 import { CardGrid } from './CardCard';
+import { LoadingState } from '@/components/ui/LoadingState';
+import { ErrorState } from '@/components/ui/ErrorState';
 
 interface CardListProps {
   cardTypeFilter?: CardTypeValue;
@@ -73,32 +75,22 @@ export function CardList({
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center py-12">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600"></div>
-      </div>
+      <LoadingState
+        message="Loading cards..."
+        size="lg"
+      />
     );
   }
 
   if (error) {
     return (
       <div data-testid="card-list">
-        <div className="text-center py-12">
-          <svg
-            className="mx-auto h-12 w-12 text-red-400"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-            />
-          </svg>
-          <h3 className="mt-2 text-sm font-medium text-gray-900">Error</h3>
-          <p className="mt-1 text-sm text-gray-500">{error}</p>
-        </div>
+        <ErrorState
+          title="Failed to load cards"
+          message={error}
+          onRetry={() => fetchCards()}
+          errorType="network"
+        />
       </div>
     );
   }

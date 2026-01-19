@@ -1,5 +1,38 @@
 // API Types matching the Rust backend
 
+// Phase 4.1: Enhanced API configuration types
+export interface RetryConfig {
+  maxRetries: number;
+  retryDelay: number;
+  retryBackoffMultiplier: number;
+  retryableStatusCodes: number[];
+  retryableMethods: string[];
+}
+
+export interface ApiError {
+  message: string;
+  statusCode?: number;
+  isOffline?: boolean;
+  isQueued?: boolean;
+  retryCount?: number;
+}
+
+export interface LoadingState {
+  isLoading: boolean;
+  message?: string;
+}
+
+export interface ErrorStateType {
+  hasError: boolean;
+  error: ApiError | null;
+}
+
+export interface OfflineState {
+  isOffline: boolean;
+  queuedRequestCount: number;
+}
+
+
 export interface Card {
   id: string;
   name: string;

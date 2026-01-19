@@ -11,6 +11,7 @@ import { CardForm } from './components/cards/CardForm';
 import { ProtectedRoute } from './components/ProtectedRoute';
 import { Layout } from './components/Layout';
 import { TemplateLibrary, AuditLogPage } from './components/governance/arb';
+import { OfflineBanner } from './components/ui/ErrorState';
 // Governance Pages
 import {
   PrinciplesPage,
@@ -53,6 +54,7 @@ import {
 function App() {
   return (
     <BrowserRouter>
+      <OfflineBanner />
       <Routes>
         <Route path="/login" element={<Login />} />
 
