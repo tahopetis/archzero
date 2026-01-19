@@ -22,7 +22,7 @@ interface CompliancePolicy {
 
 export function PoliciesPage() {
   const { id } = useParams();
-  const [activeTab, setActiveTab] = useState<'architecture' | 'compliance'>('architecture');
+  const [activeTab, setActiveTab] = useState<'architecture' | 'compliance'>('compliance');
   const [selectedPolicy, setSelectedPolicy] = useState<ArchitecturePolicy | null>(null);
   const [selectedCompliancePolicy, setSelectedCompliancePolicy] = useState<CompliancePolicy | null>(null);
   const [isFormOpen, setIsFormOpen] = useState(false);
