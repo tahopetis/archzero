@@ -472,6 +472,16 @@ function App() {
             </ProtectedRoute>
           }
         />
+        <Route
+          path="/roadmap"
+          element={
+            <ProtectedRoute>
+              <Layout>
+                <RoadmapPage />
+              </Layout>
+            </ProtectedRoute>
+          }
+        />
 
         {/* Import/Export Routes */}
         <Route
