@@ -26,6 +26,15 @@ pub enum RiskStatus {
     Closed,
 }
 
+/// Risk approval status
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, ToSchema)]
+#[serde(rename_all = "camelCase")]
+pub enum RiskApprovalStatus {
+    Pending,
+    Approved,
+    Rejected,
+}
+
 /// Risk register entry
 #[derive(Debug, Clone, Serialize, Deserialize, ToSchema)]
 #[serde(rename_all = "camelCase")]
@@ -43,6 +52,10 @@ pub struct Risk {
     pub owner: Option<String>,
     pub status: RiskStatus,
     pub target_closure_date: Option<String>,  // ISO 8601 date
+    pub approval_status: Option<RiskApprovalStatus>,
+    pub approved_by: Option<String>,
+    pub approved_at: Option<String>,  // ISO 8601 datetime
+    pub is_overdue: Option<bool>,
     pub created_at: DateTime<Utc>,
     pub updated_at: DateTime<Utc>,
 }
@@ -60,6 +73,10 @@ pub struct CreateRiskRequest {
     pub owner: Option<String>,
     pub status: Option<RiskStatus>,
     pub target_closure_date: Option<String>,
+    pub approval_status: Option<RiskApprovalStatus>,
+    pub approved_by: Option<String>,
+    pub approved_at: Option<String>,
+    pub is_overdue: Option<bool>,
 }
 
 /// Update a risk
@@ -75,6 +92,10 @@ pub struct UpdateRiskRequest {
     pub owner: Option<String>,
     pub status: Option<RiskStatus>,
     pub target_closure_date: Option<String>,
+    pub approval_status: Option<RiskApprovalStatus>,
+    pub approved_by: Option<String>,
+    pub approved_at: Option<String>,
+    pub is_overdue: Option<bool>,
 }
 
 /// Query parameters for listing risks
@@ -223,6 +244,10 @@ mod tests {
             owner: None,
             status: None,
             target_closure_date: None,
+            approval_status: None,
+            approved_by: None,
+            approved_at: None,
+            is_overdue: None,
         };
         assert_eq!(req.calculate_risk_score(), 20);
     }
@@ -239,6 +264,10 @@ mod tests {
             owner: None,
             status: None,
             target_closure_date: None,
+            approval_status: None,
+            approved_by: None,
+            approved_at: None,
+            is_overdue: None,
         };
         assert!(req.validate().is_ok());
     }
@@ -255,6 +284,10 @@ mod tests {
             owner: None,
             status: None,
             target_closure_date: None,
+            approval_status: None,
+            approved_by: None,
+            approved_at: None,
+            is_overdue: None,
         };
         assert!(req.validate().is_err());
     }
@@ -271,6 +304,10 @@ mod tests {
             owner: None,
             status: None,
             target_closure_date: None,
+            approval_status: None,
+            approved_by: None,
+            approved_at: None,
+            is_overdue: None,
         };
         assert!(req.validate().is_err());
     }

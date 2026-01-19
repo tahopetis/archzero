@@ -150,6 +150,18 @@ pub async fn create_risk(
     if let Some(target_date) = &req.target_closure_date {
         attributes["targetClosureDate"] = serde_json::json!(target_date);
     }
+    if let Some(approval_status) = &req.approval_status {
+        attributes["approvalStatus"] = serde_json::json!(approval_status);
+    }
+    if let Some(approved_by) = &req.approved_by {
+        attributes["approvedBy"] = serde_json::json!(approved_by);
+    }
+    if let Some(approved_at) = &req.approved_at {
+        attributes["approvedAt"] = serde_json::json!(approved_at);
+    }
+    if let Some(is_overdue) = &req.is_overdue {
+        attributes["isOverdue"] = serde_json::json!(is_overdue);
+    }
 
     // Create card request
     let card_req = CreateCardRequest {
@@ -226,6 +238,18 @@ pub async fn update_risk(
     if let Some(target_date) = existing_attrs.get("targetClosureDate") {
         attributes["targetClosureDate"] = target_date.clone();
     }
+    if let Some(approval_status) = existing_attrs.get("approvalStatus") {
+        attributes["approvalStatus"] = approval_status.clone();
+    }
+    if let Some(approved_by) = existing_attrs.get("approvedBy") {
+        attributes["approvedBy"] = approved_by.clone();
+    }
+    if let Some(approved_at) = existing_attrs.get("approvedAt") {
+        attributes["approvedAt"] = approved_at.clone();
+    }
+    if let Some(is_overdue) = existing_attrs.get("isOverdue") {
+        attributes["isOverdue"] = is_overdue.clone();
+    }
 
     // Update with new values
     if let Some(risk_type) = &req.risk_type {
@@ -252,6 +276,18 @@ pub async fn update_risk(
     }
     if let Some(target_date) = &req.target_closure_date {
         attributes["targetClosureDate"] = serde_json::json!(target_date);
+    }
+    if let Some(approval_status) = &req.approval_status {
+        attributes["approvalStatus"] = serde_json::json!(approval_status);
+    }
+    if let Some(approved_by) = &req.approved_by {
+        attributes["approvedBy"] = serde_json::json!(approved_by);
+    }
+    if let Some(approved_at) = &req.approved_at {
+        attributes["approvedAt"] = serde_json::json!(approved_at);
+    }
+    if let Some(is_overdue) = &req.is_overdue {
+        attributes["isOverdue"] = serde_json::json!(is_overdue);
     }
 
     // Create update request
@@ -444,6 +480,22 @@ fn card_to_risk(card: crate::models::card::Card) -> Option<Risk> {
         .get("targetClosureDate")
         .and_then(|v| serde_json::from_value(v.clone()).ok());
 
+    let approval_status: Option<crate::models::risks::RiskApprovalStatus> = attrs
+        .get("approvalStatus")
+        .and_then(|v| serde_json::from_value(v.clone()).ok());
+
+    let approved_by: Option<String> = attrs
+        .get("approvedBy")
+        .and_then(|v| serde_json::from_value(v.clone()).ok());
+
+    let approved_at: Option<String> = attrs
+        .get("approvedAt")
+        .and_then(|v| serde_json::from_value(v.clone()).ok());
+
+    let is_overdue: Option<bool> = attrs
+        .get("isOverdue")
+        .and_then(|v| serde_json::from_value(v.clone()).ok());
+
     Some(Risk {
         id: card.id,
         name: card.name,
@@ -457,6 +509,10 @@ fn card_to_risk(card: crate::models::card::Card) -> Option<Risk> {
         owner,
         status,
         target_closure_date,
+        approval_status,
+        approved_by,
+        approved_at,
+        is_overdue,
         created_at: card.created_at,
         updated_at: card.updated_at,
     })

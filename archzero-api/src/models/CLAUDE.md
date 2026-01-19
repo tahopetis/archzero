@@ -26,6 +26,7 @@
 
 | ID | Time | T | Title | Read |
 |----|------|---|-------|------|
+| #4957 | 6:48 PM | 🔵 | Backend CreateRiskRequest Structure Found | ~231 |
 | #4745 | 2:36 PM | 🟣 | Compliance Audit Data Models Added to Backend | ~287 |
 | #4744 | 2:35 PM | 🔵 | Compliance Data Models Found in Backend | ~262 |
 </claude-mem-context>
