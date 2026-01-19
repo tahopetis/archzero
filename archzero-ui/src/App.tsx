@@ -40,6 +40,9 @@ import { RelationshipExplorerPage } from './pages/RelationshipExplorerPage';
 import { RelationshipMatrixPage } from './pages/RelationshipMatrixPage';
 import { TechnologyRadarPage } from './pages/TechnologyRadarPage';
 import { TCOCalculatorPage } from './pages/TCOCalculatorPage';
+import { BIAAssessmentPage } from './pages/BIAAssessmentPage';
+import { MigrationAdvisorPage } from './pages/MigrationAdvisorPage';
+import { CustomReportBuilderPage } from './pages/CustomReportBuilderPage';
 // Admin Pages
 import {
   UsersPage,
@@ -548,6 +551,26 @@ function App() {
             </ProtectedRoute>
           }
         />
+        <Route
+          path="/intelligence/bia"
+          element={
+            <ProtectedRoute>
+              <Layout>
+                <BIAAssessmentPage />
+              </Layout>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/intelligence/migration"
+          element={
+            <ProtectedRoute>
+              <Layout>
+                <MigrationAdvisorPage />
+              </Layout>
+            </ProtectedRoute>
+          }
+        />
 
         {/* Reports Route */}
         <Route
@@ -556,6 +579,16 @@ function App() {
             <ProtectedRoute>
               <Layout>
                 <ReportsDashboard />
+              </Layout>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/reports/builder"
+          element={
+            <ProtectedRoute>
+              <Layout>
+                <CustomReportBuilderPage />
               </Layout>
             </ProtectedRoute>
           }
