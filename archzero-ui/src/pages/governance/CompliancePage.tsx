@@ -22,9 +22,63 @@ export function CompliancePage() {
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
   const handleExportReport = async (format: 'pdf' | 'csv') => {
-    // Implement export functionality
-    console.log(`Exporting compliance report as ${format}`);
-    // TODO: Call backend API to generate report
+    try {
+      // Fetch compliance requirements from backend
+      const token = localStorage.getItem('auth_token');
+      const frameworkParam = selectedFramework !== 'all' ? `?framework=${selectedFramework}` : '';
+      const response = await fetch(`/api/v1/compliance-requirements${frameworkParam}`, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to fetch compliance data');
+      }
+
+      const data = await response.json();
+      const requirements = data.data || data;
+
+      if (!Array.isArray(requirements)) {
+        throw new Error('Invalid response format');
+      }
+
+      if (format === 'csv') {
+        // Generate CSV content
+        const headers = ['ID', 'Name', 'Framework', 'Description', 'Applicable Card Types', 'Required Controls', 'Audit Frequency'];
+        const csvRows = [
+          headers.join(','),
+          ...requirements.map(req => [
+            req.id,
+            `"${req.name.replace(/"/g, '""')}"`,
+            req.framework || '',
+            `"${(req.description || '').replace(/"/g, '""')}"`,
+            `"${(req.applicable_card_types || []).join('; ')}"`,
+            `"${(req.required_controls || []).join('; ')}"`,
+            req.audit_frequency || '',
+          ].join(',')),
+        ];
+
+        const csvContent = csvRows.join('\n');
+        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.setAttribute('href', url);
+        link.setAttribute('download', `compliance-report-${new Date().toISOString().split('T')[0]}.csv`);
+        link.style.display = 'none';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
+      } else {
+        // For PDF, we would need a backend endpoint or a client-side PDF library
+        // For now, export as CSV with a note
+        console.warn('PDF export not yet implemented, exporting as CSV');
+        alert('PDF export will be implemented soon. Exporting as CSV instead.');
+      }
+    } catch (error) {
+      console.error('Export failed:', error);
+    }
   };
 
   const handleSetupFramework = async (framework: { type: string; name: string; description: string }) => {

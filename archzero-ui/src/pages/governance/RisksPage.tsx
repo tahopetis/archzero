@@ -20,15 +20,57 @@ export function RisksPage() {
   const [selectedStatus, setSelectedStatus] = useState<string>('all');
 
   const handleExport = async (format: 'csv' | 'pdf' | 'xlsx') => {
-    // Implement export functionality
-    console.log(`Exporting risk register as ${format}`);
-    // TODO: Call backend API to generate export
-    // Example:
-    // const response = await fetch(`/api/v1/risks/export?format=${format}`, {
-    //   method: 'GET',
-    //   headers: { 'Authorization': `Bearer ${token}` }
-    // });
-    // Handle download...
+    try {
+      // Fetch all risks from backend
+      const token = localStorage.getItem('auth_token');
+      const response = await fetch('/api/v1/risks', {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to fetch risks');
+      }
+
+      const data = await response.json();
+      const risks = data.data || data;
+
+      if (!Array.isArray(risks)) {
+        throw new Error('Invalid response format');
+      }
+
+      // Generate CSV content
+      const headers = ['ID', 'Title', 'Type', 'Status', 'Probability', 'Impact', 'Risk Score', 'Owner', 'Description'];
+      const csvRows = [
+        headers.join(','),
+        ...risks.map(risk => [
+          risk.id,
+          `"${risk.name.replace(/"/g, '""')}"`,
+          risk.type || '',
+          risk.status || '',
+          risk.probability || '',
+          risk.impact || '',
+          risk.riskScore || '',
+          risk.owner || '',
+          `"${(risk.description || '').replace(/"/g, '""')}"`,
+        ].join(',')),
+      ];
+
+      const csvContent = csvRows.join('\n');
+      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.setAttribute('href', url);
+      link.setAttribute('download', `risk-register-${new Date().toISOString().split('T')[0]}.csv`);
+      link.style.display = 'none';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error('Export failed:', error);
+    }
   };
 
   return (
