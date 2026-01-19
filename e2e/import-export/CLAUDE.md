@@ -7,6 +7,7 @@
 
 | ID | Time | T | Title | Read |
 |----|------|---|-------|------|
+| #2424 | 4:23 PM | 🔄 | Removed conditional logic from template download test | ~253 |
 | #2412 | 4:20 PM | 🔄 | Removed conditional logic from JSON export test | ~274 |
 | #2404 | 4:18 PM | 🔴 | Removed conditional logic from import confirmation E2E test | ~285 |
 | #2400 | 4:17 PM | 🔄 | Removed conditional logic from import file validation test | ~268 |

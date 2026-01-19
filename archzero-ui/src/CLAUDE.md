@@ -20,6 +20,8 @@
 
 | ID | Time | T | Title | Read |
 |----|------|---|-------|------|
+| #5012 | 7:27 PM | 🔵 | Admin Routes Found in App.tsx | ~186 |
+| #5011 | 7:26 PM | 🔵 | Admin Routes Configured in App.tsx but Page Components Missing | ~254 |
 | #4917 | 6:32 PM | 🔵 | Ralph Loop Iterations 7-8 Achieved 65.9% Test Pass Rate Through Compliance Features and React Stability | ~528 |
 | #4912 | 6:31 PM | 🟣 | Ralph Loop Iterations 7-8: Compliance features achieve 65.9% test pass rate | ~662 |
 | #4819 | 3:45 PM | 🟣 | Analytics Page Imports Added to App.tsx | ~216 |

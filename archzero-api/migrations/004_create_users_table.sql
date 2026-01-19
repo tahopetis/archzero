@@ -32,42 +32,75 @@ CREATE TRIGGER update_users_updated_at
     EXECUTE FUNCTION update_updated_at_column();
 
 -- Insert test users (passwords are bcrypt hashes)
+-- All users use password: changeme123
+-- Bcrypt hash: $2b$12$SGW95NLHMSGnRnR.PQ6l7OQlDZkvp/zK3JkTGy1AH2KoSFmUA7AOG
+
 -- admin@archzero.local / changeme123
 INSERT INTO users (id, email, password_hash, full_name, role)
 VALUES (
     '01234567-89ab-cdef-0123-456789abcdef',
     'admin@archzero.local',
-    '$2b$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/LewY5GyYzW5qsqL3q',  -- changeme123
+    '$2b$12$SGW95NLHMSGnRnR.PQ6l7OQlDZkvp/zK3JkTGy1AH2KoSFmUA7AOG',
     'System Administrator',
-    'Admin'
+    'admin'
 ) ON CONFLICT (email) DO NOTHING;
 
--- architect@archzero.local / test123456
+-- architect@archzero.local / changeme123
 INSERT INTO users (id, email, password_hash, full_name, role)
 VALUES (
     '12345678-9abc-def0-1234-56789abcdef0',
     'architect@archzero.local',
-    '$2b$12$EixZaYVK1fsbw1ZfbX3OXe/PZ/Xc9zYFx1r6f3n7zWpLvU8cZqWUi',  -- test123456
+    '$2b$12$SGW95NLHMSGnRnR.PQ6l7OQlDZkvp/zK3JkTGy1AH2KoSFmUA7AOG',
     'Enterprise Architect',
-    'Architect'
+    'architect'
 ) ON CONFLICT (email) DO NOTHING;
 
--- editor@archzero.local / test123456
+-- editor@archzero.local / changeme123
 INSERT INTO users (id, email, password_hash, full_name, role)
 VALUES (
     '23456789-abcd-ef01-2345-6789abcdef01',
     'editor@archzero.local',
-    '$2b$12$EixZaYVK1fsbw1ZfbX3OXe/PZ/Xc9zYFx1r6f3n7zWpLvU8cZqWUi',  -- test123456
+    '$2b$12$SGW95NLHMSGnRnR.PQ6l7OQlDZkvp/zK3JkTGy1AH2KoSFmUA7AOG',
     'Content Editor',
-    'Editor'
+    'editor'
 ) ON CONFLICT (email) DO NOTHING;
 
--- viewer@archzero.local / test123456
+-- viewer@archzero.local / changeme123
 INSERT INTO users (id, email, password_hash, full_name, role)
 VALUES (
     '34567890-bcde-f012-3456-789abcdef12',
     'viewer@archzero.local',
-    '$2b$12$EixZaYVK1fsbw1ZfbX3OXe/PZ/Xc9zYFx1r6f3n7zWpLvU8cZqWUi',  -- test123456
+    '$2b$12$SGW95NLHMSGnRnR.PQ6l7OQlDZkvp/zK3JkTGy1AH2KoSFmUA7AOG',
     'Read-only Viewer',
-    'Viewer'
+    'viewer'
+) ON CONFLICT (email) DO NOTHING;
+
+-- editor1@archzero.local / changeme123 (for concurrent editing tests)
+INSERT INTO users (id, email, password_hash, full_name, role)
+VALUES (
+    '45678901-cdef-0123-4567-89abcdef1234',
+    'editor1@archzero.local',
+    '$2b$12$SGW95NLHMSGnRnR.PQ6l7OQlDZkvp/zK3JkTGy1AH2KoSFmUA7AOG',
+    'Content Editor 1',
+    'editor'
+) ON CONFLICT (email) DO NOTHING;
+
+-- editor2@archzero.local / changeme123 (for concurrent editing tests)
+INSERT INTO users (id, email, password_hash, full_name, role)
+VALUES (
+    '56789012-def0-1234-5678-9abcdef12345',
+    'editor2@archzero.local',
+    '$2b$12$SGW95NLHMSGnRnR.PQ6l7OQlDZkvp/zK3JkTGy1AH2KoSFmUA7AOG',
+    'Content Editor 2',
+    'editor'
+) ON CONFLICT (email) DO NOTHING;
+
+-- auditor@archzero.local / changeme123
+INSERT INTO users (id, email, password_hash, full_name, role)
+VALUES (
+    '67890123-ef01-2345-6789-abcdef123456',
+    'auditor@archzero.local',
+    '$2b$12$SGW95NLHMSGnRnR.PQ6l7OQlDZkvp/zK3JkTGy1AH2KoSFmUA7AOG',
+    'Compliance Auditor',
+    'viewer'
 ) ON CONFLICT (email) DO NOTHING;

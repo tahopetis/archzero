@@ -37,6 +37,10 @@ impl AuthService {
         }
     }
 
+    pub fn get_pool(&self) -> &PgPool {
+        &self.pool
+    }
+
     pub async fn login(&self, req: LoginRequest) -> Result<LoginResponse, AppError> {
         // Fetch user from database
         let user_row = sqlx::query_as::<_, UserRow>(

@@ -13,7 +13,7 @@ use utoipa::OpenApi;
 use archzero_api::{
     config::Settings,
     state::AppState,
-    handlers::{auth, cards, health, relationships, bia, migration, tco, policies, principles, standards, exceptions, initiatives, risks, compliance, arb, graph, import, bulk, csrf, cache, test_reset},
+    handlers::{auth, cards, health, relationships, bia, migration, tco, policies, principles, standards, exceptions, initiatives, risks, compliance, arb, graph, import, bulk, csrf, cache, test_reset, users},
     services::{CardService, AuthService, RelationshipService, Neo4jService, SagaOrchestrator, BIAService, TopologyService, MigrationService, TCOService, CsrfService, RateLimitService, CacheService, ArbTemplateService, ARBAuditService, ARBNotificationService},
     middleware::{security_headers, security_logging, rate_limit_middleware, auth_middleware},
     models::card::{Card, CardType, LifecyclePhase, CreateCardRequest, UpdateCardRequest, CardSearchParams},
@@ -444,6 +444,16 @@ async fn main() -> anyhow::Result<()> {
                 .route("/login", post(auth::login))
                 .route("/logout", post(auth::logout))
                 .route("/me", get(auth::me)),
+        )
+        .nest(
+            "/api/v1/users",
+            Router::new()
+                .route("/", get(users::get_users).post(users::create_user))
+                .route("/:id", get(users::get_user).put(users::update_user).delete(users::delete_user))
+                .layer(axum::middleware::from_fn_with_state(
+                    app_state.clone(),
+                    auth_middleware,
+                )),
         )
         .nest(
             "/api/v1/cards",

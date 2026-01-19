@@ -1,5 +1,6 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Plus, Edit, Trash2, User, Mail, Shield } from 'lucide-react';
+import { userApi, type User as ApiUser } from '../../lib/users';
 
 interface UserRole {
   id: string;
@@ -11,43 +12,44 @@ interface User {
   username: string;
   email: string;
   fullName: string;
-  roles: UserRole[];
+  role: string; // Changed from roles array to single role string to match backend
+  roles: UserRole[]; // Keep for display purposes
   isActive: boolean;
   createdAt: string;
 }
 
 export function UsersPage() {
-  const [users, setUsers] = useState<User[]>([
-    {
-      id: '1',
-      username: 'admin',
-      email: 'admin@archzero.local',
-      fullName: 'System Administrator',
-      roles: [{ id: '1', name: 'Admin' }],
-      isActive: true,
-      createdAt: '2024-01-01',
-    },
-    {
-      id: '2',
-      username: 'jdoe',
-      email: 'john.doe@example.com',
-      fullName: 'John Doe',
-      roles: [{ id: '2', name: 'Editor' }],
-      isActive: true,
-      createdAt: '2024-01-15',
-    },
-    {
-      id: '3',
-      username: 'asmith',
-      email: 'alice.smith@example.com',
-      fullName: 'Alice Smith',
-      roles: [{ id: '3', name: 'Viewer' }],
-      isActive: false,
-      createdAt: '2024-01-20',
-    },
-  ]);
+  const [users, setUsers] = useState<User[]>([]);
+  const [loading, setLoading] = useState(true);
   const [isCreating, setIsCreating] = useState(false);
   const [editingUser, setEditingUser] = useState<User | null>(null);
+
+  // Fetch users from API on mount
+  useEffect(() => {
+    const fetchUsers = async () => {
+      try {
+        const apiUsers: ApiUser[] = await userApi.list();
+        // Map API users to UI users
+        const uiUsers: User[] = apiUsers.map((apiUser) => ({
+          id: apiUser.id,
+          username: apiUser.email.split('@')[0], // Extract username from email
+          email: apiUser.email,
+          fullName: apiUser.full_name || '',
+          role: apiUser.role,
+          roles: [{ id: apiUser.role, name: apiUser.role.charAt(0).toUpperCase() + apiUser.role.slice(1) }],
+          isActive: true, // Default to active since we don't have this field yet
+          createdAt: new Date(apiUser.created_at).toISOString().split('T')[0],
+        }));
+        setUsers(uiUsers);
+      } catch (error) {
+        console.error('Failed to fetch users:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchUsers();
+  }, []);
 
   return (
     <div className="container mx-auto py-6">
@@ -64,6 +66,15 @@ export function UsersPage() {
           Add User
         </button>
       </div>
+
+      {loading ? (
+        <div className="text-center py-12" data-testid="users-loading">
+          <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-current border-r-transparent align-[-0.125em] motion-reduce:animate-[spin_1.5s_linear_infinite]" role="status">
+            <span className="sr-only">Loading...</span>
+          </div>
+          <p className="mt-4 text-gray-600 dark:text-gray-400">Loading users...</p>
+        </div>
+      ) : (
 
       <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden">
         <table className="w-full" data-testid="users-list">
@@ -88,7 +99,7 @@ export function UsersPage() {
           </thead>
           <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
             {users.map((user) => (
-              <tr key={user.id} data-testid={`user-row-${user.id}`}>
+              <tr key={user.id} className="user-row" data-testid={`user-row-${user.id}`}>
                 <td className="px-6 py-4 whitespace-nowrap">
                   <div className="flex items-center">
                     <div className="flex-shrink-0 h-10 w-10 bg-gray-300 dark:bg-gray-600 rounded-full flex items-center justify-center">
@@ -160,6 +171,7 @@ export function UsersPage() {
           </tbody>
         </table>
       </div>
+      )}
 
       {isCreating && (
         <UserForm
@@ -195,6 +207,7 @@ function UserForm({ user, onClose, onSave }: UserFormProps) {
   const [username, setUsername] = useState(user?.username || '');
   const [email, setEmail] = useState(user?.email || '');
   const [fullName, setFullName] = useState(user?.fullName || '');
+  const [role, setRole] = useState(user?.role || 'viewer');
   const [isActive, setIsActive] = useState(user?.isActive ?? true);
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -203,7 +216,8 @@ function UserForm({ user, onClose, onSave }: UserFormProps) {
       username,
       email,
       fullName,
-      roles: user?.roles || [],
+      role,
+      roles: [{ id: role, name: role.charAt(0).toUpperCase() + role.slice(1) }],
       isActive,
     });
   };
@@ -245,6 +259,22 @@ function UserForm({ user, onClose, onSave }: UserFormProps) {
               data-testid="user-email-input"
               required
             />
+          </div>
+          <div className="mb-4">
+            <label className="block text-sm font-medium mb-1">Role</label>
+            <select
+              value={role}
+              onChange={(e) => setRole(e.target.value)}
+              className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
+              data-testid="user-role-select"
+            >
+              <option value="admin">Admin</option>
+              <option value="architect">Architect</option>
+              <option value="editor">Editor</option>
+              <option value="viewer">Viewer</option>
+              <option value="arbchair">ARB Chair</option>
+              <option value="arbmember">ARB Member</option>
+            </select>
           </div>
           <div className="mb-4">
             <label className="flex items-center gap-2">

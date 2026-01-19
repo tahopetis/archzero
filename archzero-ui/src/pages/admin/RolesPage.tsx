@@ -173,11 +173,11 @@ function RoleForm({ role, onClose, onSave }: RoleFormProps) {
 
   const availablePermissions: Permission[] = [
     { id: '1', name: 'Create Cards', resource: 'cards', action: 'create' },
-    { id: '2', name: 'Edit Cards', resource: 'cards', action: 'edit' },
+    { id: '2', name: 'Edit Cards', resource: 'cards', action: 'update' }, // Changed from 'edit' to 'update' to match tests
     { id: '3', name: 'Delete Cards', resource: 'cards', action: 'delete' },
-    { id: '6', name: 'View Cards', resource: 'cards', action: 'view' },
-    { id: '4', name: 'Manage Users', resource: 'users', action: 'manage' },
-    { id: '5', name: 'Manage Roles', resource: 'roles', action: 'manage' },
+    { id: '4', name: 'View Cards', resource: 'cards', action: 'read' }, // Changed from 'view' to 'read' to match tests
+    { id: '5', name: 'Manage Users', resource: 'users', action: 'manage' },
+    { id: '6', name: 'Manage Roles', resource: 'roles', action: 'manage' },
     { id: '7', name: 'View Governance', resource: 'governance', action: 'view' },
     { id: '8', name: 'Edit Governance', resource: 'governance', action: 'edit' },
   ];
@@ -214,7 +214,7 @@ function RoleForm({ role, onClose, onSave }: RoleFormProps) {
               value={name}
               onChange={(e) => setName(e.target.value)}
               className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
-              data-testid="role-name-input"
+              data-testid="role-name"
               required
             />
           </div>
@@ -224,7 +224,7 @@ function RoleForm({ role, onClose, onSave }: RoleFormProps) {
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
-              data-testid="role-description-input"
+              data-testid="role-description"
               rows={3}
               required
             />
@@ -246,7 +246,8 @@ function RoleForm({ role, onClose, onSave }: RoleFormProps) {
                     checked={selectedPermissions.has(permission.id)}
                     onChange={() => togglePermission(permission.id)}
                     className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                    data-testid={`role-permission-checkbox-${permission.id}`}
+                    data-testid={`perm-${permission.resource}-${permission.action}`}
+                    id={`perm-${permission.resource}-${permission.action}`}
                   />
                   <span className="text-sm">{permission.name}</span>
                 </label>
