@@ -46,11 +46,12 @@
   - Custom Report Builder: ✅ COMPLETE (5 tests × 3 browsers = 15 passing)
 - All Phase 3 beads: CLOSED or updated to complete
 
-**Phase 4: Test Infrastructure & Quality** - 🔄 **IN PROGRESS** (15%)
+**Phase 4: Test Infrastructure & Quality** - 🔄 **IN PROGRESS** (30%)
 - Target: +86 tests (100%)
 - Estimated: 5-7 days
 - Open Beads: archzero-8z0 (P1), archzero-b0n (P1), archzero-3hv (P2)
 - **Phase 4.1**: ✅ **COMPLETE** - API Mocking Tests Infrastructure (January 19, 2026)
+- **Phase 4.2**: 🔄 **IN PROGRESS** - Risk Management Test Selectors (January 19, 2026)
 
 ### 📊 PROGRESS SUMMARY
 
@@ -58,9 +59,9 @@
 Phase 1: ████████████████████ 100% ✅ COMPLETE
 Phase 2: █████████████████████  95% ✅ BACKEND DONE
 Phase 3: ██████████████████████ 100% ✅ COMPLETE 🎉
-Phase 4: ███░░░░░░░░░░░░░░░░░░░  15% 🔄 IN PROGRESS
+Phase 4: ████████░░░░░░░░░░░░░░  30% 🔄 IN PROGRESS
 ────────────────────────────────────────
-Overall: █████████████████████░  72% COMPLETE
+Overall: ██████████████████████  75% COMPLETE
 ```
 
 ### 🔧 KEY FIXES APPLIED
@@ -546,7 +547,39 @@ This plan addresses ALL issues systematically with no shortcuts.
 
 #### 4.2 Implement Missing Features (Target: +30 tests)
 
-**Status:** ⏳ PENDING (archzero-b0n - OPEN, P1)
+**Status:** 🔄 **IN PROGRESS** (archzero-b0n - OPEN, P1)
+
+**Implementation Summary (January 19, 2026):**
+
+1. **✅ Risk Management Test Selectors Added**
+   - RiskDashboard: `data-testid="risk-dashboard"`
+   - RiskHeatMap: `data-testid="risk-heatmap"`
+   - TopRisks: `data-testid="top-risks"`
+   - TopRisks Container: `data-testid="top-risks-container"`
+   - Risk Items: `data-testid="risk-item"`
+   - RisksPage: `data-testid="risk-register"`
+   - Add Risk Button: `data-testid="add-risk-btn"`
+
+2. **✅ RiskForm Test Selectors Updated**
+   - Risk Title: `data-testid="risk-title"`
+   - Risk Category: `data-testid="risk-category"`
+   - Risk Probability: `data-testid="risk-probability"`
+   - Risk Impact: `data-testid="risk-impact"`
+   - Risk Score: `data-testid="risk-score"`
+   - Save Button: `data-testid="save-risk-btn"`
+
+**Files Modified:**
+- `archzero-ui/src/components/governance/risks/RiskComponents.tsx`
+- `archzero-ui/src/components/governance/risks/RiskForm.tsx`
+- `archzero-ui/src/pages/governance/RisksPage.tsx`
+
+**Build Status:** ✅ SUCCESS
+
+**Remaining Work for 4.2:**
+- Compliance dashboard enhancements
+- Governance export functionality
+- Relationship graph performance optimizations
+- Report generation features (PDF, PowerPoint)
 
 **Solution - Complete Implementation:**
 
