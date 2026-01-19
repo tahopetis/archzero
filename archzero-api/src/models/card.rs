@@ -23,6 +23,7 @@ pub enum CardType {
     Initiative,
     Risk,
     ComplianceRequirement,
+    ComplianceAudit,
     // Layer E: ARB (Architecture Review Board)
     ARBMeeting,
     ARBSubmission,

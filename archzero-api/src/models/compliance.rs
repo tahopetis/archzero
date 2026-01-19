@@ -154,3 +154,50 @@ pub struct ComplianceRequirementsListResponse {
 pub struct CompliancePagination {
     pub total: i64,
 }
+
+/// Compliance audit record
+#[derive(Debug, Serialize, Deserialize, Clone, ToSchema)]
+#[serde(rename_all = "camelCase")]
+pub struct ComplianceAudit {
+    pub id: Uuid,
+    pub title: String,
+    pub date: String, // ISO date string
+    pub framework: String,
+    pub auditor: String,
+    pub status: String,
+    pub notes: String,
+    pub created_at: DateTime<Utc>,
+    pub updated_at: DateTime<Utc>,
+}
+
+/// Request to create a compliance audit
+#[derive(Debug, Deserialize, Clone, ToSchema)]
+#[serde(rename_all = "camelCase")]
+pub struct CreateComplianceAuditRequest {
+    pub title: String,
+    pub date: String,
+    pub framework: String,
+    pub auditor: String,
+    pub status: String,
+    pub notes: String,
+}
+
+/// Request to update a compliance audit
+#[derive(Debug, Deserialize, Clone, ToSchema)]
+#[serde(rename_all = "camelCase")]
+pub struct UpdateComplianceAuditRequest {
+    pub title: Option<String>,
+    pub date: Option<String>,
+    pub framework: Option<String>,
+    pub auditor: Option<String>,
+    pub status: Option<String>,
+    pub notes: Option<String>,
+}
+
+/// Paginated response for compliance audits
+#[derive(Debug, Serialize, ToSchema)]
+#[serde(rename_all = "camelCase")]
+pub struct ComplianceAuditsListResponse {
+    pub data: Vec<ComplianceAudit>,
+    pub pagination: CompliancePagination,
+}

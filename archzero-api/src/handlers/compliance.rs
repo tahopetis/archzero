@@ -1,7 +1,6 @@
 use axum::{extract::{Path, Query, State}, Json};
 use uuid::Uuid;
 use std::collections::HashMap;
-use utoipa::ToSchema;
 
 use crate::models::card::{Card, CardType, CreateCardRequest, UpdateCardRequest, CardSearchParams};
 use crate::models::compliance::*;
@@ -510,5 +509,279 @@ impl Default for CardSearchParams {
             page: None,
             page_size: None,
         }
+    }
+}
+
+/// List compliance audits with optional framework filter
+#[utoipa::path(
+    get,
+    path = "/api/v1/compliance-audits",
+    params(
+        ("framework" = Option<String>, Query, description = "Filter by framework"),
+        ("page" = Option<u32>, Query, description = "Page number")
+    ),
+    responses(
+        (status = 200, description = "Compliance audits retrieved successfully", body = ComplianceAuditsListResponse),
+        (status = 500, description = "Internal server error")
+    ),
+    tag = "Compliance"
+)]
+pub async fn list_compliance_audits(
+    State(state): State<AppState>,
+    Query(params): Query<HashMap<String, String>>,
+) -> Result<Json<ComplianceAuditsListResponse>> {
+    use crate::models::card::CardType;
+
+    // Build search params for cards
+    let page = params.get("page").and_then(|p| p.parse::<u32>().ok());
+    let card_params = CardSearchParams {
+        card_type: Some(CardType::ComplianceAudit),
+        page,
+        ..Default::default()
+    };
+
+    let (cards, total) = state.card_service.list(card_params).await?;
+
+    // Filter by framework if specified
+    let filtered_cards: Vec<Card> = if let Some(framework) = params.get("framework") {
+        cards.into_iter()
+            .filter(|card| {
+                card.attributes.get("framework")
+                    .and_then(|v| v.as_str())
+                    .map(|s| s == framework)
+                    .unwrap_or(false)
+            })
+            .collect()
+    } else {
+        cards
+    };
+
+    // Convert to compliance audit response
+    let audits: Vec<ComplianceAudit> = filtered_cards
+        .into_iter()
+        .map(card_to_compliance_audit)
+        .collect();
+
+    Ok(Json(ComplianceAuditsListResponse {
+        data: audits,
+        pagination: CompliancePagination { total },
+    }))
+}
+
+/// Get a compliance audit by ID
+#[utoipa::path(
+    get,
+    path = "/api/v1/compliance-audits/{id}",
+    params(
+        ("id" = Uuid, Path, description = "Compliance audit ID")
+    ),
+    responses(
+        (status = 200, description = "Compliance audit retrieved successfully", body = ComplianceAudit),
+        (status = 404, description = "Compliance audit not found"),
+        (status = 500, description = "Internal server error")
+    ),
+    tag = "Compliance"
+)]
+pub async fn get_compliance_audit(
+    State(state): State<AppState>,
+    Path(id): Path<Uuid>,
+) -> Result<Json<ComplianceAudit>> {
+    use crate::models::card::CardType;
+
+    let card = state.card_service.get(id).await?;
+
+    // Validate card type
+    if card.card_type != CardType::ComplianceAudit {
+        return Err(crate::error::AppError::NotFound(format!(
+            "Card {} is not a compliance audit", id
+        )));
+    }
+
+    Ok(Json(card_to_compliance_audit(card)))
+}
+
+/// Create a new compliance audit
+#[utoipa::path(
+    post,
+    path = "/api/v1/compliance-audits",
+    request_body = CreateComplianceAuditRequest,
+    responses(
+        (status = 200, description = "Compliance audit created successfully", body = ComplianceAudit),
+        (status = 400, description = "Bad request"),
+        (status = 500, description = "Internal server error")
+    ),
+    tag = "Compliance"
+)]
+pub async fn create_compliance_audit(
+    State(state): State<AppState>,
+    Json(req): Json<CreateComplianceAuditRequest>,
+) -> Result<Json<ComplianceAudit>> {
+    use crate::models::card::{CardType, LifecyclePhase};
+    use chrono::Utc;
+
+    let attributes = serde_json::json!({
+        "framework": req.framework,
+        "auditor": req.auditor,
+        "status": req.status,
+        "notes": req.notes,
+        "date": req.date,
+    });
+
+    let card_req = CreateCardRequest {
+        name: req.title.clone(),
+        card_type: CardType::ComplianceAudit,
+        lifecycle_phase: LifecyclePhase::Active,
+        quality_score: None,
+        description: Some(req.notes.clone()),
+        owner_id: None,
+        attributes: Some(attributes),
+        tags: Some(vec![req.framework.clone()]),
+    };
+
+    let card = state.card_service.create(card_req).await?;
+
+    // Add created_at and updated_at to the response
+    let mut audit = card_to_compliance_audit(card);
+    audit.created_at = Utc::now();
+    audit.updated_at = Utc::now();
+
+    Ok(Json(audit))
+}
+
+/// Update a compliance audit
+#[utoipa::path(
+    put,
+    path = "/api/v1/compliance-audits/{id}",
+    params(
+        ("id" = Uuid, Path, description = "Compliance audit ID")
+    ),
+    request_body = UpdateComplianceAuditRequest,
+    responses(
+        (status = 200, description = "Compliance audit updated successfully", body = ComplianceAudit),
+        (status = 404, description = "Compliance audit not found"),
+        (status = 400, description = "Bad request"),
+        (status = 500, description = "Internal server error")
+    ),
+    tag = "Compliance"
+)]
+pub async fn update_compliance_audit(
+    State(state): State<AppState>,
+    Path(id): Path<Uuid>,
+    Json(req): Json<UpdateComplianceAuditRequest>,
+) -> Result<Json<ComplianceAudit>> {
+    use crate::models::card::CardType;
+
+    // Get existing card to merge attributes
+    let existing = state.card_service.get(id).await?;
+
+    // Validate card type
+    if existing.card_type != CardType::ComplianceAudit {
+        return Err(crate::error::AppError::NotFound(format!(
+            "Card {} is not a compliance audit", id
+        )));
+    }
+
+    // Build updated attributes
+    let mut attributes = existing.attributes;
+    if let Some(framework) = &req.framework {
+        attributes["framework"] = serde_json::Value::String(framework.clone());
+    }
+    if let Some(auditor) = &req.auditor {
+        attributes["auditor"] = serde_json::Value::String(auditor.clone());
+    }
+    if let Some(status) = &req.status {
+        attributes["status"] = serde_json::Value::String(status.clone());
+    }
+    if let Some(notes) = &req.notes {
+        attributes["notes"] = serde_json::Value::String(notes.clone());
+    }
+    if let Some(date) = &req.date {
+        attributes["date"] = serde_json::Value::String(date.clone());
+    }
+
+    let card_req = UpdateCardRequest {
+        name: req.title,
+        lifecycle_phase: None,
+        quality_score: None,
+        description: req.notes.clone(),
+        attributes: Some(attributes),
+        tags: None,
+    };
+
+    let card = state.card_service.update(id, card_req).await?;
+    Ok(Json(card_to_compliance_audit(card)))
+}
+
+/// Delete a compliance audit
+#[utoipa::path(
+    delete,
+    path = "/api/v1/compliance-audits/{id}",
+    params(
+        ("id" = Uuid, Path, description = "Compliance audit ID")
+    ),
+    responses(
+        (status = 200, description = "Compliance audit deleted successfully"),
+        (status = 404, description = "Compliance audit not found"),
+        (status = 500, description = "Internal server error")
+    ),
+    tag = "Compliance"
+)]
+pub async fn delete_compliance_audit(
+    State(state): State<AppState>,
+    Path(id): Path<Uuid>,
+) -> Result<Json<()>> {
+    use crate::models::card::CardType;
+
+    // Validate that the card exists and is a compliance audit
+    let card = state.card_service.get(id).await?;
+    if card.card_type != CardType::ComplianceAudit {
+        return Err(crate::error::AppError::NotFound(format!(
+            "Card {} is not a compliance audit", id
+        )));
+    }
+
+    state.card_service.delete(id).await?;
+    Ok(Json(()))
+}
+
+/// Helper function to convert a Card to ComplianceAudit
+fn card_to_compliance_audit(card: Card) -> ComplianceAudit {
+    use chrono::Utc;
+
+    let framework = card.attributes.get("framework")
+        .and_then(|v| v.as_str())
+        .unwrap_or("Unknown")
+        .to_string();
+
+    let auditor = card.attributes.get("auditor")
+        .and_then(|v| v.as_str())
+        .unwrap_or("Unknown")
+        .to_string();
+
+    let status = card.attributes.get("status")
+        .and_then(|v| v.as_str())
+        .unwrap_or("scheduled")
+        .to_string();
+
+    let notes = card.attributes.get("notes")
+        .and_then(|v| v.as_str())
+        .unwrap_or("")
+        .to_string();
+
+    let date = card.attributes.get("date")
+        .and_then(|v| v.as_str())
+        .unwrap_or("")
+        .to_string();
+
+    ComplianceAudit {
+        id: card.id,
+        title: card.name,
+        date,
+        framework,
+        auditor,
+        status,
+        notes,
+        created_at: card.created_at,
+        updated_at: card.updated_at,
     }
 }

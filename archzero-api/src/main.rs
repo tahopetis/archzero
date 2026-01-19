@@ -565,6 +565,14 @@ async fn main() -> anyhow::Result<()> {
                 .route("/:id/dashboard", get(compliance::get_compliance_dashboard))
                 // Removed Extension layer to fix type inference),
         )
+        // Phase 4.2: Compliance Audit endpoints
+        .nest(
+            "/api/v1/compliance-audits",
+            Router::new()
+                .route("/", get(compliance::list_compliance_audits).post(compliance::create_compliance_audit))
+                .route("/:id", get(compliance::get_compliance_audit).put(compliance::update_compliance_audit).delete(compliance::delete_compliance_audit))
+                // Removed Extension layer to fix type inference),
+        )
         // Phase 3: ARB Workflow endpoints (with authentication)
         .nest(
             "/api/v1/arb/meetings",
