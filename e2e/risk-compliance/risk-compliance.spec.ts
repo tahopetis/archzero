@@ -449,8 +449,15 @@ test.describe('Risk Review and Approval', () => {
   test('should require approval for high-risk items', async ({ page }) => {
     await page.goto('/governance/risks');
 
-    // Create high-risk item
-    await page.locator('button:has-text("Add Risk")').click();
+    // Wait for page to fully load
+    await expect(page.locator('[data-testid="risk-register"], h1:has-text("Risks")')).toBeVisible({ timeout: 10000 });
+    await page.waitForLoadState('domcontentloaded');
+    await page.waitForTimeout(1000); // Wait for React to fully stabilize
+
+    // Create high-risk item - use data-testid selector and wait for button to be stable
+    const addRiskBtn = page.locator('[data-testid="add-risk-btn"]');
+    await expect(addRiskBtn).toBeAttached();
+    await addRiskBtn.click();
     await page.locator('[data-testid="risk-title"]').fill('Critical Risk');
     await page.locator('[data-testid="risk-probability"]').selectOption('High');
     await page.locator('[data-testid="risk-impact"]').selectOption('Critical');
@@ -463,6 +470,18 @@ test.describe('Risk Review and Approval', () => {
 
   test('should allow risk manager to approve risks', async ({ page }) => {
     await page.goto('/governance/risks');
+
+    // Wait for page to fully load
+    await expect(page.locator('[data-testid="risk-register"], h1:has-text("Risks")')).toBeVisible({ timeout: 10000 });
+    await page.waitForLoadState('domcontentloaded');
+    await page.waitForTimeout(1000); // Wait for React to fully stabilize
+
+    // Switch to list view to see all risks with their data attributes
+    const allRisksTab = page.locator('text=All Risks').first();
+    await expect(allRisksTab).toBeAttached();
+    await allRisksTab.click();
+    await page.waitForLoadState('domcontentloaded');
+    await page.waitForTimeout(500);
 
     const pendingRisk = page.locator('[data-testid="risk-item"][data-status="pending"]').first();
     await expect(pendingRisk).toBeVisible();
@@ -480,6 +499,18 @@ test.describe('Risk Review and Approval', () => {
 
   test('should escalate overdue risks', async ({ page }) => {
     await page.goto('/governance/risks');
+
+    // Wait for page to fully load
+    await expect(page.locator('[data-testid="risk-register"], h1:has-text("Risks")')).toBeVisible({ timeout: 10000 });
+    await page.waitForLoadState('domcontentloaded');
+    await page.waitForTimeout(1000); // Wait for React to fully stabilize
+
+    // Switch to list view to see all risks with their data attributes
+    const allRisksTab = page.locator('text=All Risks').first();
+    await expect(allRisksTab).toBeAttached();
+    await allRisksTab.click();
+    await page.waitForLoadState('domcontentloaded');
+    await page.waitForTimeout(500);
 
     const overdueRisk = page.locator('[data-testid="risk-item"][data-overdue="true"]').first();
     await expect(overdueRisk).toBeVisible();
