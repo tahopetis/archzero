@@ -13,6 +13,10 @@ interface RiskFormProps {
   onCancel: () => void;
 }
 
+interface FormError {
+  message: string;
+}
+
 export function RiskForm({ risk, onSuccess, onCancel }: RiskFormProps) {
   const createMutation = useCreateRisk();
   const updateMutation = useUpdateRisk();
@@ -27,10 +31,21 @@ export function RiskForm({ risk, onSuccess, onCancel }: RiskFormProps) {
   const [owner, setOwner] = useState(risk?.owner || '');
   const [targetClosureDate, setTargetClosureDate] = useState(risk?.targetClosureDate?.split('T')[0] || '');
 
+  const [error, setError] = useState<FormError | null>(null);
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
+
   const riskScore = parseInt(likelihood) * parseInt(impact);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setError(null);
+    setSuccessMessage(null);
+
+    // Basic validation
+    if (!name.trim()) {
+      setError({ message: 'Risk name is required' });
+      return;
+    }
 
     const data = {
       name,
@@ -44,26 +59,36 @@ export function RiskForm({ risk, onSuccess, onCancel }: RiskFormProps) {
       targetClosureDate: targetClosureDate || undefined,
     };
 
-    if (risk) {
-      await updateMutation.mutateAsync({
-        id: risk.id,
-        data: {
-          name,
-          description,
-          riskType,
-          likelihood: parseInt(likelihood),
-          impact: parseInt(impact),
-          status,
-          mitigationPlan,
-          owner,
-          targetClosureDate: targetClosureDate || undefined,
-        },
-      });
-    } else {
-      await createMutation.mutateAsync(data);
-    }
+    try {
+      if (risk) {
+        await updateMutation.mutateAsync({
+          id: risk.id,
+          data: {
+            name,
+            description,
+            riskType,
+            likelihood: parseInt(likelihood),
+            impact: parseInt(impact),
+            status,
+            mitigationPlan,
+            owner,
+            targetClosureDate: targetClosureDate || undefined,
+          },
+        });
+        setSuccessMessage('Risk updated successfully');
+      } else {
+        await createMutation.mutateAsync(data);
+        setSuccessMessage('Risk created successfully');
+      }
 
-    onSuccess();
+      // Call onSuccess after a brief delay to show the success message
+      setTimeout(() => {
+        onSuccess();
+      }, 500);
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Failed to save risk';
+      setError({ message: errorMessage });
+    }
   };
 
   return (
@@ -71,6 +96,20 @@ export function RiskForm({ risk, onSuccess, onCancel }: RiskFormProps) {
       <h2 className="text-xl font-bold text-slate-900 mb-4">
         {risk ? 'Edit Risk' : 'New Risk'}
       </h2>
+
+      {/* Success Message */}
+      {successMessage && (
+        <div className="mb-4 p-3 bg-emerald-50 border border-emerald-200 rounded-lg" data-testid="success-message">
+          <p className="text-sm font-medium text-emerald-800">{successMessage}</p>
+        </div>
+      )}
+
+      {/* Error Message */}
+      {error && (
+        <div className="mb-4 p-3 bg-rose-50 border border-rose-200 rounded-lg" data-testid="error-message">
+          <p className="text-sm font-medium text-rose-800">{error.message}</p>
+        </div>
+      )}
 
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
@@ -249,19 +288,28 @@ export function RiskForm({ risk, onSuccess, onCancel }: RiskFormProps) {
           <button
             type="submit"
             disabled={createMutation.isPending || updateMutation.isPending}
-            className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors font-medium disabled:opacity-50"
+            className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
             data-testid="save-risk-btn"
           >
-            {createMutation.isPending || updateMutation.isPending
-              ? 'Saving...'
-              : risk
-              ? 'Update Risk'
-              : 'Create Risk'}
+            {createMutation.isPending || updateMutation.isPending ? (
+              <>
+                <svg className="animate-spin h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                <span>Saving...</span>
+              </>
+            ) : risk ? (
+              'Update Risk'
+            ) : (
+              'Create Risk'
+            )}
           </button>
           <button
             type="button"
             onClick={onCancel}
-            className="px-4 py-2 bg-slate-100 text-slate-700 rounded-lg hover:bg-slate-200 transition-colors"
+            disabled={createMutation.isPending || updateMutation.isPending}
+            className="px-4 py-2 bg-slate-100 text-slate-700 rounded-lg hover:bg-slate-200 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             data-testid="risk-cancel-button"
           >
             Cancel
