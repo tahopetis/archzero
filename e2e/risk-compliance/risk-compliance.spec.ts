@@ -30,10 +30,7 @@ test.describe('Risk Register', () => {
   test('should create new risk entry', async ({ page }) => {
     await page.goto('/governance/risks');
 
-    // Add brief wait for React hydration
-    await page.waitForTimeout(500);
-
-    await page.locator('[data-testid="add-risk-btn"]').click();
+    await page.locator('button:has-text("Add Risk"), [data-testid="add-risk-btn"]').click();
 
     // Fill risk details
     await page.locator('[data-testid="risk-title"]').fill('Data Breach Risk');
@@ -43,17 +40,15 @@ test.describe('Risk Register', () => {
     await page.locator('[data-testid="risk-impact"]').selectOption('High');
 
     // Save
-    await page.locator('[data-testid="save-risk-btn"]').click();
+    await page.locator('button:has-text("Save"), [data-testid="save-risk-btn"]').click();
 
-    await expect(page.locator('[data-testid="success-message"]')).toBeVisible({ timeout: 5000 });
+    await expect(page.locator('text=Risk created, text=Success')).toBeVisible({ timeout: 5000 });
   });
 
   test('should calculate risk score (Likelihood × Impact)', async ({ page }) => {
     await page.goto('/governance/risks');
 
-    await page.waitForTimeout(500);
-
-    await page.locator('[data-testid="add-risk-btn"]').click();
+    await page.locator('button:has-text("Add Risk")').click();
 
     // Set probability (Likelihood) to High (4) and Impact to High (5)
     await page.locator('[data-testid="risk-title"]').fill('Test Risk Score');
