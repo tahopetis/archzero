@@ -2,7 +2,7 @@
  * Risk Management Page
  */
 
-import { useState, memo, useCallback, useEffect, useRef } from 'react';
+import { useState, memo, useCallback } from 'react';
 import { Download } from 'lucide-react';
 import { RiskDashboard, RiskHeatMap, RisksList, type Risk } from '@/components/governance/risks';
 import { RiskForm } from '@/components/governance/risks/RiskForm';
@@ -51,35 +51,6 @@ export function RisksPage() {
   // Filter states
   const [selectedRiskType, setSelectedRiskType] = useState<string>('all');
   const [selectedStatus, setSelectedStatus] = useState<string>('all');
-
-  // Defer rendering of data-fetching components to prevent initial render re-renders
-  const [isReady, setIsReady] = useState(false);
-  const isReadyRef = useRef(false);
-
-  useEffect(() => {
-    // Defer setting ready state to ensure stable header after React hydration
-    // Use requestAnimationFrame to wait for paint before allowing data fetching
-    let rafId: number;
-    let timeoutId: NodeJS.Timeout;
-
-    const markReady = () => {
-      // Double RAF to ensure browser paint is complete
-      rafId = requestAnimationFrame(() => {
-        rafId = requestAnimationFrame(() => {
-          isReadyRef.current = true;
-          setIsReady(true);
-        });
-      });
-    };
-
-    // Also set a timeout fallback in case RAF doesn't fire
-    timeoutId = setTimeout(markReady, 50);
-
-    return () => {
-      if (rafId) cancelAnimationFrame(rafId);
-      clearTimeout(timeoutId);
-    };
-  }, []);
 
   // Memoize handlers to prevent re-renders of memoized header
   const handleExport = useCallback(async (format: 'csv' | 'pdf' | 'xlsx') => {
@@ -230,16 +201,16 @@ export function RisksPage() {
           </div>
         )}
 
-        {/* Defer rendering data-fetching components to ensure header stability */}
-        {isReady && viewMode === 'dashboard' && <RiskDashboard />}
+        {/* Dashboard and List Views */}
+        {viewMode === 'dashboard' && <RiskDashboard />}
 
-        {isReady && viewMode === 'heatmap' && (
+        {viewMode === 'heatmap' && (
           <div className="space-y-6">
             <RiskHeatMap />
           </div>
         )}
 
-        {isReady && viewMode === 'list' && (
+        {viewMode === 'list' && (
           <div className="space-y-6">
             <RisksList
               riskType={selectedRiskType !== 'all' ? selectedRiskType as RiskType : undefined}

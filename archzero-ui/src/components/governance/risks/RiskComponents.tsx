@@ -52,7 +52,7 @@ export function RiskCard({ risk, onEdit, onDelete }: RiskCardProps) {
   };
 
   return (
-    <Card variant="bordered" className="group hover:shadow-lg transition-all" data-testid={`risk-item-${risk.id}`}>
+    <Card variant="bordered" className="risk-item group hover:shadow-lg transition-all" data-testid="risk-item">
       <div className="flex items-start justify-between mb-3">
         <div className="flex-1">
           <div className="flex items-center gap-2 mb-2">
