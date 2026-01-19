@@ -220,6 +220,16 @@ export function RiskForm({ risk, onSuccess, onCancel }: RiskFormProps) {
             placeholder="Describe the mitigation strategy..."
             data-testid="risk-mitigation-input"
           />
+          <div className="mt-2">
+            <button
+              type="button"
+              onClick={() => {}}
+              className="text-sm text-indigo-600 hover:text-indigo-700 font-medium"
+              data-testid="add-mitigation-btn"
+            >
+              + Add Mitigation Action
+            </button>
+          </div>
         </div>
 
         <div>
