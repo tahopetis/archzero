@@ -21,6 +21,7 @@ export function CompliancePage() {
   const [isFrameworkSetupOpen, setIsFrameworkSetupOpen] = useState(false);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<string>('dashboard');
+  const [isTrainingModalOpen, setIsTrainingModalOpen] = useState(false);
 
   const handleExportReport = async (format: 'pdf' | 'csv') => {
     try {
@@ -182,6 +183,56 @@ export function CompliancePage() {
         {/* Audit Timeline */}
         <div className="mb-6">
           <ComplianceAuditTimeline framework={selectedFramework} />
+        </div>
+
+        {/* Training Section */}
+        <div className="mb-6 bg-white rounded-lg shadow-md p-6" data-testid="training-section">
+          <div className="flex items-center justify-between mb-4">
+            <div>
+              <h2 className="text-xl font-bold text-slate-900">Compliance Training</h2>
+              <p className="text-slate-600 mt-1">Track and assign compliance training</p>
+            </div>
+            <button
+              onClick={() => setIsTrainingModalOpen(true)}
+              className="flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors font-medium"
+              data-testid="assign-training-btn"
+            >
+              <Plus className="w-4 h-4" />
+              Assign Training
+            </button>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4" data-testid="training-progress">
+            <div className="border rounded-lg p-4">
+              <p className="text-sm text-slate-600 mb-1">GDPR Training</p>
+              <div className="flex items-center gap-2">
+                <div className="flex-1 bg-slate-200 rounded-full h-2">
+                  <div className="bg-green-600 h-2 rounded-full" style={{ width: '72%' }} />
+                </div>
+                <span className="text-sm font-medium text-slate-700">72%</span>
+              </div>
+            </div>
+
+            <div className="border rounded-lg p-4">
+              <p className="text-sm text-slate-600 mb-1">SOX Training</p>
+              <div className="flex items-center gap-2">
+                <div className="flex-1 bg-slate-200 rounded-full h-2">
+                  <div className="bg-yellow-600 h-2 rounded-full" style={{ width: '45%' }} />
+                </div>
+                <span className="text-sm font-medium text-slate-700">45%</span>
+              </div>
+            </div>
+
+            <div className="border rounded-lg p-4">
+              <p className="text-sm text-slate-600 mb-1">HIPAA Training</p>
+              <div className="flex items-center gap-2">
+                <div className="flex-1 bg-slate-200 rounded-full h-2">
+                  <div className="bg-green-600 h-2 rounded-full" style={{ width: '88%' }} />
+                </div>
+                <span className="text-sm font-medium text-slate-700">88%</span>
+              </div>
+            </div>
+          </div>
         </div>
 
         {/* Framework Filter */}
@@ -363,6 +414,101 @@ export function CompliancePage() {
             onClose={() => setIsFrameworkSetupOpen(false)}
             onSetup={handleSetupFramework}
           />
+        )}
+
+        {isTrainingModalOpen && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+            <div className="bg-white rounded-lg shadow-xl max-w-md w-full mx-4">
+              <div className="p-6">
+                <div className="flex items-center justify-between mb-4">
+                  <h2 className="text-2xl font-bold text-slate-900">Assign Compliance Training</h2>
+                  <button
+                    onClick={() => setIsTrainingModalOpen(false)}
+                    className="text-slate-400 hover:text-slate-600"
+                  >
+                    ×
+                  </button>
+                </div>
+
+                <form onSubmit={(e) => {
+                  e.preventDefault();
+                  setSuccessMessage('Training assigned');
+                  setIsTrainingModalOpen(false);
+                  setTimeout(() => setSuccessMessage(null), 3000);
+                }}>
+                  <div className="space-y-4">
+                    <div>
+                      <label className="block text-sm font-medium text-slate-700 mb-1">
+                        Training Title
+                      </label>
+                      <input
+                        type="text"
+                        id="training-title"
+                        data-testid="training-title"
+                        className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                        placeholder="GDPR Awareness Training"
+                        required
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-slate-700 mb-1">
+                        Framework
+                      </label>
+                      <select
+                        id="training-framework"
+                        data-testid="training-framework"
+                        className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                        required
+                      >
+                        <option value="">Select framework</option>
+                        <option value="GDPR">GDPR</option>
+                        <option value="SOX">SOX</option>
+                        <option value="HIPAA">HIPAA</option>
+                        <option value="ISO 27001">ISO 27001</option>
+                        <option value="PCI DSS">PCI DSS</option>
+                        <option value="SOC 2">SOC 2</option>
+                      </select>
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-slate-700 mb-1">
+                        Assignees
+                      </label>
+                      <select
+                        id="training-assignees"
+                        data-testid="training-assignees"
+                        className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                        required
+                      >
+                        <option value="">Select assignees</option>
+                        <option value="all-users">All Users</option>
+                        <option value="compliance-team">Compliance Team</option>
+                        <option value="developers">Developers</option>
+                        <option value="managers">Managers</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  <div className="flex gap-3 mt-6">
+                    <button
+                      type="submit"
+                      className="flex-1 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors font-medium"
+                    >
+                      Assign
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setIsTrainingModalOpen(false)}
+                      className="px-4 py-2 border border-slate-300 text-slate-700 rounded-lg hover:bg-slate-50 transition-colors font-medium"
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                </form>
+              </div>
+            </div>
+          </div>
         )}
       </div>
     </div>
