@@ -22,7 +22,6 @@
 | #2582 | " | 🔄 | Test data seeder refactored with authentication support and hyphenated names | ~344 |
 | #2581 | " | 🟣 | Authentication token support added to TestDataSeeder | ~284 |
 | #2579 | 3:35 AM | 🔄 | Removed qualityScore field from card creation request | ~217 |
-| #2574 | 3:27 AM | 🔄 | Fixed card name formatting in relationship mapping | ~299 |
 
 ### Jan 16, 2026
 
@@ -57,6 +56,7 @@
 
 | ID | Time | T | Title | Read |
 |----|------|---|-------|------|
+| #4093 | 11:11 PM | 🔵 | ARB Implementation Documentation Located | ~185 |
 | #4021 | 4:43 PM | 🔴 | Fixed Initiative Health Enum Value | ~160 |
 | #4020 | 4:42 PM | 🔴 | Fixed Initiative Test Data Model | ~291 |
 | #4019 | " | 🔴 | Fixed Initiative Test Data Schema to Match Backend API | ~301 |
