@@ -11,6 +11,7 @@ export function CompliancePage() {
   const { id } = useParams();
   const [selectedRequirement, setSelectedRequirement] = useState<ComplianceRequirement | null>(null);
   const [isFormOpen, setIsFormOpen] = useState(false);
+  const [selectedFramework, setSelectedFramework] = useState<string>('all');
 
   if (id) {
     return (
@@ -39,6 +40,26 @@ export function CompliancePage() {
           >
             New Requirement
           </button>
+        </div>
+
+        <div className="mb-6">
+          <label className="block text-sm font-semibold text-slate-700 mb-2">
+            Filter by Framework
+          </label>
+          <select
+            value={selectedFramework}
+            onChange={(e) => setSelectedFramework(e.target.value)}
+            className="px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+            data-testid="compliance-framework"
+          >
+            <option value="all">All Frameworks</option>
+            <option value="GDPR">GDPR</option>
+            <option value="SOX">SOX</option>
+            <option value="HIPAA">HIPAA</option>
+            <option value="ISO 27001">ISO 27001</option>
+            <option value="PCI DSS">PCI DSS</option>
+            <option value="SOC 2">SOC 2</option>
+          </select>
         </div>
 
         {isFormOpen && (
