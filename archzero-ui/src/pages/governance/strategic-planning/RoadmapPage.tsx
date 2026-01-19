@@ -160,6 +160,7 @@ export function RoadmapPage() {
   const [showDependencyView, setShowDependencyView] = useState(false);
   const [isAddingMilestone, setIsAddingMilestone] = useState(false);
   const [phaseFilter, setPhaseFilter] = useState<string>('all');
+  const [timeSliderValue, setTimeSliderValue] = useState<number>(50);
 
   const getStatusIcon = (status: Milestone['status']) => {
     switch (status) {
@@ -314,20 +315,40 @@ export function RoadmapPage() {
                     <Calendar size={20} />
                     Timeline View
                   </h3>
-                  <div className="flex gap-2">
+                  <div className="flex gap-2 flex-wrap">
+                    {/* Quarter Filter */}
                     <select
                       value={phaseFilter}
                       onChange={(e) => setPhaseFilter(e.target.value)}
                       className="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
-                      data-testid="phase-filter"
+                      data-testid="quarter-filter"
+                      name="quarter"
                     >
-                      <option value="all">All Phases</option>
-                      {selectedRoadmap.phases.map((phase) => (
-                        <option key={phase.id} value={phase.id}>
-                          {phase.name}
-                        </option>
-                      ))}
+                      <option value="all">All Quarters</option>
+                      <option value="Q1 2026">Q1 2026</option>
+                      <option value="Q2 2026">Q2 2026</option>
+                      <option value="Q3 2026">Q3 2026</option>
+                      <option value="Q4 2026">Q4 2026</option>
                     </select>
+
+                    {/* Time Slider */}
+                    <div className="flex items-center gap-2 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700">
+                      <span className="text-xs text-gray-600 dark:text-gray-400">Time:</span>
+                      <input
+                        type="range"
+                        min="0"
+                        max="100"
+                        value={timeSliderValue}
+                        onChange={(e) => setTimeSliderValue(Number(e.target.value))}
+                        className="w-32 h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer dark:bg-gray-600"
+                        data-testid="time-slider"
+                      />
+                      <div
+                        className="w-4 h-4 bg-blue-600 rounded-full cursor-pointer slider-handle"
+                        data-testid="slider-handle"
+                        style={{ marginLeft: `${timeSliderValue - 50}%` }}
+                      />
+                    </div>
                     <button
                       onClick={() => setShowDependencyView(!showDependencyView)}
                       className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-colors ${
@@ -442,7 +463,7 @@ export function RoadmapPage() {
                                     <div
                                       key={milestone.id}
                                       className="flex items-start gap-3 p-3 bg-white dark:bg-gray-800 rounded-lg hover:shadow-sm transition-shadow"
-                                      data-testid="roadmap-milestone"
+                                      data-testid="initiative-card"
                                     >
                                       <StatusIcon
                                         size={20}

@@ -38,6 +38,8 @@ import { ExportPage } from './pages/export/ExportPage';
 // Relationship Pages
 import { RelationshipExplorerPage } from './pages/RelationshipExplorerPage';
 import { RelationshipMatrixPage } from './pages/RelationshipMatrixPage';
+import { TechnologyRadarPage } from './pages/TechnologyRadarPage';
+import { TCOCalculatorPage } from './pages/TCOCalculatorPage';
 // Admin Pages
 import {
   UsersPage,
@@ -510,6 +512,28 @@ function App() {
             <ProtectedRoute>
               <Layout>
                 <RelationshipMatrixPage />
+              </Layout>
+            </ProtectedRoute>
+          }
+        />
+
+        {/* Intelligence Routes */}
+        <Route
+          path="/intelligence/radar"
+          element={
+            <ProtectedRoute>
+              <Layout>
+                <TechnologyRadarPage />
+              </Layout>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/intelligence/tco"
+          element={
+            <ProtectedRoute>
+              <Layout>
+                <TCOCalculatorPage />
               </Layout>
             </ProtectedRoute>
           }

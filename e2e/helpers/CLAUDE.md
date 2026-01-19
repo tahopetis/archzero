@@ -19,8 +19,6 @@
 | #2594 | 3:58 AM | 🟣 | Test data seeder implemented and operational | ~410 |
 | #2592 | 3:56 AM | 🟣 | Test data seeder successfully created 31 cards | ~302 |
 | #2583 | 3:37 AM | 🔴 | Test data seeder failing with 500 internal server errors | ~327 |
-| #2582 | " | 🔄 | Test data seeder refactored with authentication support and hyphenated names | ~344 |
-| #2581 | " | 🟣 | Authentication token support added to TestDataSeeder | ~284 |
 
 ### Jan 16, 2026
 
@@ -76,5 +74,7 @@
 
 | ID | Time | T | Title | Read |
 |----|------|---|-------|------|
+| #4186 | 12:17 AM | ✅ | Beads Tracking Updates Committed and Pushed | ~271 |
+| #4185 | " | 🟣 | Staged Documentation Updates for Commit | ~152 |
 | #4170 | 12:10 AM | ✅ | Documentation Files Modified | ~200 |
 </claude-mem-context>
