@@ -3,7 +3,7 @@
  */
 
 import { useState } from 'react';
-import { RiskDashboard, RiskHeatMap, type Risk } from '@/components/governance/risks';
+import { RiskDashboard, RiskHeatMap, RisksList, type Risk } from '@/components/governance/risks';
 import { RiskForm } from '@/components/governance/risks/RiskForm';
 
 type ViewMode = 'dashboard' | 'heatmap' | 'list';
@@ -92,10 +92,16 @@ export function RisksPage() {
 
         {viewMode === 'list' && (
           <div className="space-y-6">
-            {/* RisksList component */}
-            <div className="text-center py-12 bg-white rounded-lg">
-              <p className="text-slate-500">Risk list view would be rendered here</p>
-            </div>
+            <RisksList
+              onEdit={(risk) => {
+                setSelectedRisk(risk);
+                setIsFormOpen(true);
+              }}
+              onDelete={(id) => {
+                console.log('Delete risk:', id);
+                // TODO: Implement delete
+              }}
+            />
           </div>
         )}
       </div>
