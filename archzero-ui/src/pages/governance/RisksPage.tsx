@@ -2,13 +2,46 @@
  * Risk Management Page
  */
 
-import { useState } from 'react';
+import { useState, memo, useCallback, useEffect, useRef } from 'react';
 import { Download } from 'lucide-react';
 import { RiskDashboard, RiskHeatMap, RisksList, type Risk } from '@/components/governance/risks';
 import { RiskForm } from '@/components/governance/risks/RiskForm';
 import { RiskType, RiskStatus } from '@/types/governance';
 
 type ViewMode = 'dashboard' | 'heatmap' | 'list';
+
+// Memoized header to prevent re-renders when data fetching occurs in dashboard
+interface RiskPageHeaderProps {
+  onExport: (format: 'csv' | 'pdf' | 'xlsx') => void;
+  onAddRisk: () => void;
+}
+
+const RiskPageHeader = memo(({ onExport, onAddRisk }: RiskPageHeaderProps) => (
+  <div className="flex items-center justify-between mb-6">
+    <div>
+      <h1 className="text-3xl font-bold text-slate-900">Risk Management</h1>
+      <p className="text-slate-600 mt-1">Monitor and mitigate technical and operational risks</p>
+    </div>
+    <div className="flex items-center gap-3">
+      <button
+        onClick={() => onExport('csv')}
+        className="flex items-center gap-2 px-4 py-2 bg-teal-600 text-white rounded-lg hover:bg-teal-700 transition-colors font-medium"
+        data-testid="export-risks-btn"
+      >
+        <Download className="w-4 h-4" />
+        Export
+      </button>
+      <button
+        onClick={onAddRisk}
+        className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors font-medium"
+        data-testid="add-risk-btn"
+      >
+        Add Risk
+      </button>
+    </div>
+  </div>
+));
+RiskPageHeader.displayName = 'RiskPageHeader';
 
 export function RisksPage() {
   const [viewMode, setViewMode] = useState<ViewMode>('dashboard');
@@ -19,7 +52,37 @@ export function RisksPage() {
   const [selectedRiskType, setSelectedRiskType] = useState<string>('all');
   const [selectedStatus, setSelectedStatus] = useState<string>('all');
 
-  const handleExport = async (format: 'csv' | 'pdf' | 'xlsx') => {
+  // Defer rendering of data-fetching components to prevent initial render re-renders
+  const [isReady, setIsReady] = useState(false);
+  const isReadyRef = useRef(false);
+
+  useEffect(() => {
+    // Defer setting ready state to ensure stable header after React hydration
+    // Use requestAnimationFrame to wait for paint before allowing data fetching
+    let rafId: number;
+    let timeoutId: NodeJS.Timeout;
+
+    const markReady = () => {
+      // Double RAF to ensure browser paint is complete
+      rafId = requestAnimationFrame(() => {
+        rafId = requestAnimationFrame(() => {
+          isReadyRef.current = true;
+          setIsReady(true);
+        });
+      });
+    };
+
+    // Also set a timeout fallback in case RAF doesn't fire
+    timeoutId = setTimeout(markReady, 50);
+
+    return () => {
+      if (rafId) cancelAnimationFrame(rafId);
+      clearTimeout(timeoutId);
+    };
+  }, []);
+
+  // Memoize handlers to prevent re-renders of memoized header
+  const handleExport = useCallback(async (format: 'csv' | 'pdf' | 'xlsx') => {
     try {
       // Fetch all risks from backend
       const token = localStorage.getItem('auth_token');
@@ -71,34 +134,16 @@ export function RisksPage() {
     } catch (error) {
       console.error('Export failed:', error);
     }
-  };
+  }, []);
+
+  const handleAddRisk = useCallback(() => {
+    setIsFormOpen(true);
+  }, []);
 
   return (
     <div className="min-h-screen bg-slate-50" data-testid="risk-register">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="flex items-center justify-between mb-6">
-          <div>
-            <h1 className="text-3xl font-bold text-slate-900">Risk Management</h1>
-            <p className="text-slate-600 mt-1">Monitor and mitigate technical and operational risks</p>
-          </div>
-          <div className="flex items-center gap-3">
-            <button
-              onClick={() => handleExport('csv')}
-              className="flex items-center gap-2 px-4 py-2 bg-teal-600 text-white rounded-lg hover:bg-teal-700 transition-colors font-medium"
-              data-testid="export-risks-btn"
-            >
-              <Download className="w-4 h-4" />
-              Export
-            </button>
-            <button
-              onClick={() => setIsFormOpen(true)}
-              className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors font-medium"
-              data-testid="add-risk-btn"
-            >
-              Add Risk
-            </button>
-          </div>
-        </div>
+        <RiskPageHeader onExport={handleExport} onAddRisk={handleAddRisk} />
 
         {/* Risk Type and Status Filters */}
         <div className="mb-6 flex flex-wrap items-center gap-4">
@@ -185,15 +230,16 @@ export function RisksPage() {
           </div>
         )}
 
-        {viewMode === 'dashboard' && <RiskDashboard />}
+        {/* Defer rendering data-fetching components to ensure header stability */}
+        {isReady && viewMode === 'dashboard' && <RiskDashboard />}
 
-        {viewMode === 'heatmap' && (
+        {isReady && viewMode === 'heatmap' && (
           <div className="space-y-6">
             <RiskHeatMap />
           </div>
         )}
 
-        {viewMode === 'list' && (
+        {isReady && viewMode === 'list' && (
           <div className="space-y-6">
             <RisksList
               riskType={selectedRiskType !== 'all' ? selectedRiskType as RiskType : undefined}
