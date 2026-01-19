@@ -1130,7 +1130,7 @@ class TestDataFactory {
         riskType: 'Security',
         likelihood: 3,
         impact: 4,
-        status: 'Mitigating',
+        status: 'Mitigated',
         mitigationPlan: 'Implement OAuth2 and rate limiting on all legacy APIs',
         owner: 'Platform Team',
         targetClosureDate: '2026-03-15',
@@ -1138,7 +1138,7 @@ class TestDataFactory {
       {
         name: 'Database Performance',
         description: 'Query performance degradation under high load',
-        riskType: 'Technical',
+        riskType: 'Strategic',
         likelihood: 4,
         impact: 3,
         status: 'Open',
@@ -1163,7 +1163,7 @@ class TestDataFactory {
         riskType: 'Financial',
         likelihood: 3,
         impact: 3,
-        status: 'Monitoring',
+        status: 'Accepted',
         mitigationPlan: 'Implement cost monitoring and alerting',
         owner: 'FinOps Team',
         targetClosureDate: '2026-01-31',
@@ -1193,10 +1193,10 @@ class TestDataFactory {
       {
         name: 'Skill Gap in Cloud Technologies',
         description: 'Team lacks expertise in Kubernetes and container orchestration',
-        riskType: 'Human Resources',
+        riskType: 'Reputational',
         likelihood: 3,
         impact: 3,
-        status: 'Mitigating',
+        status: 'Mitigated',
         mitigationPlan: 'Provide training and hire experienced cloud engineers',
         owner: 'HR Team',
         targetClosureDate: '2026-06-30',
@@ -1211,7 +1211,7 @@ class TestDataFactory {
     return [
       {
         name: 'GDPR Article 32 - Data Security',
-        framework: 'GDPR',
+        framework: 'gDPR',
         description: 'Technical and organizational measures to ensure data security',
         applicableCardTypes: ['Application', 'Database', 'API'],
         requiredControls: [
@@ -1225,7 +1225,7 @@ class TestDataFactory {
       },
       {
         name: 'GDPR Article 25 - Data Protection by Design',
-        framework: 'GDPR',
+        framework: 'gDPR',
         description: 'Data protection measures must be implemented into the development of business processes',
         applicableCardTypes: ['Application', 'Database'],
         requiredControls: [
@@ -1238,7 +1238,7 @@ class TestDataFactory {
       },
       {
         name: 'SOX Section 404 - Internal Controls',
-        framework: 'SOX',
+        framework: 'sOX',
         description: 'Internal control over financial reporting requirements',
         applicableCardTypes: ['Application', 'Database', 'Infrastructure'],
         requiredControls: [
@@ -1252,7 +1252,7 @@ class TestDataFactory {
       },
       {
         name: 'HIPAA Security Rule',
-        framework: 'HIPAA',
+        framework: 'hIPAA',
         description: 'Protected health information (PHI) security requirements',
         applicableCardTypes: ['Application', 'Database', 'API'],
         requiredControls: [
@@ -1266,7 +1266,7 @@ class TestDataFactory {
       },
       {
         name: 'ISO 27001 A.9 Access Control',
-        framework: 'ISO 27001',
+        framework: 'ISO27001',
         description: 'Information access control policy and procedures',
         applicableCardTypes: ['Application', 'Database', 'API', 'Infrastructure'],
         requiredControls: [
@@ -1280,7 +1280,7 @@ class TestDataFactory {
       },
       {
         name: 'ISO 27001 A.12 Operations Security',
-        framework: 'ISO 27001',
+        framework: 'ISO27001',
         description: 'Procedures and responsibilities to ensure correct and secure operations',
         applicableCardTypes: ['Application', 'Infrastructure', 'Database'],
         requiredControls: [
@@ -1294,7 +1294,7 @@ class TestDataFactory {
       },
       {
         name: 'PCI DSS Requirement 8',
-        framework: 'PCI DSS',
+        framework: 'PCI-DSS',
         description: 'Identify and authenticate access to system components',
         applicableCardTypes: ['Application', 'Database', 'API'],
         requiredControls: [
