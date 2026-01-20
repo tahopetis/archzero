@@ -8,11 +8,52 @@
 | ID | Time | T | Title | Read |
 |----|------|---|-------|------|
 | #2329 | 3:53 PM | 🔄 | Login page authentication methods deprecated in favor of storageState | ~301 |
+| #2309 | 3:25 PM | 🟣 | Page Object Model Implements Card Management Test Abstractions | ~649 |
+| #2036 | 10:05 AM | 🔴 | Fixed Auth E2E Tests - All 50 Tests Now Passing | ~189 |
+| #2038 | " | 🔵 | Cards E2E Tests Failing with Timeouts Despite Backend Fix | ~203 |
+| #1953 | 9:24 AM | 🟣 | Complete E2E Testing Infrastructure Implemented | ~405 |
+| #1928 | 9:08 AM | 🟣 | All 50 Auth E2E Tests Now Passing | ~251 |
 | #1927 | 9:05 AM | 🟣 | LoginViaApi Now Sets Zustand Storage | ~203 |
 | #1924 | 9:00 AM | 🟣 | LocalStorage Keys Fixed to Match Frontend | ~166 |
 | #1909 | 8:54 AM | 🟣 | LoginViaApi Method Enhanced for Cross-Browser Compatibility | ~216 |
-| #1859 | 8:40 AM | 🟣 | LoginViaApi Return Statement Fixed | ~136 |
+| #1862 | 8:41 AM | 🟣 | Login Method Improved for Cross-Browser Stability | ~223 |
+| #1861 | 8:40 AM | 🔵 | LocalStorage Access Pattern Found | ~200 |
+| #1859 | " | 🟣 | LoginViaApi Return Statement Fixed | ~136 |
 | #1858 | " | 🟣 | E2E Test Helper Fixed to Match Backend API | ~184 |
+| #1852 | 8:39 AM | 🔵 | API Response Format Mismatch Identified | ~212 |
+| #1777 | 7:29 AM | 🔄 | Login page object refactored for better cross-browser synchronization | ~310 |
+| #1775 | 7:18 AM | 🔴 | Login page object updated with improved cross-browser wait strategy | ~286 |
 | #1770 | 7:07 AM | 🔄 | Login page object improved with Promise.all for race condition fix | ~249 |
+| #1767 | 7:05 AM | 🔴 | Fixed Firefox networkidle timeout by switching to domcontentloaded | ~261 |
+| #1714 | 5:17 AM | 🔵 | Login page object provides comprehensive authentication test methods | ~385 |
+| #1556 | 1:38 AM | 🟣 | Page objects barrel export file created | ~204 |
 | #1534 | 1:28 AM | 🟣 | Card management page objects created for E2E testing | ~383 |
+| #1532 | 1:27 AM | 🟣 | Login page object created for authentication testing | ~275 |
+| #1530 | 1:26 AM | 🟣 | Base page object class created with common functionality | ~345 |
+
+### Jan 15, 2026
+
+| ID | Time | T | Title | Read |
+|----|------|---|-------|------|
+| #2628 | 5:13 AM | 🔴 | Fixed backend soft delete issues and test data seeding for Phase 1.2 | ~353 |
+| #2607 | 4:25 AM | 🔵 | Card detail navigation fails due to missing data-card-name attribute | ~243 |
+| #2562 | 3:14 AM | 🔴 | Card management tests show missing UI selectors | ~326 |
+
+### Jan 16, 2026
+
+| ID | Time | T | Title | Read |
+|----|------|---|-------|------|
+| #2746 | 9:59 AM | 🔵 | E2E test authentication uses loginViaApi method across all test suites | ~486 |
+
+### Jan 17, 2026
+
+| ID | Time | T | Title | Read |
+|----|------|---|-------|------|
+| #3262 | 10:38 AM | 🔵 | LoginPage loginViaApi sets authentication state in localStorage | ~322 |
+
+### Jan 20, 2026
+
+| ID | Time | T | Title | Read |
+|----|------|---|-------|------|
+| #5177 | 1:24 AM | 🔵 | Risk Compliance Test Fails Due to Element Detachment and Navigation Timeouts | ~381 |
 </claude-mem-context>

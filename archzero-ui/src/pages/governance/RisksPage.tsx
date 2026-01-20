@@ -44,6 +44,100 @@ const RiskPageHeader = memo(function RiskPageHeader({ onExport, onAddRisk }: Ris
   );
 });
 
+// Memoized filters component to prevent unnecessary re-renders
+interface RiskFiltersProps {
+  selectedRiskType: string;
+  onRiskTypeChange: (type: string) => void;
+  selectedStatus: string;
+  onStatusChange: (status: string) => void;
+}
+
+const RiskFilters = memo(function RiskFilters({
+  selectedRiskType,
+  onRiskTypeChange,
+  selectedStatus,
+  onStatusChange
+}: RiskFiltersProps) {
+  return (
+    <div className="mb-6 flex flex-wrap items-center gap-4">
+      <div>
+        <label className="block text-sm font-semibold text-slate-700 mb-2">Risk Type</label>
+        <select
+          value={selectedRiskType}
+          onChange={(e) => onRiskTypeChange(e.target.value)}
+          className="px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+          data-testid="risk-category-filter"
+        >
+          <option value="all">All Types</option>
+          {Object.values(RiskType).map((type) => (
+            <option key={type} value={type}>{type}</option>
+          ))}
+        </select>
+      </div>
+
+      <div>
+        <label className="block text-sm font-semibold text-slate-700 mb-2">Status</label>
+        <select
+          value={selectedStatus}
+          onChange={(e) => onStatusChange(e.target.value)}
+          className="px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+          data-testid="risk-status-filter"
+        >
+          <option value="all">All Statuses</option>
+          {Object.values(RiskStatus).map((status) => (
+            <option key={status} value={status}>{status}</option>
+          ))}
+        </select>
+      </div>
+    </div>
+  );
+});
+
+// Memoized view mode tabs to prevent unnecessary re-renders
+interface ViewModeTabsProps {
+  viewMode: ViewMode;
+  onViewModeChange: (mode: ViewMode) => void;
+}
+
+const ViewModeTabs = memo(function ViewModeTabs({ viewMode, onViewModeChange }: ViewModeTabsProps) {
+  return (
+    <div className="mb-6 border-b border-slate-200">
+      <nav className="flex -mb-px space-x-8">
+        <button
+          onClick={() => onViewModeChange('dashboard')}
+          className={`py-4 px-1 border-b-2 font-medium text-sm ${
+            viewMode === 'dashboard'
+              ? 'border-indigo-500 text-indigo-600'
+              : 'border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300'
+          }`}
+        >
+          Dashboard
+        </button>
+        <button
+          onClick={() => onViewModeChange('heatmap')}
+          className={`py-4 px-1 border-b-2 font-medium text-sm ${
+            viewMode === 'heatmap'
+              ? 'border-indigo-500 text-indigo-600'
+              : 'border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300'
+          }`}
+        >
+          Heat Map
+        </button>
+        <button
+          onClick={() => onViewModeChange('list')}
+          className={`py-4 px-1 border-b-2 font-medium text-sm ${
+            viewMode === 'list'
+              ? 'border-indigo-500 text-indigo-600'
+              : 'border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300'
+          }`}
+        >
+          All Risks
+        </button>
+      </nav>
+    </div>
+  );
+});
+
 export function RisksPage() {
   const [viewMode, setViewMode] = useState<ViewMode>('dashboard');
   const [selectedRisk, setSelectedRisk] = useState<Risk | null>(null);
@@ -55,6 +149,19 @@ export function RisksPage() {
   // Filter states
   const [selectedRiskType, setSelectedRiskType] = useState<string>('all');
   const [selectedStatus, setSelectedStatus] = useState<string>('all');
+
+  // Stable handlers to prevent re-renders
+  const handleRiskTypeChange = useCallback((type: string) => {
+    setSelectedRiskType(type);
+  }, []);
+
+  const handleStatusChange = useCallback((status: string) => {
+    setSelectedStatus(status);
+  }, []);
+
+  const handleViewModeChange = useCallback((mode: ViewMode) => {
+    setViewMode(mode);
+  }, []);
 
   // Memoize handlers to prevent re-renders of memoized header
   const handleExport = useCallback(async (format: 'csv' | 'pdf' | 'xlsx') => {
@@ -183,74 +290,19 @@ export function RisksPage() {
 
         <RiskPageHeader key="risk-header" onExport={handleExport} onAddRisk={handleAddRisk} />
 
-        {/* Risk Type and Status Filters */}
-        <div className="mb-6 flex flex-wrap items-center gap-4">
-          <div>
-            <label className="block text-sm font-semibold text-slate-700 mb-2">Risk Type</label>
-            <select
-              value={selectedRiskType}
-              onChange={(e) => setSelectedRiskType(e.target.value)}
-              className="px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-              data-testid="risk-category-filter"
-            >
-              <option value="all">All Types</option>
-              {Object.values(RiskType).map((type) => (
-                <option key={type} value={type}>{type}</option>
-              ))}
-            </select>
-          </div>
+        {/* Risk Type and Status Filters - Memoized */}
+        <RiskFilters
+          selectedRiskType={selectedRiskType}
+          onRiskTypeChange={handleRiskTypeChange}
+          selectedStatus={selectedStatus}
+          onStatusChange={handleStatusChange}
+        />
 
-          <div>
-            <label className="block text-sm font-semibold text-slate-700 mb-2">Status</label>
-            <select
-              value={selectedStatus}
-              onChange={(e) => setSelectedStatus(e.target.value)}
-              className="px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-              data-testid="risk-status-filter"
-            >
-              <option value="all">All Statuses</option>
-              {Object.values(RiskStatus).map((status) => (
-                <option key={status} value={status}>{status}</option>
-              ))}
-            </select>
-          </div>
-        </div>
-
-        {/* View Mode Tabs */}
-        <div className="mb-6 border-b border-slate-200">
-          <nav className="flex -mb-px space-x-8">
-            <button
-              onClick={() => setViewMode('dashboard')}
-              className={`py-4 px-1 border-b-2 font-medium text-sm ${
-                viewMode === 'dashboard'
-                  ? 'border-indigo-500 text-indigo-600'
-                  : 'border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300'
-              }`}
-            >
-              Dashboard
-            </button>
-            <button
-              onClick={() => setViewMode('heatmap')}
-              className={`py-4 px-1 border-b-2 font-medium text-sm ${
-                viewMode === 'heatmap'
-                  ? 'border-indigo-500 text-indigo-600'
-                  : 'border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300'
-              }`}
-            >
-              Heat Map
-            </button>
-            <button
-              onClick={() => setViewMode('list')}
-              className={`py-4 px-1 border-b-2 font-medium text-sm ${
-                viewMode === 'list'
-                  ? 'border-indigo-500 text-indigo-600'
-                  : 'border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300'
-              }`}
-            >
-              All Risks
-            </button>
-          </nav>
-        </div>
+        {/* View Mode Tabs - Memoized */}
+        <ViewModeTabs
+          viewMode={viewMode}
+          onViewModeChange={handleViewModeChange}
+        />
 
         {isFormOpen && (
           <div className="mb-6">

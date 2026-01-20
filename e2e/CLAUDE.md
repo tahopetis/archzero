@@ -26,12 +26,12 @@
 | #3958 | 3:53 PM | 🔵 | Phase 3 Frontend Implementation Details | ~316 |
 | #3957 | 3:52 PM | 🔵 | 100% Test Success Plan - Current Status | ~327 |
 | #3946 | 3:50 PM | 🔵 | ARB Implementation Status and Phase 3 Scope | ~328 |
-| #3931 | 3:30 PM | 🔵 | Comprehensive Test Success Plan Documents Complete E2E Fix Strategy | ~773 |
 
 ### Jan 19, 2026
 
 | ID | Time | T | Title | Read |
 |----|------|---|-------|------|
+| #5108 | 8:57 PM | 🔵 | Phase 3.2 Scope Clarification Request | ~239 |
 | #4914 | 6:32 PM | 🔵 | 100 Percent Test Success Plan Documents Implementation Progress | ~355 |
 | #4913 | " | 🔵 | Comprehensive Test Success Plan Document Found | ~155 |
 | #4898 | 5:54 PM | 🔵 | Playwright Test Configuration Examined | ~162 |

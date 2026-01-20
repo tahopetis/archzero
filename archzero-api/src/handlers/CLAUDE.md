@@ -12,13 +12,12 @@
 | #3422 | 2:32 PM | ✅ | Changed card_to_arb_submission function visibility from private to public | ~270 |
 | #3402 | 2:26 PM | 🔵 | ARB handler file contains 1383 lines of Rust code | ~223 |
 | #3399 | 2:25 PM | 🔵 | ARB handler file structure reviewed - comprehensive implementation | ~181 |
-| #3397 | " | 🔵 | ARB meeting creation handler uses card system | ~283 |
-| #3390 | 2:22 PM | 🟣 | ARB Templates Backend Handlers Implemented | ~307 |
 
 ### Jan 19, 2026
 
 | ID | Time | T | Title | Read |
 |----|------|---|-------|------|
+| #5128 | 9:20 PM | 🔵 | Examined Backend Risk Handler Implementation for Approval Workflow Fields | ~299 |
 | #4964 | 6:51 PM | 🟣 | Backend Risk Handler Extended with Approval Fields | ~262 |
 | #4750 | 2:41 PM | 🔴 | Fixed Timestamp Field Access in Compliance Handler | ~120 |
 | #4729 | 2:10 PM | 🔵 | Compliance API Handler Implementation Found | ~275 |
