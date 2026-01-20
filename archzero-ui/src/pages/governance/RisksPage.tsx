@@ -16,32 +16,33 @@ interface RiskPageHeaderProps {
   onAddRisk: () => void;
 }
 
-const RiskPageHeader = memo(({ onExport, onAddRisk }: RiskPageHeaderProps) => (
-  <div className="flex items-center justify-between mb-6">
-    <div>
-      <h1 className="text-3xl font-bold text-slate-900">Risk Management</h1>
-      <p className="text-slate-600 mt-1">Monitor and mitigate technical and operational risks</p>
+const RiskPageHeader = memo(function RiskPageHeader({ onExport, onAddRisk }: RiskPageHeaderProps) {
+  return (
+    <div className="flex items-center justify-between mb-6">
+      <div>
+        <h1 className="text-3xl font-bold text-slate-900">Risk Management</h1>
+        <p className="text-slate-600 mt-1">Monitor and mitigate technical and operational risks</p>
+      </div>
+      <div className="flex items-center gap-3">
+        <button
+          onClick={() => onExport('csv')}
+          className="flex items-center gap-2 px-4 py-2 bg-teal-600 text-white rounded-lg hover:bg-teal-700 transition-colors font-medium"
+          data-testid="export-risks-btn"
+        >
+          <Download className="w-4 h-4" />
+          Export
+        </button>
+        <button
+          onClick={onAddRisk}
+          className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors font-medium"
+          data-testid="add-risk-btn"
+        >
+          Add Risk
+        </button>
+      </div>
     </div>
-    <div className="flex items-center gap-3">
-      <button
-        onClick={() => onExport('csv')}
-        className="flex items-center gap-2 px-4 py-2 bg-teal-600 text-white rounded-lg hover:bg-teal-700 transition-colors font-medium"
-        data-testid="export-risks-btn"
-      >
-        <Download className="w-4 h-4" />
-        Export
-      </button>
-      <button
-        onClick={onAddRisk}
-        className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors font-medium"
-        data-testid="add-risk-btn"
-      >
-        Add Risk
-      </button>
-    </div>
-  </div>
-));
-RiskPageHeader.displayName = 'RiskPageHeader';
+  );
+});
 
 export function RisksPage() {
   const [viewMode, setViewMode] = useState<ViewMode>('dashboard');
