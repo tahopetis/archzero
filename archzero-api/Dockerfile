@@ -1,6 +1,6 @@
 # Multi-stage Dockerfile for Arc Zero API (Rust Backend)
 # Stage 1: Build
-FROM rust:1.75-slim as builder
+FROM rust:1.88-slim as builder
 
 # Install build dependencies
 RUN apt-get update && apt-get install -y \
@@ -13,7 +13,7 @@ RUN apt-get update && apt-get install -y \
 WORKDIR /usr/src/archzero-api
 
 # Copy Cargo files
-COPY Cargo.toml Cargo.lock ./
+COPY Cargo.toml ./
 
 # Create a dummy main.rs to build dependencies
 RUN mkdir src && \
@@ -55,11 +55,11 @@ COPY --from=builder /usr/src/archzero-api/target/release/archzero-api /app/archz
 COPY --from=builder /usr/src/archzero-api/migrations ./migrations
 
 # Copy migration runner script
-COPY scripts/run-migrations.sh ./scripts/run-migrations.sh
+COPY --chown=archzero:archzero run-migrations.sh ./run-migrations.sh
 
 # Change ownership to archzero user
 RUN chown -R archzero:archzero /app && \
-    chmod +x ./scripts/run-migrations.sh
+    chmod +x ./run-migrations.sh
 
 # Switch to non-root user
 USER archzero
@@ -72,4 +72,4 @@ HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
     CMD curl -f http://localhost:8080/api/v1/health || exit 1
 
 # Run the application with migrations
-CMD ["sh", "-c", "./scripts/run-migrations.sh && ./archzero-api"]
+CMD ["sh", "-c", "./run-migrations.sh && ./archzero-api"]
