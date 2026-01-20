@@ -3,6 +3,14 @@ name = "archzero-api"
 version = "0.1.0"
 edition = "2021"
 
+[lib]
+name = "archzero_api"
+path = "src/lib.rs"
+
+[[bin]]
+name = "archzero-api"
+path = "src/main.rs"
+
 [dependencies]
 # Web framework
 axum = { version = "0.7", features = ["multipart"] }

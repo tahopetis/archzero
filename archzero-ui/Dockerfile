@@ -9,7 +9,7 @@ WORKDIR /app
 COPY package.json package-lock.json ./
 
 # Install dependencies
-RUN npm ci --only=production
+RUN npm ci
 
 # Stage 2: Build
 FROM node:18-alpine AS builder
@@ -22,7 +22,7 @@ COPY --from=deps /app/node_modules ./node_modules
 
 # Copy package files and source
 COPY package.json ./
-COPY tsconfig.json ./
+COPY tsconfig*.json ./
 COPY vite.config.ts ./
 COPY tailwind.config.js ./
 COPY postcss.config.js ./

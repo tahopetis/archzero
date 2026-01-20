@@ -15,10 +15,10 @@ WORKDIR /usr/src/archzero-api
 # Copy Cargo files
 COPY Cargo.toml ./
 
-# Create a dummy main.rs to build dependencies
+# Create dummy source files to pre-build dependencies
 RUN mkdir src && \
+    touch src/lib.rs && \
     echo "fn main() {}" > src/main.rs && \
-    echo "fn main() {}" > src/lib.rs && \
     cargo build --release && \
     rm -rf src
 
@@ -27,7 +27,7 @@ COPY src ./src
 COPY migrations ./migrations
 
 # Build the actual application
-RUN touch src/main.rs && cargo build --release
+RUN cargo build --release
 
 # Stage 2: Runtime
 FROM debian:bookworm-slim
