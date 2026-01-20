@@ -180,7 +180,7 @@ export function RisksPage() {
           </div>
         )}
 
-        <RiskPageHeader onExport={handleExport} onAddRisk={handleAddRisk} />
+        <RiskPageHeader key="risk-header" onExport={handleExport} onAddRisk={handleAddRisk} />
 
         {/* Risk Type and Status Filters */}
         <div className="mb-6 flex flex-wrap items-center gap-4">
@@ -281,14 +281,14 @@ export function RisksPage() {
             <RisksList
               riskType={selectedRiskType !== 'all' ? selectedRiskType as RiskType : undefined}
               status={selectedStatus !== 'all' ? selectedStatus as RiskStatus : undefined}
-              onEdit={(risk) => {
+              onEdit={useCallback((risk: Risk) => {
                 setSelectedRisk(risk);
                 setIsFormOpen(true);
-              }}
-              onDelete={(id) => {
+              }, [])}
+              onDelete={useCallback((id: string) => {
                 console.log('Delete risk:', id);
                 // TODO: Implement delete
-              }}
+              }, [])}
               onApprove={handleApprove}
               onEscalate={handleEscalate}
             />
