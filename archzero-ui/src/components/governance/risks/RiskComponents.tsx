@@ -3,7 +3,7 @@
  * Including Risk Heat Map visualization
  */
 
-import { useMemo } from 'react';
+import { useMemo, memo } from 'react';
 import { Link } from 'react-router-dom';
 import {
   Shield,
@@ -216,7 +216,7 @@ interface RisksListProps {
   onEscalate?: (risk: Risk) => void;
 }
 
-export function RisksList({ riskType, status, onEdit, onDelete, onApprove, onEscalate }: RisksListProps) {
+export const RisksList = memo(function RisksList({ riskType, status, onEdit, onDelete, onApprove, onEscalate }: RisksListProps) {
   const { data: risks, isLoading } = useRisks({ riskType, status });
 
   if (isLoading) {
@@ -237,7 +237,7 @@ export function RisksList({ riskType, status, onEdit, onDelete, onApprove, onEsc
       ))}
     </div>
   );
-}
+});
 
 // ============================================================================
 // RISK HEAT MAP
@@ -277,7 +277,7 @@ function HeatMapCell({ likelihood, impact, count, risks, onClick }: HeatMapCellP
   );
 }
 
-export function RiskHeatMap({ onSelectRisks }: { onSelectRisks?: (risks: Risk[]) => void }) {
+export const RiskHeatMap = memo(function RiskHeatMap({ onSelectRisks }: { onSelectRisks?: (risks: Risk[]) => void }) {
   const { data: heatMapData, isLoading } = useRiskHeatMap();
 
   if (isLoading) {
@@ -370,13 +370,13 @@ export function RiskHeatMap({ onSelectRisks }: { onSelectRisks?: (risks: Risk[])
       </div>
     </Card>
   );
-}
+});
 
 // ============================================================================
 // TOP RISKS
 // ============================================================================
 
-export function TopRisks() {
+export const TopRisks = memo(function TopRisks() {
   const { data: topRisks, isLoading } = useTopRisks();
 
   if (isLoading) {
@@ -440,13 +440,13 @@ export function TopRisks() {
       </div>
     </Card>
   );
-}
+});
 
 // ============================================================================
 // RISK DASHBOARD
 // ============================================================================
 
-export function RiskDashboard() {
+export const RiskDashboard = memo(function RiskDashboard() {
   return (
     <div className="space-y-6" data-testid="risk-dashboard">
       <div>
@@ -469,4 +469,4 @@ export function RiskDashboard() {
       </Card>
     </div>
   );
-}
+});
