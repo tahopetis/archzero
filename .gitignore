@@ -94,3 +94,22 @@ IMPLEMENTATION_AUDIT.md
 
 # Cleanup duplicates
 archzero/
+
+# Docker
+*.tar.gz
+*.tar
+*.zip
+docker-volumes/
+/backup/
+
+# Docker environment (keep example)
+.env.production
+.env.staging
+
+# Docker build cache
+.docker/
+
+# Test coverage
+coverage/
+*.lcov
+.nyc_output/

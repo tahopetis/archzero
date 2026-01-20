@@ -9,4 +9,11 @@
 |----|------|---|-------|------|
 | #4974 | 6:55 PM | 🔵 | SQLX Offline Feature Not Available in Version 0.7.4 | ~220 |
 | #4972 | 6:54 PM | 🔵 | Backend Uses SQLx with PostgreSQL Features | ~130 |
+
+### Jan 20, 2026
+
+| ID | Time | T | Title | Read |
+|----|------|---|-------|------|
+| #5463 | 9:24 AM | 🟣 | Production Dockerfile created for Rust backend | ~342 |
+| #5462 | 9:23 AM | 🟣 | Dockerfile created for Arc Zero UI frontend | ~276 |
 </claude-mem-context>

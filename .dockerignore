@@ -1,0 +1,46 @@
+# Git
+.git
+.gitignore
+.gitattributes
+
+# Documentation
+README.md
+docs/
+*.md
+AGENTS.md
+CLAUDE.md
+
+# Development
+docker-compose.dev.yml
+.env
+.env.*
+*.log
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Node
+node_modules/
+npm-debug.log*
+
+# Rust
+target/
+Cargo.lock
+
+# Test
+test-results/
+coverage/
+*.test.ts.snap
+
+# Misc
+*.bak
+*.tmp
+dist/
