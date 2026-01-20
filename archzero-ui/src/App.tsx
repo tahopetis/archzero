@@ -32,6 +32,7 @@ import {
   RiskMitigationPage,
   ComplianceEvidencePage,
   ComplianceReportsPage,
+  RegulatoryChangesPage,
 } from './pages/governance';
 import { RiskAnalyticsPage } from './pages/governance/RiskAnalyticsPage';
 import { ComplianceAnalyticsPage } from './pages/governance/ComplianceAnalyticsPage';
@@ -407,6 +408,16 @@ function App() {
             <ProtectedRoute>
               <Layout>
                 <ComplianceReportsPage />
+              </Layout>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/governance/compliance/changes"
+          element={
+            <ProtectedRoute>
+              <Layout>
+                <RegulatoryChangesPage />
               </Layout>
             </ProtectedRoute>
           }
