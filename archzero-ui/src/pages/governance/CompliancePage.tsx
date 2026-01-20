@@ -352,12 +352,62 @@ export function CompliancePage() {
 
               {/* Assessment Results */}
               <div className="space-y-4" data-testid="controls-view">
-                <div className="border rounded-lg p-4">
+                {/* Control Item 1 - Interactive */}
+                <div className="border rounded-lg p-4" data-testid="control-item">
                   <h3 className="font-semibold text-slate-900 mb-2">GDPR Article 32 - Data Security</h3>
-                  <div className="flex items-center gap-2 mb-2">
-                    <span className="px-2 py-1 bg-green-100 text-green-800 rounded text-xs font-medium">Compliant</span>
+                  <div className="flex items-center gap-2 mb-3">
+                    <span data-testid="control-status" className="px-2 py-1 bg-green-100 text-green-800 rounded text-xs font-medium">Compliant</span>
                     <span className="text-sm text-slate-600">Last assessed: 2026-01-15</span>
                   </div>
+
+                  {/* Interactive Control Assessment */}
+                  <div className="mb-3 p-3 bg-slate-50 rounded" data-testid="control-assessment">
+                    <p className="text-sm font-medium text-slate-700 mb-2">Assessment Status:</p>
+                    <div className="flex items-center gap-4">
+                      <label className="flex items-center gap-2 text-sm">
+                        <input
+                          type="radio"
+                          name="control-1-status"
+                          value="compliant"
+                          defaultChecked
+                          className="text-green-600 focus:ring-green-500"
+                        />
+                        <span>Compliant</span>
+                      </label>
+                      <label className="flex items-center gap-2 text-sm">
+                        <input
+                          type="radio"
+                          name="control-1-status"
+                          value="partial"
+                          className="text-yellow-600 focus:ring-yellow-500"
+                        />
+                        <span>Partial</span>
+                      </label>
+                      <label className="flex items-center gap-2 text-sm">
+                        <input
+                          type="radio"
+                          name="control-1-status"
+                          value="non-compliant"
+                          className="text-rose-600 focus:ring-rose-500"
+                        />
+                        <span>Non-Compliant</span>
+                      </label>
+                    </div>
+                  </div>
+
+                  {/* Evidence Input */}
+                  <div className="mb-3">
+                    <label className="block text-sm font-medium text-slate-700 mb-1">
+                      Evidence:
+                    </label>
+                    <textarea
+                      data-testid="control-evidence"
+                      className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm"
+                      rows="2"
+                      placeholder="Upload evidence or describe controls verified..."
+                    >Encryption at rest using AES-256, TLS 1.3 for transit, access control via RBAC</textarea>
+                  </div>
+
                   <div className="text-sm text-slate-600">
                     <p className="font-medium mb-1">Controls Verified:</p>
                     <ul className="list-disc list-inside space-y-1 text-slate-700">
@@ -366,14 +416,71 @@ export function CompliancePage() {
                       <li>Regular security audits conducted</li>
                     </ul>
                   </div>
+
+                  <button
+                    onClick={() => setSuccessMessage('Assessment saved')}
+                    className="mt-2 px-3 py-1 bg-indigo-600 text-white rounded text-sm hover:bg-indigo-700"
+                  >
+                    Save Assessment
+                  </button>
                 </div>
 
-                <div className="border rounded-lg p-4">
+                {/* Control Item 2 - Interactive */}
+                <div className="border rounded-lg p-4" data-testid="control-item">
                   <h3 className="font-semibold text-slate-900 mb-2">GDPR Article 25 - Data Protection by Design</h3>
-                  <div className="flex items-center gap-2 mb-2">
-                    <span className="px-2 py-1 bg-yellow-100 text-yellow-800 rounded text-xs font-medium">Partially Compliant</span>
+                  <div className="flex items-center gap-2 mb-3">
+                    <span data-testid="control-status" className="px-2 py-1 bg-yellow-100 text-yellow-800 rounded text-xs font-medium">Partially Compliant</span>
                     <span className="text-sm text-slate-600">Last assessed: 2026-01-10</span>
                   </div>
+
+                  {/* Interactive Control Assessment */}
+                  <div className="mb-3 p-3 bg-slate-50 rounded" data-testid="control-assessment">
+                    <p className="text-sm font-medium text-slate-700 mb-2">Assessment Status:</p>
+                    <div className="flex items-center gap-4">
+                      <label className="flex items-center gap-2 text-sm">
+                        <input
+                          type="radio"
+                          name="control-2-status"
+                          value="compliant"
+                          className="text-green-600 focus:ring-green-500"
+                        />
+                        <span>Compliant</span>
+                      </label>
+                      <label className="flex items-center gap-2 text-sm">
+                        <input
+                          type="radio"
+                          name="control-2-status"
+                          value="partial"
+                          defaultChecked
+                          className="text-yellow-600 focus:ring-yellow-500"
+                        />
+                        <span>Partial</span>
+                      </label>
+                      <label className="flex items-center gap-2 text-sm">
+                        <input
+                          type="radio"
+                          name="control-2-status"
+                          value="non-compliant"
+                          className="text-rose-600 focus:ring-rose-500"
+                        />
+                        <span>Non-Compliant</span>
+                      </label>
+                    </div>
+                  </div>
+
+                  {/* Evidence Input */}
+                  <div className="mb-3">
+                    <label className="block text-sm font-medium text-slate-700 mb-1">
+                      Evidence:
+                    </label>
+                    <textarea
+                      data-testid="control-evidence"
+                      className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm"
+                      rows="2"
+                      placeholder="Upload evidence or describe controls verified..."
+                    >PIA conducted for new data processing activities, data retention policy defined</textarea>
+                  </div>
+
                   <div className="text-sm text-slate-600">
                     <p className="font-medium mb-1">Controls Verified:</p>
                     <ul className="list-disc list-inside space-y-1 text-slate-700">
@@ -382,6 +489,13 @@ export function CompliancePage() {
                       <li className="text-orange-600">⚠️ Data protection officers need additional training</li>
                     </ul>
                   </div>
+
+                  <button
+                    onClick={() => setSuccessMessage('Assessment saved')}
+                    className="mt-2 px-3 py-1 bg-indigo-600 text-white rounded text-sm hover:bg-indigo-700"
+                  >
+                    Save Assessment
+                  </button>
                 </div>
               </div>
             </div>
