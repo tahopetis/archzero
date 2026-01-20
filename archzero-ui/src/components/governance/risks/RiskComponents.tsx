@@ -217,24 +217,41 @@ interface RisksListProps {
 }
 
 export const RisksList = memo(function RisksList({ riskType, status, onEdit, onDelete, onApprove, onEscalate }: RisksListProps) {
-  const { data: risks, isLoading } = useRisks({ riskType, status });
+  const { data: risks, isLoading, error } = useRisks({ riskType, status });
 
   if (isLoading) {
-    return <div className="animate-pulse bg-slate-100 h-64 rounded-xl" />;
+    return <div className="animate-pulse bg-slate-100 h-64 rounded-xl" data-testid="risks-list" />;
   }
+
+  if (error) {
+    return (
+      <div className="p-6 bg-rose-50 border border-rose-200 rounded-lg" data-testid="risks-list">
+        <p className="text-rose-800">Error loading risks: {error.message}</p>
+      </div>
+    );
+  }
+
+  const risksArray = risks?.data || [];
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4" data-testid="risks-list">
-      {risks?.data.map((risk) => (
-        <RiskCard
-          key={risk.id}
-          risk={risk}
-          onEdit={onEdit}
-          onDelete={onDelete}
-          onApprove={onApprove}
-          onEscalate={onEscalate}
-        />
-      ))}
+      {risksArray.length === 0 ? (
+        <div className="col-span-full p-6 bg-slate-50 rounded-lg text-center">
+          <Shield className="w-12 h-12 text-slate-300 mx-auto mb-2" />
+          <p className="text-slate-500">No risks found</p>
+        </div>
+      ) : (
+        risksArray.map((risk) => (
+          <RiskCard
+            key={risk.id}
+            risk={risk}
+            onEdit={onEdit}
+            onDelete={onDelete}
+            onApprove={onApprove}
+            onEscalate={onEscalate}
+          />
+        ))
+      )}
     </div>
   );
 });
