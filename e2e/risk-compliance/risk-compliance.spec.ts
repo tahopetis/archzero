@@ -12,14 +12,20 @@ test.describe('Risk Register', () => {
 
   test('should display risk register', async ({ page }) => {
     await page.goto('/governance/risks');
+    await page.waitForLoadState('domcontentloaded');
+    await page.waitForTimeout(500); // Wait for React to stabilize
 
     await expect(page.locator('[data-testid="risk-register"], h1:has-text("Risks")')).toBeVisible({ timeout: 10000 });
   });
 
   test('should create new risk entry', async ({ page }) => {
     await page.goto('/governance/risks');
+    await page.waitForLoadState('domcontentloaded');
+    await page.waitForTimeout(500); // Wait for React to stabilize
 
-    await page.locator('button:has-text("Add Risk"), [data-testid="add-risk-btn"]').click();
+    const addRiskBtn = page.locator('button:has-text("Add Risk"), [data-testid="add-risk-btn"]');
+    await addRiskBtn.waitFor({ state: 'attached' });
+    await addRiskBtn.click();
 
     // Fill risk details
     await page.locator('[data-testid="risk-title"]').fill('Data Breach Risk');
@@ -36,8 +42,12 @@ test.describe('Risk Register', () => {
 
   test('should calculate risk score (Likelihood × Impact)', async ({ page }) => {
     await page.goto('/governance/risks');
+    await page.waitForLoadState('domcontentloaded');
+    await page.waitForTimeout(500); // Wait for React to stabilize
 
-    await page.locator('button:has-text("Add Risk")').click();
+    const addRiskBtn = page.locator('button:has-text("Add Risk")');
+    await addRiskBtn.waitFor({ state: 'attached' });
+    await addRiskBtn.click();
 
     // Set probability (Likelihood) to High (4) and Impact to High (5)
     await page.locator('[data-testid="risk-title"]').fill('Test Risk Score');
@@ -53,6 +63,8 @@ test.describe('Risk Register', () => {
 
   test('should display Risk Heat Map visualization', async ({ page }) => {
     await page.goto('/governance/risks');
+    await page.waitForLoadState('domcontentloaded');
+    await page.waitForTimeout(500); // Wait for React to stabilize
 
     // Look for heat map visualization
     const heatMap = page.locator('[data-testid="risk-heatmap"], .risk-heatmap, [data-testid="risk-matrix"]');
@@ -61,6 +73,8 @@ test.describe('Risk Register', () => {
 
   test('should show Top 10 Risks dashboard', async ({ page }) => {
     await page.goto('/governance/risks');
+    await page.waitForLoadState('domcontentloaded');
+    await page.waitForTimeout(500); // Wait for React to stabilize
 
     const topRisks = page.locator('[data-testid="top-risks"], .top-risks-dashboard');
     await expect(topRisks.first()).toBeVisible();
@@ -74,12 +88,16 @@ test.describe('Risk Register', () => {
 
   test('should categorize risks by type', async ({ page }) => {
     await page.goto('/governance/risks');
+    await page.waitForLoadState('domcontentloaded');
+    await page.waitForTimeout(500); // Wait for React to stabilize
 
     // Create risks of different types
     const categories = ['Security', 'Compliance', 'Operational', 'Financial', 'Strategic'];
 
     for (const category of categories) {
-      await page.locator('button:has-text("Add Risk")').click();
+      const addRiskBtn = page.locator('button:has-text("Add Risk")');
+      await addRiskBtn.waitFor({ state: 'attached' });
+      await addRiskBtn.click();
       await page.locator('[data-testid="risk-title"]').fill(`${category} Risk`);
       await page.locator('[data-testid="risk-category"]').selectOption(category);
       await page.locator('[data-testid="risk-probability"]').selectOption('Low');
@@ -99,6 +117,8 @@ test.describe('Risk Register', () => {
 
   test('should track risk mitigation plans', async ({ page }) => {
     await page.goto('/governance/risks');
+    await page.waitForLoadState('domcontentloaded');
+    await page.waitForTimeout(500);
 
     const firstRisk = page.locator('[data-testid="risk-item"]').first();
     await expect(firstRisk).toBeVisible();
@@ -118,6 +138,8 @@ test.describe('Risk Register', () => {
 
   test('should show mitigation progress', async ({ page }) => {
     await page.goto('/governance/risks');
+    await page.waitForLoadState('domcontentloaded');
+    await page.waitForTimeout(500);
 
     const firstRisk = page.locator('[data-testid="risk-item"]').first();
     await expect(firstRisk).toBeVisible();
@@ -130,6 +152,8 @@ test.describe('Risk Register', () => {
 
   test('should allow updating risk status', async ({ page }) => {
     await page.goto('/governance/risks');
+    await page.waitForLoadState('domcontentloaded');
+    await page.waitForTimeout(500);
 
     const firstRisk = page.locator('[data-testid="risk-item"]').first();
     await expect(firstRisk).toBeVisible();
@@ -145,6 +169,8 @@ test.describe('Risk Register', () => {
 
   test('should show risk history and timeline', async ({ page }) => {
     await page.goto('/governance/risks');
+    await page.waitForLoadState('domcontentloaded');
+    await page.waitForTimeout(500);
 
     const firstRisk = page.locator('[data-testid="risk-item"]').first();
     await expect(firstRisk).toBeVisible();
@@ -160,6 +186,8 @@ test.describe('Risk Register', () => {
 
   test('should export risk register', async ({ page }) => {
     await page.goto('/governance/risks');
+    await page.waitForLoadState('domcontentloaded');
+    await page.waitForTimeout(500);
 
     const exportBtn = page.locator('button:has-text("Export"), [data-testid="export-risks-btn"]');
     await expect(exportBtn.first()).toBeVisible();
@@ -182,14 +210,19 @@ test.describe('Compliance Framework', () => {
 
   test('should display compliance dashboard', async ({ page }) => {
     await page.goto('/governance/compliance');
+    await page.waitForLoadState('domcontentloaded');
+    await page.waitForTimeout(500);
 
     await expect(page.locator('[data-testid="compliance-dashboard"]')).toBeVisible({ timeout: 10000 });
   });
 
   test('should setup compliance framework', async ({ page }) => {
     await page.goto('/governance/compliance');
+    await page.waitForLoadState('domcontentloaded');
+    await page.waitForTimeout(500);
 
     const setupBtn = page.locator('button:has-text("Setup Framework"), [data-testid="setup-framework-btn"]');
+    await setupBtn.waitFor({ state: 'attached' });
     await expect(setupBtn.first()).toBeVisible();
     await setupBtn.click();
 
@@ -208,11 +241,14 @@ test.describe('Compliance Framework', () => {
 
   test('should support multiple frameworks (GDPR, SOX, HIPAA, ISO 27001)', async ({ page }) => {
     await page.goto('/governance/compliance');
+    await page.waitForLoadState('domcontentloaded');
+    await page.waitForTimeout(500);
 
     const frameworks = ['GDPR', 'SOX', 'HIPAA', 'ISO 27001'];
 
     for (const framework of frameworks) {
       const addBtn = page.locator('button:has-text("Add Framework")');
+      await addBtn.waitFor({ state: 'attached' });
       await expect(addBtn.first()).toBeVisible();
       await addBtn.click();
       await page.locator('[data-testid="compliance-framework"]').selectOption(framework);
@@ -230,6 +266,8 @@ test.describe('Compliance Framework', () => {
 
   test('should track compliance requirements', async ({ page }) => {
     await page.goto('/governance/compliance');
+    await page.waitForLoadState('domcontentloaded');
+    await page.waitForTimeout(500);
 
     // Select framework
     const framework = page.locator('[data-testid="framework-item"]').first();
@@ -247,6 +285,8 @@ test.describe('Compliance Framework', () => {
 
   test('should perform compliance assessment', async ({ page }) => {
     await page.goto('/governance/compliance');
+    await page.waitForLoadState('domcontentloaded');
+    await page.waitForTimeout(500);
 
     const framework = page.locator('[data-testid="framework-item"]').first();
     await expect(framework).toBeVisible();
