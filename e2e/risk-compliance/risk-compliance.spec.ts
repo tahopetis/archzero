@@ -25,6 +25,7 @@ test.describe('Risk Register', () => {
 
     const addRiskBtn = page.locator('button:has-text("Add Risk"), [data-testid="add-risk-btn"]');
     await addRiskBtn.waitFor({ state: 'attached' });
+    await addRiskBtn.scrollIntoViewIfNeeded();
     await addRiskBtn.click();
 
     // Fill risk details
@@ -47,6 +48,7 @@ test.describe('Risk Register', () => {
 
     const addRiskBtn = page.locator('button:has-text("Add Risk")');
     await addRiskBtn.waitFor({ state: 'attached' });
+    await addRiskBtn.scrollIntoViewIfNeeded();
     await addRiskBtn.click();
 
     // Set probability (Likelihood) to High (4) and Impact to High (5)
@@ -97,6 +99,7 @@ test.describe('Risk Register', () => {
     for (const category of categories) {
       const addRiskBtn = page.locator('button:has-text("Add Risk")');
       await addRiskBtn.waitFor({ state: 'attached' });
+      await addRiskBtn.scrollIntoViewIfNeeded();
       await addRiskBtn.click();
       await page.locator('[data-testid="risk-title"]').fill(`${category} Risk`);
       await page.locator('[data-testid="risk-category"]').selectOption(category);
@@ -223,7 +226,7 @@ test.describe('Compliance Framework', () => {
 
     const setupBtn = page.locator('button:has-text("Setup Framework"), [data-testid="setup-framework-btn"]');
     await setupBtn.waitFor({ state: 'attached' });
-    await expect(setupBtn.first()).toBeVisible();
+    await setupBtn.scrollIntoViewIfNeeded();
     await setupBtn.click();
 
     // Select framework
@@ -249,7 +252,7 @@ test.describe('Compliance Framework', () => {
     for (const framework of frameworks) {
       const addBtn = page.locator('button:has-text("Add Framework")');
       await addBtn.waitFor({ state: 'attached' });
-      await expect(addBtn.first()).toBeVisible();
+      await addBtn.scrollIntoViewIfNeeded();
       await addBtn.click();
       await page.locator('[data-testid="compliance-framework"]').selectOption(framework);
       await page.locator('button:has-text("Save")').click();
@@ -497,6 +500,7 @@ test.describe('Risk Review and Approval', () => {
     // Create high-risk item - use data-testid selector and wait for button to be stable
     const addRiskBtn = page.locator('[data-testid="add-risk-btn"]');
     await expect(addRiskBtn).toBeAttached();
+    await addRiskBtn.scrollIntoViewIfNeeded();
     await addRiskBtn.click();
     await page.locator('[data-testid="risk-title"]').fill('Critical Risk');
     await page.locator('[data-testid="risk-probability"]').selectOption('High');
@@ -519,6 +523,7 @@ test.describe('Risk Review and Approval', () => {
     // Switch to list view to see all risks with their data attributes
     const allRisksTab = page.locator('text=All Risks').first();
     await expect(allRisksTab).toBeAttached();
+    await allRisksTab.scrollIntoViewIfNeeded();
     await allRisksTab.click();
     await page.waitForLoadState('domcontentloaded');
     await page.waitForTimeout(500);
@@ -548,6 +553,7 @@ test.describe('Risk Review and Approval', () => {
     // Switch to list view to see all risks with their data attributes
     const allRisksTab = page.locator('text=All Risks').first();
     await expect(allRisksTab).toBeAttached();
+    await allRisksTab.scrollIntoViewIfNeeded();
     await allRisksTab.click();
     await page.waitForLoadState('domcontentloaded');
     await page.waitForTimeout(500);
