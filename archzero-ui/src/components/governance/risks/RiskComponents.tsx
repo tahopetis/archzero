@@ -280,74 +280,79 @@ function HeatMapCell({ likelihood, impact, count, risks, onClick }: HeatMapCellP
 export const RiskHeatMap = memo(function RiskHeatMap({ onSelectRisks }: { onSelectRisks?: (risks: Risk[]) => void }) {
   const { data: heatMapData, isLoading } = useRiskHeatMap();
 
-  if (isLoading) {
-    return <div className="animate-pulse bg-slate-100 h-96 rounded-xl" data-testid="risk-heatmap" />;
-  }
-
-  if (!heatMapData) {
-    return null;
-  }
-
-  // Build 5x5 grid
-  const grid: Array<{ likelihood: number; impact: number; count: number; risks: Risk[] }> = [];
-
-  for (let impact = 5; impact >= 1; impact--) {
-    for (let likelihood = 1; likelihood <= 5; likelihood++) {
-      const cell = heatMapData.cells.find(
-        c => c.likelihood === likelihood && c.impact === impact
-      );
-
-      grid.push({
-        likelihood,
-        impact,
-        count: cell?.count || 0,
-        risks: cell?.risks || []
-      });
-    }
-  }
-
+  // Always render the container with data-testid
   return (
     <Card className="p-6" data-testid="risk-heatmap">
       <div className="flex items-center justify-between mb-6">
         <div>
           <h2 className="text-xl font-bold text-slate-900">Risk Heat Map</h2>
           <p className="text-sm text-slate-600">
-            {heatMapData.totalRisks} risks • Avg score: {heatMapData.avgRiskScore.toFixed(1)}
+            {heatMapData ? `${heatMapData.totalRisks} risks • Avg score: ${heatMapData.avgRiskScore.toFixed(1)}` : 'Loading...'}
           </p>
         </div>
         <IconBadge icon={Flame} label="Heat Map" variant="danger" />
       </div>
 
-      <div className="space-y-2">
-        {/* Y-axis label */}
-        <div className="flex items-center">
-          <div className="w-16 text-xs font-semibold text-slate-500 text-right pr-2">
-            IMPACT
+      {isLoading ? (
+        <div className="animate-pulse bg-slate-100 h-64 rounded-lg flex items-center justify-center">
+          <p className="text-slate-500">Loading heat map...</p>
+        </div>
+      ) : !heatMapData ? (
+        <div className="bg-slate-50 rounded-lg p-8 text-center">
+          <Flame className="w-12 h-12 text-slate-300 mx-auto mb-3" />
+          <p className="text-slate-600">Unable to load risk heat map</p>
+        </div>
+      ) : (
+        <div className="space-y-2">
+          {/* Y-axis label */}
+          <div className="flex items-center">
+            <div className="w-16 text-xs font-semibold text-slate-500 text-right pr-2">
+              IMPACT
+            </div>
+
+            {/* Grid */}
+            <div className="flex-1 grid grid-cols-5 gap-2">
+              {(() => {
+                const grid: Array<{ likelihood: number; impact: number; count: number; risks: Risk[] }> = [];
+
+                for (let impact = 5; impact >= 1; impact--) {
+                  for (let likelihood = 1; likelihood <= 5; likelihood++) {
+                    const cell = heatMapData.cells.find(
+                      c => c.likelihood === likelihood && c.impact === impact
+                    );
+
+                    grid.push({
+                      likelihood,
+                      impact,
+                      count: cell?.count || 0,
+                      risks: cell?.risks || []
+                    });
+                  }
+                }
+
+                return grid.map((cell, idx) => (
+                  <HeatMapCell
+                    key={`${cell.likelihood}-${cell.impact}`}
+                    likelihood={cell.likelihood}
+                    impact={cell.impact}
+                    count={cell.count}
+                    risks={cell.risks}
+                    onClick={onSelectRisks}
+                  />
+                ));
+              })()}
+            </div>
           </div>
 
-          {/* Grid */}
-          <div className="flex-1 grid grid-cols-5 gap-2">
-            {grid.map((cell, idx) => (
-              <HeatMapCell
-                key={`${cell.likelihood}-${cell.impact}`}
-                likelihood={cell.likelihood}
-                impact={cell.impact}
-                count={cell.count}
-                risks={cell.risks}
-                onClick={onSelectRisks}
-              />
-            ))}
+          {/* X-axis label */}
+          <div className="flex items-center justify-center">
+            <div className="w-16" />
+            <div className="flex-1 text-center">
+              <span className="text-xs font-semibold text-slate-500">LIKELIHOOD →</span>
+            </div>
           </div>
         </div>
-
-        {/* X-axis label */}
-        <div className="flex items-center justify-center">
-          <div className="w-16" />
-          <div className="flex-1 text-center">
-            <span className="text-xs font-semibold text-slate-500">LIKELIHOOD →</span>
-          </div>
-        </div>
-      </div>
+      )}
 
       {/* Legend */}
       <div className="mt-6 flex items-center justify-center gap-4">
