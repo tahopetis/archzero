@@ -190,7 +190,7 @@ export function RisksPage() {
               value={selectedRiskType}
               onChange={(e) => setSelectedRiskType(e.target.value)}
               className="px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-              data-testid="risk-type-filter"
+              data-testid="risk-category-filter"
             >
               <option value="all">All Types</option>
               {Object.values(RiskType).map((type) => (

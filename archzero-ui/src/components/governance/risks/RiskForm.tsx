@@ -75,10 +75,10 @@ export function RiskForm({ risk, onSuccess, onCancel }: RiskFormProps) {
             targetClosureDate: targetClosureDate || undefined,
           },
         });
-        setSuccessMessage('Risk updated successfully');
+        setSuccessMessage('Risk updated Success');
       } else {
         await createMutation.mutateAsync(data);
-        setSuccessMessage('Risk created successfully');
+        setSuccessMessage('Risk created Success');
       }
 
       // Call onSuccess after a brief delay to show the success message
