@@ -8,7 +8,7 @@ use std::collections::HashMap;
 use crate::{
     error::AppError,
     state::AppState,
-    models::export::{ExportRequest, ExportFormat, ExportFilters},
+    models::export::{ExportRequest, ExportFormat, ExportFilters, CreateScheduledExportRequest, UpdateScheduledExportRequest, ScheduledExport, ScheduledExportsResponse},
 };
 
 /// Query parameters for export history
@@ -189,6 +189,128 @@ pub async fn get_export_history(
         .map_err(|e| AppError::Internal(anyhow::anyhow!("Failed to serialize response: {}", e)))?;
 
     Ok(Json(json_value))
+}
+
+/// Create scheduled export endpoint
+///
+/// Create a new scheduled export job
+#[utoipa::path(
+    post,
+    path = "/api/v1/export/scheduled",
+    request_body = CreateScheduledExportRequest,
+    responses(
+        (status = 201, description = "Scheduled export created successfully"),
+        (status = 400, description = "Bad request"),
+        (status = 500, description = "Internal server error")
+    ),
+    tag = "Export",
+    security(("bearer_auth" = []))
+)]
+pub async fn create_scheduled_export(
+    State(_state): State<AppState>,
+    Json(_req): Json<CreateScheduledExportRequest>,
+) -> Result<Json<serde_json::Value>, AppError> {
+    // Placeholder - would validate cron, calculate next_run_at, and save to database
+    let user_id = Uuid::new_v4(); // Placeholder - get from JWT
+
+    Ok(Json(serde_json::json!({
+        "id": Uuid::new_v4(),
+        "name": _req.name,
+        "export_type": _req.export_type,
+        "schedule": serde_json::to_string(&_req.schedule).unwrap(),
+        "filters": _req.filters,
+        "format": serde_json::to_string(&_req.format).unwrap(),
+        "next_run_at": chrono::Utc::now(),
+        "last_run_at": None::<chrono::DateTime<chrono::Utc>>,
+        "created_by": user_id,
+        "is_active": true,
+        "created_at": chrono::Utc::now(),
+        "updated_at": chrono::Utc::now(),
+        "message": "Scheduled export created - database integration pending"
+    })))
+}
+
+/// List scheduled exports endpoint
+///
+/// Get all scheduled exports for current user
+#[utoipa::path(
+    get,
+    path = "/api/v1/export/scheduled",
+    responses(
+        (status = 200, description = "Scheduled exports retrieved successfully"),
+        (status = 500, description = "Internal server error")
+    ),
+    tag = "Export",
+    security(("bearer_auth" = []))
+)]
+pub async fn list_scheduled_exports(
+    State(_state): State<AppState>,
+) -> Result<Json<serde_json::Value>, AppError> {
+    // Placeholder - would query database for user's scheduled exports
+    Ok(Json(serde_json::json!({
+        "data": [],
+        "message": "Scheduled exports list - database integration pending"
+    })))
+}
+
+/// Update scheduled export endpoint
+///
+/// Update an existing scheduled export
+#[utoipa::path(
+    put,
+    path = "/api/v1/export/scheduled/{id}",
+    params(
+        ("id" = Uuid, Path, description = "Scheduled export ID")
+    ),
+    request_body = UpdateScheduledExportRequest,
+    responses(
+        (status = 200, description = "Scheduled export updated successfully"),
+        (status = 403, description = "Forbidden - not owned by user"),
+        (status = 404, description = "Scheduled export not found"),
+        (status = 500, description = "Internal server error")
+    ),
+    tag = "Export",
+    security(("bearer_auth" = []))
+)]
+pub async fn update_scheduled_export(
+    State(_state): State<AppState>,
+    axum::extract::Path(id): axum::extract::Path<Uuid>,
+    Json(_req): Json<UpdateScheduledExportRequest>,
+) -> Result<Json<serde_json::Value>, AppError> {
+    // Placeholder - would validate ownership and update database
+    Ok(Json(serde_json::json!({
+        "id": id,
+        "message": "Scheduled export updated - database integration pending"
+    })))
+}
+
+/// Delete scheduled export endpoint
+///
+/// Delete a scheduled export
+#[utoipa::path(
+    delete,
+    path = "/api/v1/export/scheduled/{id}",
+    params(
+        ("id" = Uuid, Path, description = "Scheduled export ID")
+    ),
+    responses(
+        (status = 200, description = "Scheduled export deleted successfully"),
+        (status = 403, description = "Forbidden - not owned by user"),
+        (status = 404, description = "Scheduled export not found"),
+        (status = 500, description = "Internal server error")
+    ),
+    tag = "Export",
+    security(("bearer_auth" = []))
+)]
+pub async fn delete_scheduled_export(
+    State(_state): State<AppState>,
+    axum::extract::Path(id): axum::extract::Path<Uuid>,
+) -> Result<Json<serde_json::Value>, AppError> {
+    // Placeholder - would validate ownership and delete from database
+    Ok(Json(serde_json::json!({
+        "id": id,
+        "message": "Scheduled export deleted - database integration pending"
+    })))
 }
 
 #[cfg(test)]

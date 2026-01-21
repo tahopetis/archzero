@@ -477,7 +477,9 @@ async fn main() -> anyhow::Result<()> {
             Router::new()
                 .route("/cards", post(export::export_cards))
                 .route("/history", get(export::get_export_history))
-                .route("/:domain", post(export::export_domain)),
+                .route("/:domain", post(export::export_domain))
+                .route("/scheduled", post(export::create_scheduled_export).get(export::list_scheduled_exports))
+                .route("/scheduled/:id", put(export::update_scheduled_export).delete(export::delete_scheduled_export)),
         )
         // Phase 2: BIA endpoints
         .nest(
