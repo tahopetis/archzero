@@ -498,7 +498,8 @@ async fn main() -> anyhow::Result<()> {
         .nest(
             "/api/v1/reports",
             Router::new()
-                .route("/generate", post(reports::generate_report)),
+                .route("/generate", post(reports::generate_report))
+                .route("/custom", post(reports::generate_custom_report)),
         )
         // Phase 2: BIA endpoints
         .nest(
