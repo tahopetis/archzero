@@ -100,3 +100,65 @@ export function useExportHistory() {
     },
   });
 }
+
+export function useReDownloadExport() {
+  return useMutation({
+    mutationFn: async ({ id, filename }: { id: string; filename: string }) => {
+      const { data } = await api.get(`/api/v1/export/history/${id}/download`, {
+        responseType: 'blob',
+      });
+      return { blob: data, filename };
+    },
+  });
+}
+
+export function useDeleteExport() {
+  return useMutation({
+    mutationFn: async (id: string) => {
+      await api.delete(`/api/v1/export/history/${id}`);
+      return id;
+    },
+  });
+}
+
+export function useScheduledExports() {
+  return useMutation({
+    mutationFn: async () => {
+      const { data } = await api.get('/api/v1/export/scheduled');
+      return data;
+    },
+  });
+}
+
+export function useCreateScheduledExport() {
+  return useMutation({
+    mutationFn: async (scheduledExport: {
+      name: string;
+      exportType: string;
+      schedule: string;
+      filters?: Record<string, any>;
+      format: string;
+    }) => {
+      const { data } = await api.post('/api/v1/export/scheduled', scheduledExport);
+      return data;
+    },
+  });
+}
+
+export function useUpdateScheduledExport() {
+  return useMutation({
+    mutationFn: async ({ id, ...updates }: { id: string; [key: string]: any }) => {
+      const { data } = await api.put(`/api/v1/export/scheduled/${id}`, updates);
+      return data;
+    },
+  });
+}
+
+export function useDeleteScheduledExport() {
+  return useMutation({
+    mutationFn: async (id: string) => {
+      await api.delete(`/api/v1/export/scheduled/${id}`);
+      return id;
+    },
+  });
+}
