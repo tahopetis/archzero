@@ -1,4 +1,4 @@
-use axum::extract::{Json, State};
+use axum::extract::{Json, State, Path};
 use axum::response::IntoResponse;
 use axum::http::{header, StatusCode};
 use uuid::Uuid;
@@ -8,6 +8,7 @@ use crate::{
     error::AppError,
     state::AppState,
     services::report_service::{ReportRequest, ReportFormat},
+    models::export::{ReportTemplate, CreateReportTemplateRequest, UpdateReportTemplateRequest},
 };
 
 /// Request to generate a report
@@ -199,4 +200,122 @@ pub async fn generate_custom_report(
     );
 
     Ok(response.into_response())
+}
+
+/// List report templates endpoint
+///
+/// Returns all report templates for the current user
+#[utoipa::path(
+    get,
+    path = "/api/v1/reports/templates",
+    responses(
+        (status = 200, description = "Templates retrieved successfully"),
+        (status = 500, description = "Internal server error")
+    ),
+    tag = "Reports",
+    security(("bearer_auth" = []))
+)]
+pub async fn list_templates(
+    State(_state): State<AppState>,
+) -> Result<Json<Vec<ReportTemplate>>, AppError> {
+    // TODO: Implement database query to fetch templates
+    // For now, return empty vector
+    Ok(Json(vec![]))
+}
+
+/// Create report template endpoint
+///
+/// Creates a new report template
+#[utoipa::path(
+    post,
+    path = "/api/v1/reports/templates",
+    request_body = CreateReportTemplateRequest,
+    responses(
+        (status = 201, description = "Template created successfully"),
+        (status = 400, description = "Invalid request"),
+        (status = 500, description = "Internal server error")
+    ),
+    tag = "Reports",
+    security(("bearer_auth" = []))
+)]
+pub async fn create_template(
+    State(_state): State<AppState>,
+    Json(_req): Json<CreateReportTemplateRequest>,
+) -> Result<Json<ReportTemplate>, AppError> {
+    // TODO: Implement database insert
+    // For now, return placeholder template
+    let template = ReportTemplate {
+        id: Uuid::new_v4(),
+        name: "Placeholder Template".to_string(),
+        description: None,
+        template_config: serde_json::json!({}),
+        created_by: Uuid::new_v4(),
+        created_at: chrono::Utc::now(),
+        updated_at: chrono::Utc::now(),
+    };
+    Ok(Json(template))
+}
+
+/// Update report template endpoint
+///
+/// Updates an existing report template
+#[utoipa::path(
+    put,
+    path = "/api/v1/reports/templates/{id}",
+    params(
+        ("id" = Uuid, Path, description = "Template ID")
+    ),
+    request_body = UpdateReportTemplateRequest,
+    responses(
+        (status = 200, description = "Template updated successfully"),
+        (status = 403, description = "User does not own this template"),
+        (status = 404, description = "Template not found"),
+        (status = 500, description = "Internal server error")
+    ),
+    tag = "Reports",
+    security(("bearer_auth" = []))
+)]
+pub async fn update_template(
+    State(_state): State<AppState>,
+    Path(_id): Path<Uuid>,
+    Json(_req): Json<UpdateReportTemplateRequest>,
+) -> Result<Json<ReportTemplate>, AppError> {
+    // TODO: Implement database update with ownership validation
+    // For now, return placeholder
+    let template = ReportTemplate {
+        id: Uuid::new_v4(),
+        name: "Updated Placeholder Template".to_string(),
+        description: None,
+        template_config: serde_json::json!({}),
+        created_by: Uuid::new_v4(),
+        created_at: chrono::Utc::now(),
+        updated_at: chrono::Utc::now(),
+    };
+    Ok(Json(template))
+}
+
+/// Delete report template endpoint
+///
+/// Deletes an existing report template
+#[utoipa::path(
+    delete,
+    path = "/api/v1/reports/templates/{id}",
+    params(
+        ("id" = Uuid, Path, description = "Template ID")
+    ),
+    responses(
+        (status = 204, description = "Template deleted successfully"),
+        (status = 403, description = "User does not own this template"),
+        (status = 404, description = "Template not found"),
+        (status = 500, description = "Internal server error")
+    ),
+    tag = "Reports",
+    security(("bearer_auth" = []))
+)]
+pub async fn delete_template(
+    State(_state): State<AppState>,
+    Path(_id): Path<Uuid>,
+) -> Result<StatusCode, AppError> {
+    // TODO: Implement database delete with ownership validation
+    Ok(StatusCode::NO_CONTENT)
 }
