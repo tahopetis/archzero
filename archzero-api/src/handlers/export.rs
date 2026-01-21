@@ -37,7 +37,7 @@ pub struct ExportHistoryParams {
 pub async fn export_cards(
     State(state): State<AppState>,
     Json(req): Json<ExportRequest>,
-) -> Result<Response<impl IntoResponse>, AppError> {
+) -> Result<impl IntoResponse, AppError> {
     // Get user ID from JWT (would normally come from middleware)
     // For now, use a placeholder - in real implementation, extract from request
     let user_id = Uuid::new_v4(); // Placeholder
@@ -103,7 +103,7 @@ pub async fn export_domain(
     State(state): State<AppState>,
     axum::extract::Path(domain): axum::extract::Path<String>,
     Json(req): Json<ExportRequest>,
-) -> Result<Response<impl IntoResponse>, AppError> {
+) -> Result<impl IntoResponse, AppError> {
     // Validate domain
     let valid_domains = vec!["relationships", "principles", "standards", "policies", "risks"];
     if !valid_domains.contains(&domain.as_str()) {

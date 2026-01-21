@@ -1,5 +1,5 @@
 use axum::{
-    routing::{get, post, delete},
+    routing::{get, post, delete, put},
     Router,
     Json,
 };
@@ -14,7 +14,7 @@ use archzero_api::{
     config::Settings,
     state::AppState,
     handlers::{auth, cards, health, relationships, bia, migration, tco, policies, principles, standards, exceptions, initiatives, risks, compliance, arb, graph, import, bulk, csrf, cache, test_reset, users, export},
-    services::{CardService, AuthService, RelationshipService, Neo4jService, SagaOrchestrator, BIAService, TopologyService, MigrationService, TCOService, CsrfService, RateLimitService, CacheService, ArbTemplateService, ARBAuditService, ARBNotificationService, ExportScheduler},
+    services::{CardService, AuthService, RelationshipService, Neo4jService, SagaOrchestrator, BIAService, TopologyService, MigrationService, TCOService, CsrfService, RateLimitService, CacheService, ArbTemplateService, ARBAuditService, ARBNotificationService, ExportService, ExportScheduler},
     middleware::{security_headers, security_logging, rate_limit_middleware, auth_middleware},
     models::card::{Card, CardType, LifecyclePhase, CreateCardRequest, UpdateCardRequest, CardSearchParams},
     models::relationship::{Relationship, RelationshipType, CreateRelationshipRequest, UpdateRelationshipRequest},
@@ -397,9 +397,7 @@ async fn main() -> anyhow::Result<()> {
     // Start export scheduler in background
     let scheduler_clone = export_scheduler.clone();
     tokio::spawn(async move {
-        if let Err(e) = scheduler_clone.start().await {
-            tracing::error!("Export scheduler failed: {}", e);
-        }
+        scheduler_clone.start().await;
     });
 
     let import_jobs: Arc<tokio::sync::Mutex<std::collections::HashMap<Uuid, import::ImportJob>>> =
@@ -647,6 +645,7 @@ async fn main() -> anyhow::Result<()> {
             Router::new()
                 .route("/", get(arb::get_audit_logs))
                 .route("/:entity_type/:entity_id", get(arb::get_entity_audit_logs))
+                .route("/export", get(arb::export_audit_logs))
                 .layer(axum::middleware::from_fn_with_state(
                     app_state.clone(),
                     auth_middleware,
