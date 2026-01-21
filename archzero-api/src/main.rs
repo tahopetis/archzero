@@ -14,7 +14,7 @@ use archzero_api::{
     config::Settings,
     state::AppState,
     handlers::{auth, cards, health, relationships, bia, migration, tco, policies, principles, standards, exceptions, initiatives, risks, compliance, arb, graph, import, bulk, csrf, cache, test_reset, users, export},
-    services::{CardService, AuthService, RelationshipService, Neo4jService, SagaOrchestrator, BIAService, TopologyService, MigrationService, TCOService, CsrfService, RateLimitService, CacheService, ArbTemplateService, ARBAuditService, ARBNotificationService},
+    services::{CardService, AuthService, RelationshipService, Neo4jService, SagaOrchestrator, BIAService, TopologyService, MigrationService, TCOService, CsrfService, RateLimitService, CacheService, ArbTemplateService, ARBAuditService, ARBNotificationService, ExportScheduler},
     middleware::{security_headers, security_logging, rate_limit_middleware, auth_middleware},
     models::card::{Card, CardType, LifecyclePhase, CreateCardRequest, UpdateCardRequest, CardSearchParams},
     models::relationship::{Relationship, RelationshipType, CreateRelationshipRequest, UpdateRelationshipRequest},
@@ -390,6 +390,17 @@ async fn main() -> anyhow::Result<()> {
 
     // Initialize Export Service
     let export_service = Arc::new(ExportService::new(pool.clone()));
+
+    // Initialize Export Scheduler
+    let export_scheduler = Arc::new(ExportScheduler::new().await?);
+
+    // Start export scheduler in background
+    let scheduler_clone = export_scheduler.clone();
+    tokio::spawn(async move {
+        if let Err(e) = scheduler_clone.start().await {
+            tracing::error!("Export scheduler failed: {}", e);
+        }
+    });
 
     let import_jobs: Arc<tokio::sync::Mutex<std::collections::HashMap<Uuid, import::ImportJob>>> =
         Arc::new(tokio::sync::Mutex::new(std::collections::HashMap::new()));
