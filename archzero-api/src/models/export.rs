@@ -43,13 +43,13 @@ pub struct ExportFilters {
 }
 
 /// Export history item
-#[derive(Debug, Clone, Serialize, Deserialize, ToSchema)]
+#[derive(Debug, Clone, Serialize, Deserialize, ToSchema, sqlx::FromRow)]
 #[serde(rename_all = "camelCase")]
 pub struct ExportHistoryItem {
     pub id: Uuid,
     pub export_type: String,
-    pub format: ExportFormat,
-    pub status: ExportStatus,
+    pub format: String,  // Stored as string in DB, converted to ExportFormat enum in handlers
+    pub status: String,  // Stored as string in DB, converted to ExportStatus enum in handlers
     pub file_path: Option<String>,
     pub file_url: Option<String>,
     pub created_at: DateTime<Utc>,
@@ -68,15 +68,15 @@ pub enum Schedule {
 }
 
 /// Scheduled export configuration
-#[derive(Debug, Clone, Serialize, Deserialize, ToSchema)]
+#[derive(Debug, Clone, Serialize, Deserialize, ToSchema, sqlx::FromRow)]
 #[serde(rename_all = "camelCase")]
 pub struct ScheduledExport {
     pub id: Uuid,
     pub name: String,
     pub export_type: String,
-    pub schedule: Schedule,
-    pub filters: Option<ExportFilters>,
-    pub format: ExportFormat,
+    pub schedule: String,  // Stored as JSON string in DB, deserialized to Schedule enum in handlers
+    pub filters: Option<serde_json::Value>,  // Stored as JSONB in DB
+    pub format: String,  // Stored as string in DB
     pub next_run_at: DateTime<Utc>,
     pub last_run_at: Option<DateTime<Utc>>,
     pub created_by: Uuid,
@@ -144,7 +144,7 @@ pub struct ReportSection {
 }
 
 /// Report template
-#[derive(Debug, Clone, Serialize, Deserialize, ToSchema)]
+#[derive(Debug, Clone, Serialize, Deserialize, ToSchema, sqlx::FromRow)]
 #[serde(rename_all = "camelCase")]
 pub struct ReportTemplate {
     pub id: Uuid,

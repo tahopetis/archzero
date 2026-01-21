@@ -8,6 +8,4 @@
 | ID | Time | T | Title | Read |
 |----|------|---|-------|------|
 | #3537 | 4:40 PM | 🟣 | Added ARB audit logs API endpoints | ~267 |
-| #3412 | 2:28 PM | 🔵 | AppState struct manages application services | ~282 |
-| #3410 | " | 🟣 | Added ArbTemplateService to AppState | ~154 |
 </claude-mem-context>

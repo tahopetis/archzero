@@ -388,6 +388,9 @@ async fn main() -> anyhow::Result<()> {
     // Initialize ARB Notification Service
     let arb_notification_service = Arc::new(ARBNotificationService::new(pool.clone()));
 
+    // Initialize Export Service
+    let export_service = Arc::new(ExportService::new(pool.clone()));
+
     let import_jobs: Arc<tokio::sync::Mutex<std::collections::HashMap<Uuid, import::ImportJob>>> =
         Arc::new(tokio::sync::Mutex::new(std::collections::HashMap::new()));
 
@@ -408,6 +411,7 @@ async fn main() -> anyhow::Result<()> {
         arb_template_service: arb_template_service.clone(),
         arb_audit_service: arb_audit_service.clone(),
         arb_notification_service: arb_notification_service.clone(),
+        export_service: export_service.clone(),
         import_jobs: import_jobs.clone(),
     };
 
