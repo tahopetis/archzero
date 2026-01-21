@@ -13,7 +13,7 @@ use utoipa::OpenApi;
 use archzero_api::{
     config::Settings,
     state::AppState,
-    handlers::{auth, cards, health, relationships, bia, migration, tco, policies, principles, standards, exceptions, initiatives, risks, compliance, arb, graph, import, bulk, csrf, cache, test_reset, users, export},
+    handlers::{auth, cards, health, relationships, bia, migration, tco, policies, principles, standards, exceptions, initiatives, risks, compliance, arb, graph, import, bulk, csrf, cache, test_reset, users, export, reports},
     services::{CardService, AuthService, RelationshipService, Neo4jService, SagaOrchestrator, BIAService, TopologyService, MigrationService, TCOService, CsrfService, RateLimitService, CacheService, ArbTemplateService, ARBAuditService, ARBNotificationService, ExportService, ExportScheduler, ReportService},
     middleware::{security_headers, security_logging, rate_limit_middleware, auth_middleware},
     models::card::{Card, CardType, LifecyclePhase, CreateCardRequest, UpdateCardRequest, CardSearchParams},
@@ -493,6 +493,12 @@ async fn main() -> anyhow::Result<()> {
                 .route("/:domain", post(export::export_domain))
                 .route("/scheduled", post(export::create_scheduled_export).get(export::list_scheduled_exports))
                 .route("/scheduled/:id", put(export::update_scheduled_export).delete(export::delete_scheduled_export)),
+        )
+        // Phase 4: Report generation endpoints
+        .nest(
+            "/api/v1/reports",
+            Router::new()
+                .route("/generate", post(reports::generate_report)),
         )
         // Phase 2: BIA endpoints
         .nest(
