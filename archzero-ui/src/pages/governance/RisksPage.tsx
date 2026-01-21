@@ -7,6 +7,7 @@ import { Download } from 'lucide-react';
 import { RiskDashboard, RiskHeatMap, RisksList, type Risk } from '@/components/governance/risks';
 import { RiskForm } from '@/components/governance/risks/RiskForm';
 import { RiskType, RiskStatus } from '@/types/governance';
+import { useDeleteRisk } from '@/lib/governance-hooks';
 
 type ViewMode = 'dashboard' | 'heatmap' | 'list';
 
@@ -145,6 +146,9 @@ export function RisksPage() {
   const [isApprovalModalOpen, setIsApprovalModalOpen] = useState(false);
   const [isEscalationModalOpen, setIsEscalationModalOpen] = useState(false);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
+
+  // Mutations
+  const deleteRiskMutation = useDeleteRisk();
 
   // Filter states
   const [selectedRiskType, setSelectedRiskType] = useState<string>('all');
@@ -338,10 +342,18 @@ export function RisksPage() {
                 setSelectedRisk(risk);
                 setIsFormOpen(true);
               }, [])}
-              onDelete={useCallback((id: string) => {
-                console.log('Delete risk:', id);
-                // TODO: Implement delete
-              }, [])}
+              onDelete={useCallback(async (id: string) => {
+                if (!confirm('Are you sure you want to delete this risk?')) return;
+                try {
+                  await deleteRiskMutation.mutateAsync(id);
+                  setSuccessMessage('Risk deleted successfully');
+                  setTimeout(() => setSuccessMessage(null), 3000);
+                } catch (error) {
+                  console.error('Failed to delete risk:', error);
+                  setSuccessMessage('Failed to delete risk');
+                  setTimeout(() => setSuccessMessage(null), 3000);
+                }
+              }, [deleteRiskMutation])}
               onApprove={handleApprove}
               onEscalate={handleEscalate}
             />

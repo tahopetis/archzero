@@ -259,8 +259,13 @@ function ThemeDetail({ theme, onClose, onSave }: ThemeDetailProps) {
   };
 
   const handleAssignInitiative = () => {
-    // Mock assignment - in real app, this would call API
-    console.log('Assigning initiative:', selectedInitiative);
+    if (!selectedInitiative) {
+      alert('Please select an initiative');
+      return;
+    }
+    // TODO: Call API to assign initiative to theme
+    // For now, just show success message
+    alert(`Initiative "${selectedInitiative}" assigned to theme "${name}"`);
     setShowAssignInitiative(false);
     setSelectedInitiative('');
   };
