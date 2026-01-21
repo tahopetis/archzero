@@ -41,6 +41,8 @@
 
 | ID | Time | T | Title | Read |
 |----|------|---|-------|------|
+| #5630 | 12:41 PM | 🟣 | US-003 Export Service Implementation Committed | ~206 |
+| #5629 | " | 🟣 | Export Service Implemented (US-003) | ~286 |
 | #5626 | 12:38 PM | ✅ | ExportService Implementation Files Staged for Commit | ~162 |
 | #5618 | 12:29 PM | ✅ | Export Dependencies Added to Cargo.toml | ~118 |
 | #5615 | " | 🟣 | Exports Database Table Migration Created (US-002) | ~229 |

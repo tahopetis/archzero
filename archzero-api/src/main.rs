@@ -13,7 +13,7 @@ use utoipa::OpenApi;
 use archzero_api::{
     config::Settings,
     state::AppState,
-    handlers::{auth, cards, health, relationships, bia, migration, tco, policies, principles, standards, exceptions, initiatives, risks, compliance, arb, graph, import, bulk, csrf, cache, test_reset, users},
+    handlers::{auth, cards, health, relationships, bia, migration, tco, policies, principles, standards, exceptions, initiatives, risks, compliance, arb, graph, import, bulk, csrf, cache, test_reset, users, export},
     services::{CardService, AuthService, RelationshipService, Neo4jService, SagaOrchestrator, BIAService, TopologyService, MigrationService, TCOService, CsrfService, RateLimitService, CacheService, ArbTemplateService, ARBAuditService, ARBNotificationService},
     middleware::{security_headers, security_logging, rate_limit_middleware, auth_middleware},
     models::card::{Card, CardType, LifecyclePhase, CreateCardRequest, UpdateCardRequest, CardSearchParams},
@@ -470,6 +470,14 @@ async fn main() -> anyhow::Result<()> {
             Router::new()
                 .route("/", get(relationships::list_relationships).post(relationships::create_relationship))
                 .route("/:id", get(relationships::get_relationship).put(relationships::update_relationship).delete(relationships::delete_relationship)),
+        )
+        // Phase 4: Export endpoints
+        .nest(
+            "/api/v1/export",
+            Router::new()
+                .route("/cards", post(export::export_cards))
+                .route("/history", get(export::get_export_history))
+                .route("/:domain", post(export::export_domain)),
         )
         // Phase 2: BIA endpoints
         .nest(
