@@ -14,7 +14,7 @@ use archzero_api::{
     config::Settings,
     state::AppState,
     handlers::{auth, cards, health, relationships, bia, migration, tco, policies, principles, standards, exceptions, initiatives, risks, compliance, arb, graph, import, bulk, csrf, cache, test_reset, users, export},
-    services::{CardService, AuthService, RelationshipService, Neo4jService, SagaOrchestrator, BIAService, TopologyService, MigrationService, TCOService, CsrfService, RateLimitService, CacheService, ArbTemplateService, ARBAuditService, ARBNotificationService, ExportService, ExportScheduler},
+    services::{CardService, AuthService, RelationshipService, Neo4jService, SagaOrchestrator, BIAService, TopologyService, MigrationService, TCOService, CsrfService, RateLimitService, CacheService, ArbTemplateService, ARBAuditService, ARBNotificationService, ExportService, ExportScheduler, ReportService},
     middleware::{security_headers, security_logging, rate_limit_middleware, auth_middleware},
     models::card::{Card, CardType, LifecyclePhase, CreateCardRequest, UpdateCardRequest, CardSearchParams},
     models::relationship::{Relationship, RelationshipType, CreateRelationshipRequest, UpdateRelationshipRequest},
@@ -391,6 +391,9 @@ async fn main() -> anyhow::Result<()> {
     // Initialize Export Service
     let export_service = Arc::new(ExportService::new(pool.clone()));
 
+    // Initialize Report Service
+    let report_service = Arc::new(ReportService::new(pool.clone()));
+
     // Initialize Export Scheduler
     let export_scheduler = Arc::new(ExportScheduler::new().await?);
 
@@ -421,6 +424,7 @@ async fn main() -> anyhow::Result<()> {
         arb_audit_service: arb_audit_service.clone(),
         arb_notification_service: arb_notification_service.clone(),
         export_service: export_service.clone(),
+        report_service: report_service.clone(),
         import_jobs: import_jobs.clone(),
     };
 
