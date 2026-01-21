@@ -23,6 +23,7 @@ import { Search, Filter, RotateCw, Download } from 'lucide-react';
 import type { DependencyNode, DependencyLink } from '@/lib/relationship-hooks';
 
 type RelationshipType = 'all' | 'depends_on' | 'implements' | 'similar_to' | 'conflicts_with';
+type LifecycleState = 'current' | 'target';
 
 interface RelationshipExplorerProps {
   cardId: string;
@@ -116,6 +117,8 @@ export function RelationshipExplorer({ cardId }: RelationshipExplorerProps) {
   const [maxDepth, setMaxDepth] = useState(3);
   const [view, setView] = useState<'tree' | 'graph'>('graph');
   const [searchQuery, setSearchQuery] = useState('');
+  const [lifecycleState, setLifecycleState] = useState<LifecycleState>('current');
+  const [showImpactAnalysis, setShowImpactAnalysis] = useState(false);
 
   const { data: chain, isLoading, refetch } = useDependencyChains(cardId, maxDepth);
 
@@ -295,7 +298,7 @@ export function RelationshipExplorer({ cardId }: RelationshipExplorerProps) {
   return (
     <div className="bg-white rounded-lg shadow" data-testid="relationship-explorer">
       {/* Header */}
-      <div className="p-6 border-b">
+      <div className="p-6 border-b" data-testid="relationship-header">
         <div className="flex items-center justify-between mb-4">
           <div>
             <h3 className="text-lg font-semibold text-slate-900">Relationship Explorer</h3>
@@ -318,7 +321,7 @@ export function RelationshipExplorer({ cardId }: RelationshipExplorerProps) {
 
             <button
               onClick={handleExport}
-              data-testid="relationship-export-button"
+              data-testid="export-graph-btn"
               className={cn(
                 'p-2 rounded-lg transition-colors',
                 'hover:bg-slate-100 text-slate-600'
@@ -341,7 +344,7 @@ export function RelationshipExplorer({ cardId }: RelationshipExplorerProps) {
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="px-3 py-1.5 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
-              data-testid="relationship-search-input"
+              data-testid="graph-search"
             />
           </div>
 
@@ -389,7 +392,7 @@ export function RelationshipExplorer({ cardId }: RelationshipExplorerProps) {
           <div className="flex items-center gap-1 bg-slate-100 rounded-lg p-1">
             <button
               onClick={() => setView('tree')}
-              data-testid="relationship-layout-toggle"
+              data-testid="graph-layout-selector"
               className={cn(
                 'px-3 py-1 rounded text-sm font-medium transition-colors',
                 view === 'tree'
@@ -401,7 +404,7 @@ export function RelationshipExplorer({ cardId }: RelationshipExplorerProps) {
             </button>
             <button
               onClick={() => setView('graph')}
-              data-testid="relationship-layout-toggle"
+              data-testid="graph-layout-selector"
               className={cn(
                 'px-3 py-1 rounded text-sm font-medium transition-colors',
                 view === 'graph'
@@ -412,12 +415,61 @@ export function RelationshipExplorer({ cardId }: RelationshipExplorerProps) {
               Graph
             </button>
           </div>
+
+          {/* State Selector */}
+          <div className="flex items-center gap-2">
+            <span className="text-sm text-slate-600">State:</span>
+            <select
+              value={lifecycleState}
+              onChange={(e) => setLifecycleState(e.target.value as LifecycleState)}
+              data-testid="state-selector"
+              className="px-3 py-1.5 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            >
+              <option value="current">Current</option>
+              <option value="target">Target</option>
+            </select>
+          </div>
+
+          {/* Impact Analysis Toggle */}
+          <button
+            onClick={() => setShowImpactAnalysis(!showImpactAnalysis)}
+            data-testid="impact-analysis-tab"
+            className={cn(
+              'px-3 py-1.5 rounded-lg text-sm font-medium transition-colors',
+              showImpactAnalysis
+                ? 'bg-indigo-500 text-white'
+                : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
+            )}
+          >
+            Impact Analysis
+          </button>
         </div>
+      </div>
+
+      {/* Impact Analysis Section */}
+      {showImpactAnalysis && (
+        <div className="px-6 py-4 border-b bg-slate-50" data-testid="impact-analysis">
+          <h4 className="text-sm font-semibold text-slate-900 mb-2">Impact Analysis</h4>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div data-testid="upstream-impact">
+              <p className="text-xs text-slate-600 mb-1">Upstream Impact</p>
+              <p className="text-sm font-medium text-slate-900">{chain?.nodes.filter(n => (n.level || 0) < 0).length || 0} dependencies</p>
+            </div>
+            <div data-testid="downstream-impact">
+              <p className="text-xs text-slate-600 mb-1">Downstream Impact</p>
+              <p className="text-sm font-medium text-slate-900">{chain?.nodes.filter(n => (n.level || 0) > 0).length || 0} dependents</p>
+            </div>
+          </div>
+          <div className="mt-3" data-testid="impact-view">
+            <p className="text-xs text-slate-500">Showing impact analysis for {lifecycleState} state</p>
+          </div>
+        </div>
+      )}
       </div>
 
       {/* Content */}
       <div className="p-6" data-testid="relationship-graph-container">
-        <div style={{ height: '500px', width: '100%' }}>
+        <div style={{ height: '500px', width: '100%' }} data-testid="relationship-graph">
           <ReactFlow
             nodes={nodes}
             edges={edges}
