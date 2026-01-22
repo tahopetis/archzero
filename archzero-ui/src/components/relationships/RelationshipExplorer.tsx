@@ -22,7 +22,7 @@ import { cn } from '@/components/governance/shared';
 import { Search, Filter, RotateCw, Download } from 'lucide-react';
 import type { DependencyNode, DependencyLink } from '@/lib/relationship-hooks';
 
-type RelationshipType = 'all' | 'depends_on' | 'implements' | 'similar_to' | 'conflicts_with';
+type RelationshipType = 'all' | 'depends_on' | 'implements' | 'similar_to' | 'conflicts_with' | 'upstream' | 'downstream' | 'peer';
 type LifecycleState = 'current' | 'target';
 
 interface RelationshipExplorerProps {
@@ -127,10 +127,34 @@ export function RelationshipExplorer({ cardId, lifecycleState: propLifecycleStat
   const { initialNodes, initialEdges } = useMemo(() => {
     if (!chain) return { initialNodes: [], initialEdges: [] };
 
-    // Filter by relationship type
-    const filteredLinks = selectedType === 'all'
-      ? chain.links
-      : chain.links.filter(link => link.type === selectedType);
+    // Filter by relationship type or direction
+    let filteredLinks = chain.links;
+
+    if (selectedType === 'upstream') {
+      // Show only relationships where current card is the target (dependencies)
+      filteredLinks = chain.links.filter(link => link.target === cardId);
+    } else if (selectedType === 'downstream') {
+      // Show only relationships where current card is the source (dependents)
+      filteredLinks = chain.links.filter(link => link.source === cardId);
+    } else if (selectedType === 'peer') {
+      // Show bidirectional relationships (both source and target are related to each other)
+      const bidirectionalPairs = new Set<string>();
+      chain.links.forEach(link => {
+        const reverseLink = chain.links.find(l =>
+          l.source === link.target && l.target === link.source
+        );
+        if (reverseLink) {
+          bidirectionalPairs.add(link.source);
+          bidirectionalPairs.add(link.target);
+        }
+      });
+      filteredLinks = chain.links.filter(link =>
+        bidirectionalPairs.has(link.source) || bidirectionalPairs.has(link.target)
+      );
+    } else if (selectedType !== 'all') {
+      // Filter by specific relationship type
+      filteredLinks = chain.links.filter(link => link.type === selectedType);
+    }
 
     // Filter by search query
     const filteredNodeIds = new Set<string>();
@@ -223,6 +247,9 @@ export function RelationshipExplorer({ cardId, lifecycleState: propLifecycleStat
 
   const relationshipTypes = [
     { value: 'all' as const, label: 'All Types', color: 'bg-slate-500' },
+    { value: 'upstream' as const, label: 'Upstream', color: 'bg-blue-500' },
+    { value: 'downstream' as const, label: 'Downstream', color: 'bg-green-500' },
+    { value: 'peer' as const, label: 'Peer', color: 'bg-purple-500' },
     { value: 'depends_on' as const, label: 'Depends On', color: 'bg-indigo-500' },
     { value: 'implements' as const, label: 'Implements', color: 'bg-emerald-500' },
     { value: 'similar_to' as const, label: 'Similar To', color: 'bg-amber-500' },
