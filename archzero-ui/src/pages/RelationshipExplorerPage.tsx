@@ -12,7 +12,8 @@ export function RelationshipExplorerPage() {
     async function fetchCards() {
       try {
         const response = await api.get('/cards');
-        const cardsData = response.data;
+        // Backend returns paginated response: {data: [...], total, page, page_size}
+        const cardsData = response.data.data || response.data;
         setCards(cardsData);
 
         // Auto-select the first card if available
