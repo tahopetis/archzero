@@ -60,8 +60,8 @@ export function useDependencyChains(cardId: string, depth: number = 3, lifecycle
         }
       });
 
-      // Fetch all cards to build node data
-      const { data: allCards } = await api.get<any[]>('/cards');
+      // Fetch all cards to build node data - note: /cards returns paginated response { data: [...], total: number }
+      const { data: { data: allCards } } = await api.get<{ data: any[]; total: number }>('/cards');
 
       // Build a set of all card IDs in the relationship chain
       const cardIds = new Set<string>();
@@ -119,8 +119,8 @@ export function useRelationshipMatrix(cardIds?: string[]) {
       // Fetch all relationships
       const { data: relationships } = await api.get<any[]>('/api/v1/relationships');
 
-      // Fetch all cards
-      const { data: cards } = await api.get<any[]>('/cards');
+      // Fetch all cards - note: /cards returns paginated response { data: [...], total: number }
+      const { data: { data: cards } } = await api.get<{ data: any[]; total: number }>('/cards');
 
       // Filter by card IDs if provided
       const filteredCards = cardIds
@@ -233,8 +233,8 @@ export function useCriticalPaths() {
       // Fetch all relationships
       const { data: relationships } = await api.get<any[]>('/api/v1/relationships');
 
-      // Fetch all cards to calculate critical paths
-      const { data: cards } = await api.get<any[]>('/cards');
+      // Fetch all cards to calculate critical paths - note: /cards returns paginated response { data: [...], total: number }
+      const { data: { data: cards } } = await api.get<{ data: any[]; total: number }>('/cards');
 
       // Calculate dependency counts for each card
       const depCounts = new Map<string, number>();
