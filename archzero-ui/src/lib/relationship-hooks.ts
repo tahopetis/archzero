@@ -11,6 +11,7 @@ export interface DependencyNode {
   type: string;
   level: number;
   criticality: number;
+  lifecyclePhase?: string;
 }
 
 export interface DependencyLink {
@@ -83,6 +84,7 @@ export function useDependencyChains(cardId: string, depth: number = 3, lifecycle
           type: card.type,
           level: card.id === cardId ? 0 : cardIds.has(card.id) ? 1 : 99,
           criticality: card.attributes?.criticality || Math.random() * 0.5 + 0.25,
+          lifecyclePhase: card.lifecyclePhase,
         });
       });
 

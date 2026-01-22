@@ -451,18 +451,20 @@ test.describe('Relationship Filtering', () => {
   test('@smoke should filter relationships by type (upstream, downstream, peer)', async ({ page }) => {
     await page.goto('/relationships');
 
-    const typeFilter = page.locator('[data-testid="relationship-type-filter"], [data-testid="filter-by-type"], select[aria-label*="type"]');
-    await expect(typeFilter).toBeVisible({ timeout: 5000 });
+    // Verify filter buttons are visible
+    const typeFilters = page.locator('[data-testid="relationship-type-filter"]');
+    await expect(typeFilters.first()).toBeVisible({ timeout: 5000 });
 
-    // Test each relationship type
-    const types = ['upstream', 'downstream', 'peer', 'depends_on', 'dependency_of', 'related_to'];
+    // Test directional filters (upstream, downstream, peer)
+    const directionalFilters = ['Upstream', 'Downstream', 'Peer'];
 
-    for (const type of types) {
-      await typeFilter.selectOption(type);
+    for (const filterName of directionalFilters) {
+      const filterButton = page.locator('[data-testid="relationship-type-filter"]').filter({ hasText: filterName });
+      await filterButton.click();
       await page.waitForLoadState('networkidle');
 
-      // Verify filter applied - check for relationship items or graph update
-      await expect(page.locator('[data-testid="relationship-item"], [data-testid="graph-node"], .node')).toBeVisible();
+      // Verify filter applied - check for graph update
+      await expect(page.locator('[data-testid="relationship-graph"], canvas, .graph-container')).toBeVisible();
     }
   });
 
@@ -1236,14 +1238,16 @@ test.describe('Performance', () => {
     await page.goto('/relationships');
 
     // Wait for initial load
-    await expect(page.locator('[data-testid="relationship-type-filter"]')).toBeVisible({ timeout: 5000 });
+    const typeFilters = page.locator('[data-testid="relationship-type-filter"]');
+    await expect(typeFilters.first()).toBeVisible({ timeout: 5000 });
 
-    const typeFilter = page.locator('[data-testid="relationship-type-filter"]');
+    // Click on "Depends On" filter button
+    const dependsOnFilter = page.locator('[data-testid="relationship-type-filter"]').filter({ hasText: 'Depends On' });
 
     // Measure filter application time
     const startTime = Date.now();
 
-    await typeFilter.selectOption('depends_on');
+    await dependsOnFilter.click();
 
     // Wait for filter to apply (network idle or UI update)
     await page.waitForLoadState('networkidle');

@@ -120,6 +120,8 @@ export function RelationshipExplorer({ cardId, lifecycleState: propLifecycleStat
   const [searchQuery, setSearchQuery] = useState('');
   const [lifecycleState, setLifecycleState] = useState<LifecycleState>(propLifecycleState || 'current');
   const [showImpactAnalysis, setShowImpactAnalysis] = useState(false);
+  const [cardTypeFilter, setCardTypeFilter] = useState<string>('all');
+  const [lifecycleFilter, setLifecycleFilter] = useState<string>('all');
 
   const { data: chain, isLoading, refetch } = useDependencyChains(cardId, maxDepth, lifecycleState);
 
@@ -166,9 +168,27 @@ export function RelationshipExplorer({ cardId, lifecycleState: propLifecycleStat
       chain.nodes.forEach(node => filteredNodeIds.add(node.id));
     }
 
+    // Filter by card type
+    let typeFilteredNodeIds = new Set(filteredNodeIds);
+    if (cardTypeFilter !== 'all') {
+      typeFilteredNodeIds = new Set(
+        chain.nodes.filter(node => node.type === cardTypeFilter).map(node => node.id)
+      );
+    }
+
+    // Filter by lifecycle phase
+    let finalFilteredNodeIds = new Set(typeFilteredNodeIds);
+    if (lifecycleFilter !== 'all') {
+      finalFilteredNodeIds = new Set(
+        chain.nodes.filter(node =>
+          typeFilteredNodeIds.has(node.id) && node.lifecyclePhase === lifecycleFilter
+        ).map(node => node.id)
+      );
+    }
+
     // Create nodes
     const nodes: Node[] = chain.nodes
-      .filter(node => filteredNodeIds.has(node.id))
+      .filter(node => finalFilteredNodeIds.has(node.id))
       .map((node, index) => {
         // Position nodes in a tree layout based on level
         const level = node.level || 0;
@@ -234,7 +254,7 @@ export function RelationshipExplorer({ cardId, lifecycleState: propLifecycleStat
       });
 
     return { initialNodes: nodes, initialEdges: edges };
-  }, [chain, selectedType, searchQuery]);
+  }, [chain, selectedType, searchQuery, cardTypeFilter, lifecycleFilter]);
 
   const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
   const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
@@ -413,6 +433,53 @@ export function RelationshipExplorer({ cardId, lifecycleState: propLifecycleStat
               <option value={3}>3 levels</option>
               <option value={4}>4 levels</option>
               <option value={5}>5 levels</option>
+            </select>
+          </div>
+
+          {/* Card Type Filter */}
+          <div className="flex items-center gap-2">
+            <span className="text-sm text-slate-600">Card Type:</span>
+            <select
+              value={cardTypeFilter}
+              onChange={(e) => setCardTypeFilter(e.target.value)}
+              data-testid="card-type-filter"
+              className="px-3 py-1.5 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            >
+              <option value="all">All Types</option>
+              <option value="BusinessCapability">Business Capability</option>
+              <option value="Objective">Objective</option>
+              <option value="Application">Application</option>
+              <option value="Interface">Interface</option>
+              <option value="ITComponent">IT Component</option>
+              <option value="Platform">Platform</option>
+              <option value="ArchitecturePrinciple">Architecture Principle</option>
+              <option value="TechnologyStandard">Technology Standard</option>
+              <option value="ArchitecturePolicy">Architecture Policy</option>
+              <option value="Exception">Exception</option>
+              <option value="Initiative">Initiative</option>
+              <option value="Risk">Risk</option>
+              <option value="ComplianceRequirement">Compliance Requirement</option>
+            </select>
+          </div>
+
+          {/* Lifecycle Filter */}
+          <div className="flex items-center gap-2">
+            <span className="text-sm text-slate-600">Lifecycle:</span>
+            <select
+              value={lifecycleFilter}
+              onChange={(e) => setLifecycleFilter(e.target.value)}
+              data-testid="lifecycle-filter"
+              className="px-3 py-1.5 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            >
+              <option value="all">All Phases</option>
+              <option value="Discovery">Discovery</option>
+              <option value="Strategy">Strategy</option>
+              <option value="Planning">Planning</option>
+              <option value="Development">Development</option>
+              <option value="Testing">Testing</option>
+              <option value="Active">Active</option>
+              <option value="Decommissioned">Decommissioned</option>
+              <option value="Retired">Retired</option>
             </select>
           </div>
 
