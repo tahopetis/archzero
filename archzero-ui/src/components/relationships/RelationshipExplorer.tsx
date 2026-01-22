@@ -17,6 +17,7 @@ import { Background } from '@reactflow/background';
 import { Controls } from '@reactflow/controls';
 import { MiniMap } from '@reactflow/minimap';
 import '@reactflow/core/dist/style.css';
+import html2canvas from 'html2canvas';
 import { useDependencyChains } from '@/lib/relationship-hooks';
 import { cn } from '@/components/governance/shared';
 import { Search, Filter, RotateCw, Download } from 'lucide-react';
@@ -287,45 +288,24 @@ export function RelationshipExplorer({ cardId, lifecycleState: propLifecycleStat
         return;
       }
 
-      // Create a canvas from the ReactFlow instance
-      const canvas = document.createElement('canvas');
-      const ctx = canvas.getContext('2d');
-      if (!ctx) return;
+      // Use html2canvas to capture the graph
+      const canvasResult = await html2canvas(flowElement, {
+        backgroundColor: '#ffffff',
+        scale: 2,
+      });
 
-      // Get the bounds of the flow
-      const bounds = flowElement.getBoundingClientRect();
-      canvas.width = bounds.width * 2; // 2x for retina
-      canvas.height = bounds.height * 2;
-      ctx.scale(2, 2);
-
-      // Fill background
-      ctx.fillStyle = '#ffffff';
-      ctx.fillRect(0, 0, bounds.width, bounds.height);
-
-      // Use html2canvas if available, otherwise alert user
-      if (typeof window !== 'undefined' && (window as any).html2canvas) {
-        const html2canvas = (window as any).html2canvas;
-        const canvasResult = await html2canvas(flowElement, {
-          backgroundColor: '#ffffff',
-          scale: 2,
-        });
-
-        // Download the image
-        canvasResult.toBlob((blob: Blob | null) => {
-          if (!blob) return;
-          const url = URL.createObjectURL(blob);
-          const link = document.createElement('a');
-          link.href = url;
-          link.download = `relationship-explorer-${cardId}-${new Date().toISOString()}.png`;
-          document.body.appendChild(link);
-          link.click();
-          document.body.removeChild(link);
-          URL.revokeObjectURL(url);
-        });
-      } else {
-        // Fallback: alert user to take screenshot
-        alert('Export functionality requires html2canvas library. Please take a screenshot instead.');
-      }
+      // Download the image
+      canvasResult.toBlob((blob: Blob | null) => {
+        if (!blob) return;
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `relationship-explorer-${cardId}-${new Date().toISOString()}.png`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
+      });
     } catch (error) {
       console.error('Export failed:', error);
       alert('Failed to export graph. Please try again.');
