@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import type { Card } from '@/types/api';
 import { cardApi } from '@/lib/cards';
+import { useImpactAnalysis } from '@/lib/relationship-hooks';
 
 const cardTypeColors: Record<string, string> = {
   BusinessCapability: 'bg-purple-100 text-purple-800',
@@ -36,6 +37,9 @@ export function CardDetail() {
   const [card, setCard] = useState<Card | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  // Fetch impact analysis for this card
+  const { data: impactAnalysis } = useImpactAnalysis(id || '');
 
   useEffect(() => {
     if (!id) return;
@@ -222,6 +226,45 @@ export function CardDetail() {
           </div>
         </div>
       </div>
+
+      {/* Dependencies Section */}
+      {(impactAnalysis?.upstream.length || impactAnalysis?.downstream.length) && (
+        <div className="mt-6 bg-white rounded-lg shadow-md p-6 border border-gray-200" data-testid="dependencies-section">
+          <h2 className="text-lg font-semibold text-gray-900 mb-4">Dependencies</h2>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {/* Upstream Dependencies */}
+            {impactAnalysis?.upstream.length ? (
+              <div data-testid="upstream-dependencies">
+                <h3 className="text-sm font-medium text-gray-700 mb-2 flex items-center">
+                  <svg className="w-4 h-4 mr-1 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 10l7-7m0 0l7 7m-7-7v18" />
+                  </svg>
+                  Upstream Dependencies ({impactAnalysis.upstream.length})
+                </h3>
+                <div className="text-sm text-gray-600">
+                  This card depends on {impactAnalysis.upstream.length} other card(s)
+                </div>
+              </div>
+            ) : null}
+
+            {/* Downstream Dependencies */}
+            {impactAnalysis?.downstream.length ? (
+              <div data-testid="downstream-dependencies">
+                <h3 className="text-sm font-medium text-gray-700 mb-2 flex items-center">
+                  <svg className="w-4 h-4 mr-1 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 14l-7 7m0 0l-7-7m7 7V3" />
+                  </svg>
+                  Downstream Dependents ({impactAnalysis.downstream.length})
+                </h3>
+                <div className="text-sm text-gray-600">
+                  {impactAnalysis.downstream.length} other card(s) depend on this card
+                </div>
+              </div>
+            ) : null}
+          </div>
+        </div>
+      )}
     </div>
   );
 }
