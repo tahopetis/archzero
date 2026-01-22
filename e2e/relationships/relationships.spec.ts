@@ -179,7 +179,7 @@ test.describe('Relationship Validation', () => {
 
   test('should prevent circular dependencies', async ({ page }) => {
     await page.goto('/cards');
-    await expect(page.locator('[data-testid="card-item"]')).toBeVisible();
+    await expect(page.locator('[data-testid="card-item"]').first()).toBeVisible();
     const firstCard = page.locator('[data-testid="card-item"]').first();
     await firstCard.click();
 
@@ -208,7 +208,7 @@ test.describe('Relationship Validation', () => {
 
   test('should prevent duplicate relationships', async ({ page }) => {
     await page.goto('/cards');
-    await expect(page.locator('[data-testid="card-item"]')).toBeVisible();
+    await expect(page.locator('[data-testid="card-item"]').first()).toBeVisible();
     const firstCard = page.locator('[data-testid="card-item"]').first();
     await firstCard.click();
 
@@ -279,7 +279,7 @@ test.describe('Dependency Chain Analysis', () => {
 
   test('should show upstream dependencies', async ({ page }) => {
     await page.goto('/cards');
-    await expect(page.locator('[data-testid="card-item"]')).toBeVisible();
+    await expect(page.locator('[data-testid="card-item"]').first()).toBeVisible();
     const firstCard = page.locator('[data-testid="card-item"]').first();
     await firstCard.click();
 
@@ -289,7 +289,7 @@ test.describe('Dependency Chain Analysis', () => {
 
   test('should show downstream dependencies', async ({ page }) => {
     await page.goto('/cards');
-    await expect(page.locator('[data-testid="card-item"]')).toBeVisible();
+    await expect(page.locator('[data-testid="card-item"]').first()).toBeVisible();
     const firstCard = page.locator('[data-testid="card-item"]').first();
     await firstCard.click();
 
@@ -299,7 +299,7 @@ test.describe('Dependency Chain Analysis', () => {
 
   test('should calculate impact score', async ({ page }) => {
     await page.goto('/cards');
-    await expect(page.locator('[data-testid="card-item"]')).toBeVisible();
+    await expect(page.locator('[data-testid="card-item"]').first()).toBeVisible();
     const firstCard = page.locator('[data-testid="card-item"]').first();
     await firstCard.click();
 
@@ -579,7 +579,7 @@ test.describe('Dependency Traversal', () => {
 
   test('@smoke should navigate to upstream dependencies', async ({ page }) => {
     await page.goto('/cards');
-    await expect(page.locator('[data-testid="card-item"]')).toBeVisible();
+    await expect(page.locator('[data-testid="card-item"]').first()).toBeVisible();
 
     const firstCard = page.locator('[data-testid="card-item"]').first();
     await firstCard.click();
@@ -600,7 +600,7 @@ test.describe('Dependency Traversal', () => {
 
   test('@regression should navigate to downstream dependencies', async ({ page }) => {
     await page.goto('/cards');
-    await expect(page.locator('[data-testid="card-item"]')).toBeVisible();
+    await expect(page.locator('[data-testid="card-item"]').first()).toBeVisible();
 
     const firstCard = page.locator('[data-testid="card-item"]').first();
     await firstCard.click();
@@ -621,7 +621,7 @@ test.describe('Dependency Traversal', () => {
 
   test('@regression should view full dependency chain for a card', async ({ page }) => {
     await page.goto('/cards');
-    await expect(page.locator('[data-testid="card-item"]')).toBeVisible();
+    await expect(page.locator('[data-testid="card-item"]').first()).toBeVisible();
 
     const firstCard = page.locator('[data-testid="card-item"]').first();
     await firstCard.click();
@@ -638,7 +638,7 @@ test.describe('Dependency Traversal', () => {
 
   test('@regression should expand all nodes in chain', async ({ page }) => {
     await page.goto('/cards');
-    await expect(page.locator('[data-testid="card-item"]')).toBeVisible();
+    await expect(page.locator('[data-testid="card-item"]').first()).toBeVisible();
 
     const firstCard = page.locator('[data-testid="card-item"]').first();
     await firstCard.click();
@@ -658,7 +658,7 @@ test.describe('Dependency Traversal', () => {
 
   test('@regression should collapse all nodes', async ({ page }) => {
     await page.goto('/cards');
-    await expect(page.locator('[data-testid="card-item"]')).toBeVisible();
+    await expect(page.locator('[data-testid="card-item"]').first()).toBeVisible();
 
     const firstCard = page.locator('[data-testid="card-item"]').first();
     await firstCard.click();
@@ -678,7 +678,7 @@ test.describe('Dependency Traversal', () => {
 
   test('@regression should navigate multiple levels deep', async ({ page }) => {
     await page.goto('/cards');
-    await expect(page.locator('[data-testid="card-item"]')).toBeVisible();
+    await expect(page.locator('[data-testid="card-item"]').first()).toBeVisible();
 
     const firstCard = page.locator('[data-testid="card-item"]').first();
     await firstCard.click();
@@ -702,7 +702,7 @@ test.describe('Dependency Traversal', () => {
 
   test('@regression should view circular dependencies', async ({ page }) => {
     await page.goto('/cards');
-    await expect(page.locator('[data-testid="card-item"]')).toBeVisible();
+    await expect(page.locator('[data-testid="card-item"]').first()).toBeVisible();
 
     const firstCard = page.locator('[data-testid="card-item"]').first();
     await firstCard.click();
@@ -721,7 +721,7 @@ test.describe('Dependency Traversal', () => {
 
   test('@regression should follow cross-domain dependencies', async ({ page }) => {
     await page.goto('/cards');
-    await expect(page.locator('[data-testid="card-item"]')).toBeVisible();
+    await expect(page.locator('[data-testid="card-item"]').first()).toBeVisible();
 
     const firstCard = page.locator('[data-testid="card-item"]').first();
     await firstCard.click();
@@ -753,7 +753,7 @@ test.describe('Impact Analysis', () => {
 
   test('@smoke should view impact analysis for specific card', async ({ page }) => {
     await page.goto('/cards');
-    await expect(page.locator('[data-testid="card-item"]')).toBeVisible();
+    await expect(page.locator('[data-testid="card-item"]').first()).toBeVisible();
 
     const firstCard = page.locator('[data-testid="card-item"]').first();
     await firstCard.click();
@@ -774,7 +774,7 @@ test.describe('Impact Analysis', () => {
 
   test('@regression should see upstream impact list', async ({ page }) => {
     await page.goto('/cards');
-    await expect(page.locator('[data-testid="card-item"]')).toBeVisible();
+    await expect(page.locator('[data-testid="card-item"]').first()).toBeVisible();
 
     const firstCard = page.locator('[data-testid="card-item"]').first();
     await firstCard.click();
@@ -796,7 +796,7 @@ test.describe('Impact Analysis', () => {
 
   test('@regression should see downstream impact list', async ({ page }) => {
     await page.goto('/cards');
-    await expect(page.locator('[data-testid="card-item"]')).toBeVisible();
+    await expect(page.locator('[data-testid="card-item"]').first()).toBeVisible();
 
     const firstCard = page.locator('[data-testid="card-item"]').first();
     await firstCard.click();
@@ -818,7 +818,7 @@ test.describe('Impact Analysis', () => {
 
   test('@regression should view impact score summary', async ({ page }) => {
     await page.goto('/cards');
-    await expect(page.locator('[data-testid="card-item"]')).toBeVisible();
+    await expect(page.locator('[data-testid="card-item"]').first()).toBeVisible();
 
     const firstCard = page.locator('[data-testid="card-item"]').first();
     await firstCard.click();
@@ -841,7 +841,7 @@ test.describe('Impact Analysis', () => {
 
   test('@regression should identify critical dependencies', async ({ page }) => {
     await page.goto('/cards');
-    await expect(page.locator('[data-testid="card-item"]')).toBeVisible();
+    await expect(page.locator('[data-testid="card-item"]').first()).toBeVisible();
 
     const firstCard = page.locator('[data-testid="card-item"]').first();
     await firstCard.click();
@@ -863,7 +863,7 @@ test.describe('Impact Analysis', () => {
 
   test('@regression should analyze single point of failure', async ({ page }) => {
     await page.goto('/cards');
-    await expect(page.locator('[data-testid="card-item"]')).toBeVisible();
+    await expect(page.locator('[data-testid="card-item"]').first()).toBeVisible();
 
     const firstCard = page.locator('[data-testid="card-item"]').first();
     await firstCard.click();
@@ -882,7 +882,7 @@ test.describe('Impact Analysis', () => {
 
   test('@regression should compare current vs target state impacts', async ({ page }) => {
     await page.goto('/cards');
-    await expect(page.locator('[data-testid="card-item"]')).toBeVisible();
+    await expect(page.locator('[data-testid="card-item"]').first()).toBeVisible();
 
     const firstCard = page.locator('[data-testid="card-item"]').first();
     await firstCard.click();
@@ -1181,7 +1181,7 @@ test.describe('Export Functionality', () => {
 
   test('@regression should export dependency report', async ({ page }) => {
     await page.goto('/cards');
-    await expect(page.locator('[data-testid="card-item"]')).toBeVisible();
+    await expect(page.locator('[data-testid="card-item"]').first()).toBeVisible();
 
     const firstCard = page.locator('[data-testid="card-item"]').first();
     await firstCard.click();
