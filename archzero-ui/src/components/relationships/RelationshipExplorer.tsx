@@ -465,7 +465,6 @@ export function RelationshipExplorer({ cardId }: RelationshipExplorerProps) {
           </div>
         </div>
       )}
-      </div>
 
       {/* Content */}
       <div className="p-6" data-testid="relationship-graph-container">
