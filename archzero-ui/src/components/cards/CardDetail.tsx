@@ -229,7 +229,7 @@ export function CardDetail() {
 
       {/* Dependencies Section */}
       {(impactAnalysis?.upstream.length || impactAnalysis?.downstream.length) && (
-        <div className="mt-6 bg-white rounded-lg shadow-md p-6 border border-gray-200" data-testid="dependencies-section">
+        <div className="mt-6 bg-white rounded-lg shadow-md p-6 border border-gray-200" data-testid="dependencies-section" data-testid="card-relationships">
           <h2 className="text-lg font-semibold text-gray-900 mb-4">Dependencies</h2>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
