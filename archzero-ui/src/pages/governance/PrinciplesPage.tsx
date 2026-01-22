@@ -6,12 +6,48 @@ import { useState } from 'react';
 import { PrinciplesList, PrincipleDetail, type ArchitecturePrinciple } from '@/components/governance/principles';
 import { PrincipleForm } from '@/components/governance/principles/PrincipleForm';
 import { usePrinciples } from '@/lib/governance-hooks';
+import { useDownloadReport } from '@/lib/reports-hooks';
 import { useParams } from 'react-router-dom';
 
 export function PrinciplesPage() {
   const { id } = useParams();
   const [selectedPrinciple, setSelectedPrinciple] = useState<ArchitecturePrinciple | null>(null);
   const [isFormOpen, setIsFormOpen] = useState(false);
+
+  const { data: principles } = usePrinciples();
+  const downloadReportMutation = useDownloadReport();
+
+  const handleExport = async () => {
+    try {
+      // Get principles array from response
+      const principlesList = Array.isArray(principles)
+        ? principles
+        : (principles?.data || []);
+
+      // Generate CSV content from principles data
+      const headers = ['ID', 'Name', 'Category', 'Status', 'Rationale', 'Implications'];
+      const csvRows = [
+        headers.join(','),
+        ...principlesList.map((principle: any) => [
+          principle.id,
+          `"${principle.name.replace(/"/g, '""')}"`,
+          principle.category || '',
+          principle.status || '',
+          `"${(principle.rationale || '').replace(/"/g, '""')}"`,
+          `"${(principle.implications || '').replace(/"/g, '""')}"`,
+        ].join(',')),
+      ];
+
+      const csvContent = csvRows.join('\n');
+      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+
+      const filename = `principles-report-${new Date().toISOString().split('T')[0]}.csv`;
+      await downloadReportMutation.mutateAsync({ blob, filename });
+    } catch (error) {
+      console.error('Export failed:', error);
+      alert('Failed to export principles report');
+    }
+  };
 
   if (id) {
     return (
@@ -33,11 +69,12 @@ export function PrinciplesPage() {
           </div>
           <div className="flex items-center gap-2">
             <button
-              onClick={() => console.log('Export principles report')}
+              onClick={handleExport}
               className="px-4 py-2 bg-slate-600 text-white rounded-lg hover:bg-slate-700 transition-colors font-medium"
               data-testid="export-report-btn"
+              disabled={downloadReportMutation.isPending}
             >
-              Export
+              {downloadReportMutation.isPending ? 'Exporting...' : 'Export'}
             </button>
             <button
               onClick={() => setIsFormOpen(true)}

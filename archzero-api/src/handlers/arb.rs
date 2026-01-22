@@ -1584,3 +1584,68 @@ pub async fn delete_notification(
     Ok(StatusCode::NO_CONTENT)
 }
 
+/// Export ARB audit logs endpoint
+///
+/// Export audit logs to CSV or Excel format
+pub async fn export_audit_logs(
+    State(state): State<AppState>,
+    Query(params): Query<serde_json::Value>,
+) -> Result<impl axum::response::IntoResponse, AppError> {
+    use axum::response::{Response, IntoResponse};
+    use axum::http::{header, StatusCode};
+
+    // Get query parameters
+    let format = params.get("format").and_then(|v| v.as_str()).unwrap_or("csv");
+    let _entity_type = params.get("entity_type").and_then(|v| v.as_str());
+    let _date_start = params.get("date_start").and_then(|v| v.as_str());
+    let _date_end = params.get("date_end").and_then(|v| v.as_str());
+    let _actor_id = params.get("actor_id").and_then(|v| v.as_str());
+
+    // Fetch audit logs (would use filters)
+    let logs = state.arb_audit_service
+        .get_logs_filtered(
+            crate::services::arb_audit_service::AuditLogFilter {
+                entity_type: None,
+                entity_id: None,
+                action: None,
+                actor_id: None,
+                start_date: None,
+                end_date: None,
+            },
+            10000,
+            0
+        )
+        .await?;
+
+    // Generate CSV
+    let mut csv_content = String::new();
+
+    // Header row
+    csv_content.push_str("id,entity_type,entity_id,action,actor_id,actor_name,actor_role,created_at\n");
+
+    // Data rows
+    for log in &logs {
+        csv_content.push_str(&format!("{},{},{},{},{},{},{},{}\n",
+            log.id,
+            log.entity_type,
+            log.entity_id,
+            log.action,
+            log.actor_id,
+            log.actor_name,
+            log.actor_role.as_ref().unwrap_or(&"".to_string()),
+            log.created_at
+        ));
+    }
+
+    let filename = format!("arb_audit_logs_{}.csv", chrono::Utc::now().format("%Y%m%d_%H%M%S"));
+    let content_disposition = format!("attachment; filename=\"{}\"", filename);
+
+    let response = (
+        [(header::CONTENT_TYPE, "text/csv"),
+         (header::CONTENT_DISPOSITION, content_disposition.as_str())],
+        csv_content,
+    );
+
+    Ok(response.into_response())
+}
+

@@ -1,5 +1,5 @@
 use axum::{
-    routing::{get, post, delete},
+    routing::{get, post, delete, put},
     Router,
     Json,
 };
@@ -13,8 +13,8 @@ use utoipa::OpenApi;
 use archzero_api::{
     config::Settings,
     state::AppState,
-    handlers::{auth, cards, health, relationships, bia, migration, tco, policies, principles, standards, exceptions, initiatives, risks, compliance, arb, graph, import, bulk, csrf, cache, test_reset, users},
-    services::{CardService, AuthService, RelationshipService, Neo4jService, SagaOrchestrator, BIAService, TopologyService, MigrationService, TCOService, CsrfService, RateLimitService, CacheService, ArbTemplateService, ARBAuditService, ARBNotificationService},
+    handlers::{auth, cards, health, relationships, bia, migration, tco, policies, principles, standards, exceptions, initiatives, risks, compliance, arb, graph, import, bulk, csrf, cache, test_reset, users, export, reports},
+    services::{CardService, AuthService, RelationshipService, Neo4jService, SagaOrchestrator, BIAService, TopologyService, MigrationService, TCOService, CsrfService, RateLimitService, CacheService, ArbTemplateService, ARBAuditService, ARBNotificationService, ExportService, ExportScheduler, ReportService},
     middleware::{security_headers, security_logging, rate_limit_middleware, auth_middleware},
     models::card::{Card, CardType, LifecyclePhase, CreateCardRequest, UpdateCardRequest, CardSearchParams},
     models::relationship::{Relationship, RelationshipType, CreateRelationshipRequest, UpdateRelationshipRequest},
@@ -388,6 +388,21 @@ async fn main() -> anyhow::Result<()> {
     // Initialize ARB Notification Service
     let arb_notification_service = Arc::new(ARBNotificationService::new(pool.clone()));
 
+    // Initialize Export Service
+    let export_service = Arc::new(ExportService::new(pool.clone()));
+
+    // Initialize Report Service
+    let report_service = Arc::new(ReportService::new(pool.clone()));
+
+    // Initialize Export Scheduler
+    let export_scheduler = Arc::new(ExportScheduler::new().await?);
+
+    // Start export scheduler in background
+    let scheduler_clone = export_scheduler.clone();
+    tokio::spawn(async move {
+        scheduler_clone.start().await;
+    });
+
     let import_jobs: Arc<tokio::sync::Mutex<std::collections::HashMap<Uuid, import::ImportJob>>> =
         Arc::new(tokio::sync::Mutex::new(std::collections::HashMap::new()));
 
@@ -408,6 +423,8 @@ async fn main() -> anyhow::Result<()> {
         arb_template_service: arb_template_service.clone(),
         arb_audit_service: arb_audit_service.clone(),
         arb_notification_service: arb_notification_service.clone(),
+        export_service: export_service.clone(),
+        report_service: report_service.clone(),
         import_jobs: import_jobs.clone(),
     };
 
@@ -466,6 +483,25 @@ async fn main() -> anyhow::Result<()> {
             Router::new()
                 .route("/", get(relationships::list_relationships).post(relationships::create_relationship))
                 .route("/:id", get(relationships::get_relationship).put(relationships::update_relationship).delete(relationships::delete_relationship)),
+        )
+        // Phase 4: Export endpoints
+        .nest(
+            "/api/v1/export",
+            Router::new()
+                .route("/cards", post(export::export_cards))
+                .route("/history", get(export::get_export_history))
+                .route("/:domain", post(export::export_domain))
+                .route("/scheduled", post(export::create_scheduled_export).get(export::list_scheduled_exports))
+                .route("/scheduled/:id", put(export::update_scheduled_export).delete(export::delete_scheduled_export)),
+        )
+        // Phase 4: Report generation endpoints
+        .nest(
+            "/api/v1/reports",
+            Router::new()
+                .route("/generate", post(reports::generate_report))
+                .route("/custom", post(reports::generate_custom_report))
+                .route("/templates", get(reports::list_templates).post(reports::create_template))
+                .route("/templates/:id", put(reports::update_template).delete(reports::delete_template)),
         )
         // Phase 2: BIA endpoints
         .nest(
@@ -622,6 +658,7 @@ async fn main() -> anyhow::Result<()> {
             Router::new()
                 .route("/", get(arb::get_audit_logs))
                 .route("/:entity_type/:entity_id", get(arb::get_entity_audit_logs))
+                .route("/export", get(arb::export_audit_logs))
                 .layer(axum::middleware::from_fn_with_state(
                     app_state.clone(),
                     auth_middleware,

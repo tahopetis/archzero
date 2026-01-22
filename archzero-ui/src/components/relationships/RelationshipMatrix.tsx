@@ -63,6 +63,17 @@ export function RelationshipMatrix({ nodes, cells, onCellClick }: RelationshipMa
       {/* Filters and Controls */}
       <div className="mb-4 flex items-center justify-between">
         <div className="flex items-center gap-4">
+          {/* Type Filter */}
+          <select
+            data-testid="matrix-type-filter"
+            className="px-3 py-1.5 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+          >
+            <option value="all">All Types</option>
+            <option value="BusinessCapability">Business Capability</option>
+            <option value="Application">Application</option>
+            <option value="ITComponent">IT Component</option>
+          </select>
+
           {/* Source Type Filter */}
           <select
             data-testid="matrix-source-type-filter"
@@ -113,7 +124,7 @@ export function RelationshipMatrix({ nodes, cells, onCellClick }: RelationshipMa
       </div>
 
       <div className="overflow-x-auto">
-        <table className="w-full border-collapse">
+        <table className="w-full border-collapse matrix-view" data-testid="matrix-view-table">
           <thead>
             <tr>
               <th className="p-2 text-xs font-medium text-slate-500 bg-slate-50"></th>

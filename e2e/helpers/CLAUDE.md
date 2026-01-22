@@ -20,8 +20,6 @@
 | #3084 | 5:56 AM | 🔵 | Test Data Seeder Submission Processing Logic | ~253 |
 | #3083 | " | 🔵 | createTestARBSubmissions defined in TestDataFactory class | ~200 |
 | #3048 | 5:28 AM | 🔵 | Test data seeder resolves meeting ID markers for ARB submissions | ~316 |
-| #3047 | " | 🔵 | Located test data seeder file for ARB | ~147 |
-| #2973 | 12:06 AM | ✅ | ARB submission seeder enhanced to resolve meeting ID markers | ~360 |
 
 ### Jan 18, 2026
 
@@ -67,4 +65,11 @@
 | #4186 | 12:17 AM | ✅ | Beads Tracking Updates Committed and Pushed | ~271 |
 | #4185 | " | 🟣 | Staged Documentation Updates for Commit | ~152 |
 | #4170 | 12:10 AM | ✅ | Documentation Files Modified | ~200 |
+
+### Jan 22, 2026
+
+| ID | Time | T | Title | Read |
+|----|------|---|-------|------|
+| #5830 | 12:43 AM | ✅ | Branch created for relationship graph test fixes | ~163 |
+| #5804 | 12:33 AM | 🔵 | Test data seeder relationship seeding examined | ~183 |
 </claude-mem-context>

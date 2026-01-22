@@ -93,6 +93,32 @@ impl RelationshipService {
         Ok(relationships)
     }
 
+    pub async fn list_all(&self) -> Result<Vec<Relationship>, AppError> {
+        let rows = sqlx::query(
+            r#"
+            SELECT id, from_card_id, to_card_id, relationship_type, valid_from, valid_to, attributes, confidence, created_at
+            FROM relationships
+            ORDER BY created_at DESC
+            "#,
+        )
+        .fetch_all(&self.pool)
+        .await
+        .map_err(|e| AppError::Internal(anyhow::anyhow!("Failed to list all relationships: {}", e)))?;
+
+        let mut relationships = Vec::new();
+        for row in rows {
+            match self.row_to_relationship(row) {
+                Ok(rel) => relationships.push(rel),
+                Err(e) => {
+                    tracing::warn!("Failed to parse relationship row: {:?}", e);
+                    continue;
+                }
+            }
+        }
+
+        Ok(relationships)
+    }
+
     pub async fn update(&self, id: Uuid, req: UpdateRelationshipRequest) -> Result<Relationship, AppError> {
         let mut updates = Vec::new();
         let mut param_idx = 2;

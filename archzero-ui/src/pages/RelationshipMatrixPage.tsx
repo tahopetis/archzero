@@ -1,45 +1,25 @@
-import { useEffect, useState } from 'react';
+import { useRelationshipMatrix } from '../lib/relationship-hooks';
 import { RelationshipMatrix } from '../components/relationships/RelationshipMatrix';
 import type { MatrixCell } from '../lib/relationship-hooks';
-import { api } from '../lib/api';
 
 export function RelationshipMatrixPage() {
-  const [nodes, setNodes] = useState<{ id: string; name: string }[]>([]);
-  const [cells, setCells] = useState<MatrixCell[]>([]);
-  const [loading, setLoading] = useState(true);
+  const { data: matrixData, isLoading } = useRelationshipMatrix();
 
-  useEffect(() => {
-    // Fetch cards for the matrix
-    async function fetchData() {
-      try {
-        const response = await api.get('/cards');
-        const cards = response.data;
-
-        // Transform cards into nodes
-        const matrixNodes = cards.map((card: any) => ({
-          id: card.id,
-          name: card.name,
-        }));
-
-        // Create cells (you can customize this based on your relationship data)
-        const matrixCells: MatrixCell[] = [];
-        // TODO: Fetch actual relationship data and create cells
-
-        setNodes(matrixNodes);
-        setCells(matrixCells);
-      } catch (error) {
-        console.error('Failed to fetch data:', error);
-      } finally {
-        setLoading(false);
-      }
-    }
-
-    fetchData();
-  }, []);
-
-  if (loading) {
-    return <div className="container mx-auto py-6">Loading...</div>;
+  if (isLoading) {
+    return (
+      <div className="container mx-auto py-6">
+        <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+          <div className="animate-pulse">
+            <div className="h-6 bg-slate-200 rounded w-48 mb-4"></div>
+            <div className="h-64 bg-slate-200 rounded"></div>
+          </div>
+        </div>
+      </div>
+    );
   }
+
+  const nodes = matrixData?.nodes || [];
+  const cells = matrixData?.cells || [];
 
   return (
     <div className="container mx-auto py-6">
@@ -80,7 +60,7 @@ export function RelationshipMatrixPage() {
         </div>
       </div>
 
-      <div data-testid="dependency-matrix">
+      <div data-testid="relationship-matrix" className="bg-white dark:bg-gray-800 rounded-lg shadow">
         <RelationshipMatrix nodes={nodes} cells={cells} />
       </div>
     </div>

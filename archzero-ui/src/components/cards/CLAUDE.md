@@ -16,4 +16,11 @@
 |----|------|---|-------|------|
 | #3131 | 6:29 AM | 🔵 | CardDetail component displays card metadata | ~224 |
 | #3129 | " | 🔵 | CardDetail.tsx is 220 lines long | ~77 |
+
+### Jan 22, 2026
+
+| ID | Time | T | Title | Read |
+|----|------|---|-------|------|
+| #5934 | 10:43 AM | 🔴 | Added duplicate data-testid attribute to card dependencies section | ~261 |
+| #5867 | 12:52 AM | 🔵 | CardDetail Component Structure Examined | ~366 |
 </claude-mem-context>

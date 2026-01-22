@@ -24,6 +24,14 @@ import {
   Filter,
   CalendarClock,
 } from 'lucide-react';
+import {
+  useGenerateReport,
+  useDownloadReport,
+  useScheduleReport,
+  getReportFilename,
+  type ReportFormat,
+  type ReportSection,
+} from '@/lib/reports-hooks';
 
 // Mock data for charts
 const riskTrendData = [
@@ -76,17 +84,64 @@ export function ReportsDashboard() {
   const [scheduleFrequency, setScheduleFrequency] = useState<'weekly' | 'monthly' | 'quarterly'>('monthly');
   const [scheduleEmail, setScheduleEmail] = useState('');
 
-  const handleExport = (format: ExportFormat) => {
-    console.log(`Exporting report as ${format}`);
-    // In a real implementation, this would trigger the actual export
-    setShowExportModal(false);
+  // Report generation and scheduling hooks
+  const generateMutation = useGenerateReport();
+  const downloadMutation = useDownloadReport();
+  const scheduleMutation = useScheduleReport();
+
+  const handleExport = async (format: ExportFormat) => {
+    try {
+      // Build report sections based on current data
+      const sections: ReportSection[] = [
+        { type: 'title', title: 'Executive Summary' },
+        { type: 'metrics', title: 'Key Performance Indicators', data: { totalApps: 127, complianceScore: 87, activeRisks: 24, totalTCO: 1170000 } },
+        { type: 'chart', title: 'Risk Trends', data: { chartType: 'line', data: riskTrendData } },
+        { type: 'chart', title: 'Compliance by Category', data: { chartType: 'bar', data: complianceData } },
+        { type: 'chart', title: 'TCO Breakdown', data: { chartType: 'pie', data: tcoBreakdownData } },
+        { type: 'table', title: 'Compliance Heatmap', data: { headers: ['Domain', 'Q1', 'Q2', 'Q3', 'Q4'], rows: complianceHeatmapData.map(row => [row.domain, row.q1, row.q2, row.q3, row.q4]) } },
+      ];
+
+      const { blob } = await generateMutation.mutateAsync({
+        title: 'Arc Zero Analytics Dashboard',
+        sections,
+        format: format as ReportFormat,
+        filters: { timeRange: selectedTimeRange },
+      });
+
+      const filename = getReportFilename('analytics-dashboard', format as ReportFormat);
+      await downloadMutation.mutateAsync({ blob, filename });
+
+      setShowExportModal(false);
+      alert('Report exported successfully!');
+    } catch (error) {
+      console.error('Export failed:', error);
+      alert('Failed to export report. Please try again.');
+    }
   };
 
-  const handleScheduleReport = () => {
-    console.log(`Scheduling report: ${scheduleFrequency} to ${scheduleEmail}`);
-    // In a real implementation, this would save the schedule
-    setShowScheduleModal(false);
-    setScheduleEmail('');
+  const handleScheduleReport = async () => {
+    if (!scheduleEmail) {
+      alert('Please enter at least one email address');
+      return;
+    }
+
+    try {
+      await scheduleMutation.mutateAsync({
+        name: `Analytics Dashboard Report - ${scheduleFrequency}`,
+        report_type: 'analytics-dashboard',
+        format: 'pdf' as ReportFormat,
+        frequency: scheduleFrequency,
+        email: scheduleEmail,
+        filters: { timeRange: selectedTimeRange },
+      });
+
+      setShowScheduleModal(false);
+      setScheduleEmail('');
+      alert('Report scheduled successfully!');
+    } catch (error) {
+      console.error('Schedule failed:', error);
+      alert('Failed to schedule report. Please try again.');
+    }
   };
 
   const getHeatmapColor = (value: number) => {
@@ -368,7 +423,10 @@ export function ReportsDashboard() {
         <div className="bg-white rounded-lg shadow p-6" data-testid="summary-table">
           <div className="flex justify-between items-center mb-4">
             <h3 className="text-lg font-semibold text-gray-900">Detailed Metrics Summary</h3>
-            <button className="flex items-center gap-2 px-3 py-2 text-sm text-gray-600 hover:text-gray-900 border border-gray-300 rounded-lg hover:bg-gray-50">
+            <button
+              onClick={() => handleExport('csv')}
+              className="flex items-center gap-2 px-3 py-2 text-sm text-gray-600 hover:text-gray-900 border border-gray-300 rounded-lg hover:bg-gray-50"
+            >
               <Download className="w-4 h-4" />
               Download CSV
             </button>
@@ -475,15 +533,17 @@ export function ReportsDashboard() {
                 <button
                   onClick={() => setShowExportModal(false)}
                   className="flex-1 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+                  disabled={generateMutation.isPending}
                 >
                   Cancel
                 </button>
                 <button
                   onClick={() => handleExport(exportFormat)}
-                  className="flex-1 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors"
+                  className="flex-1 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors disabled:bg-indigo-400"
                   data-testid="confirm-export-btn"
+                  disabled={generateMutation.isPending}
                 >
-                  Export
+                  {generateMutation.isPending ? 'Exporting...' : 'Export'}
                 </button>
               </div>
             </div>
@@ -526,15 +586,17 @@ export function ReportsDashboard() {
                 <button
                   onClick={() => setShowScheduleModal(false)}
                   className="flex-1 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+                  disabled={scheduleMutation.isPending}
                 >
                   Cancel
                 </button>
                 <button
                   onClick={handleScheduleReport}
-                  className="flex-1 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors"
+                  className="flex-1 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors disabled:bg-indigo-400"
                   data-testid="confirm-schedule-btn"
+                  disabled={scheduleMutation.isPending}
                 >
-                  Schedule
+                  {scheduleMutation.isPending ? 'Scheduling...' : 'Schedule'}
                 </button>
               </div>
             </div>

@@ -9,9 +9,6 @@
 |----|------|---|-------|------|
 | #3608 | 9:56 PM | 🟣 | ARB Integration with Cards Implemented | ~307 |
 | #3574 | 5:01 PM | 🔴 | Fixed audit log actor information to use email and formatted role | ~136 |
-| #3422 | 2:32 PM | ✅ | Changed card_to_arb_submission function visibility from private to public | ~270 |
-| #3402 | 2:26 PM | 🔵 | ARB handler file contains 1383 lines of Rust code | ~223 |
-| #3399 | 2:25 PM | 🔵 | ARB handler file structure reviewed - comprehensive implementation | ~181 |
 
 ### Jan 19, 2026
 

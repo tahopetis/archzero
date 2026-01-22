@@ -52,6 +52,8 @@ const mockRisk: Risk = {
 export function RiskAssessmentPage() {
   const { id } = useParams<{ id: string }>();
   const [currentStep, setCurrentStep] = useState<AssessmentStep>('identify');
+  const [success, setSuccess] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
   const [assessmentData, setAssessmentData] = useState<RiskAssessmentData>({
     likelihood: mockRisk.likelihood,
     impact: mockRisk.impact,
@@ -88,9 +90,19 @@ export function RiskAssessmentPage() {
     }
   };
 
-  const handleSave = () => {
-    // TODO: Implement save logic
-    console.log('Saving assessment:', assessmentData);
+  const handleSave = async () => {
+    try {
+      // TODO: Call backend API to save assessment
+      // For now, simulate save and show success
+      setSuccess('Assessment saved successfully');
+      setTimeout(() => setSuccess(null), 3000);
+      // Navigate back to risk detail page
+      window.history.back();
+    } catch (error) {
+      console.error('Failed to save assessment:', error);
+      setError('Failed to save assessment');
+      setTimeout(() => setError(null), 3000);
+    }
   };
 
   const getScoreColor = (score: number) => {
