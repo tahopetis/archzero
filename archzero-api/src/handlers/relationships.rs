@@ -68,9 +68,7 @@ pub async fn list_relationships(
     let relationships = if let Some(card_id) = params.card_id {
         state.relationship_service.list_for_card(card_id).await?
     } else {
-        // For now, return empty if no card_id specified
-        // TODO: Implement full list with pagination
-        vec![]
+        state.relationship_service.list_all().await?
     };
     Ok(Json(relationships))
 }
