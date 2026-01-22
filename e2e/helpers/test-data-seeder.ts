@@ -174,12 +174,17 @@ export class TestDataSeeder {
           continue;
         }
 
-        const createRequest = {
+        const createRequest: any = {
           fromCardId: sourceId,
           toCardId: targetId,
           relationshipType: relationship.relationship_type,
           description: relationship.description,
         };
+
+        // Add valid_from for target state relationships
+        if (relationship.valid_from) {
+          createRequest.valid_from = relationship.valid_from;
+        }
 
         const response = await this.request.post(`${this.baseURL}/api/v1/relationships`, {
           headers: {
@@ -749,20 +754,19 @@ class TestDataFactory {
 
   /**
    * Create relationships between cards (by name, will be mapped to IDs later)
+   *
+   * Ensures that diverse cards have relationships for E2E tests.
+   * Tests pick the "first card" from the list, so we create relationships
+   * for all cards to guarantee test data exists.
    */
   static createTestRelationships(cardNames: string[]) {
     return [
+      // Test-Application relationships (central hub with many dependencies)
       {
         source_card_name: 'Test-Application',
         target_card_name: 'Customer-Portal',
         relationship_type: 'reliesOn',
         description: 'Test Application implements Customer Portal capability',
-      },
-      {
-        source_card_name: 'Customer-Portal',
-        target_card_name: 'Order-Management',
-        relationship_type: 'impacts',
-        description: 'Customer Portal enables Order Management',
       },
       {
         source_card_name: 'Test-Application',
@@ -775,6 +779,91 @@ class TestDataFactory {
         target_card_name: 'Redis-Cache',
         relationship_type: 'reliesOn',
         description: 'Test Application uses Redis Cache for session management',
+      },
+      {
+        source_card_name: 'Test-Application',
+        target_card_name: 'Order-Management',
+        relationship_type: 'impacts',
+        description: 'Test Application impacts Order Management capability',
+      },
+      {
+        source_card_name: 'Test-Application',
+        target_card_name: 'Payment-Gateway-API',
+        relationship_type: 'dependsOn',
+        description: 'Test Application depends on Payment Gateway API',
+      },
+      // Customer-Portal relationships (has upstream and downstream)
+      {
+        source_card_name: 'Customer-Portal',
+        target_card_name: 'Order-Management',
+        relationship_type: 'impacts',
+        description: 'Customer Portal enables Order Management',
+      },
+      {
+        source_card_name: 'Customer-Portal',
+        target_card_name: 'PostgreSQL-Database',
+        relationship_type: 'reliesOn',
+        description: 'Customer Portal stores customer data in PostgreSQL',
+      },
+      {
+        source_card_name: 'Inventory-Management-System',
+        target_card_name: 'Customer-Portal',
+        relationship_type: 'reliesOn',
+        description: 'Inventory Management depends on Customer Portal data',
+      },
+      // Cross-layer relationships (Application -> ITComponent)
+      {
+        source_card_name: 'Inventory-Management-System',
+        target_card_name: 'PostgreSQL-Database',
+        relationship_type: 'dependsOn',
+        description: 'Inventory Management stores data in PostgreSQL',
+      },
+      {
+        source_card_name: 'Inventory-Management-System',
+        target_card_name: 'Redis-Cache',
+        relationship_type: 'reliesOn',
+        description: 'Inventory Management uses Redis for caching',
+      },
+      // Business Capability relationships
+      {
+        source_card_name: 'Customer-Portal',
+        target_card_name: 'Customer-Analytics',
+        relationship_type: 'impacts',
+        description: 'Customer Portal provides data for Customer Analytics',
+      },
+      {
+        source_card_name: 'Test-Application',
+        target_card_name: 'Customer-Analytics',
+        relationship_type: 'reliesOn',
+        description: 'Test Application supports Customer Analytics',
+      },
+      // Interface relationships
+      {
+        source_card_name: 'Test-Application',
+        target_card_name: 'Shipping-Provider-Integration',
+        relationship_type: 'dependsOn',
+        description: 'Test Application uses Shipping Provider Integration',
+      },
+      {
+        source_card_name: 'Customer-Portal',
+        target_card_name: 'Payment-Gateway-API',
+        relationship_type: 'reliesOn',
+        description: 'Customer Portal processes payments via API',
+      },
+      // Target state relationships (for state comparison tests)
+      {
+        source_card_name: 'Test-Application',
+        target_card_name: 'Cloud-Platform',
+        relationship_type: 'dependsOn',
+        description: 'Future migration: Test Application will depend on Cloud Platform',
+        valid_from: new Date(Date.now() + 90 * 24 * 60 * 60 * 1000).toISOString().split('T')[0], // 90 days in future
+      },
+      {
+        source_card_name: 'Customer-Portal',
+        target_card_name: 'Cloud-Platform',
+        relationship_type: 'reliesOn',
+        description: 'Future migration: Customer Portal will move to Cloud Platform',
+        valid_from: new Date(Date.now() + 60 * 24 * 60 * 60 * 1000).toISOString().split('T')[0], // 60 days in future
       },
     ];
   }
