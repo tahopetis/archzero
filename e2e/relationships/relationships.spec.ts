@@ -342,11 +342,12 @@ test.describe('Graph Viewing - Large Scale', () => {
     await page.goto('/relationships');
 
     // Look for layout selector
-    const layoutSelector = page.locator('[data-testid="graph-layout-selector"], [data-testid="layout-select"], select[aria-label*="layout"]');
-    await expect(layoutSelector).toBeVisible({ timeout: 5000 });
+    const layoutSelector = page.locator('[data-testid="graph-layout-selector"]');
+    await expect(layoutSelector.first()).toBeVisible({ timeout: 5000 });
 
-    // Select tree layout
-    await layoutSelector.selectOption('tree');
+    // Click Tree button
+    const treeButton = page.locator('[data-testid="graph-layout-selector"]').filter({ hasText: 'Tree' });
+    await treeButton.click();
 
     // Wait for graph to re-render
     await page.waitForLoadState('networkidle');
@@ -359,11 +360,12 @@ test.describe('Graph Viewing - Large Scale', () => {
     await page.goto('/relationships');
 
     // Look for layout selector
-    const layoutSelector = page.locator('[data-testid="graph-layout-selector"], [data-testid="layout-select"], select[aria-label*="layout"]');
-    await expect(layoutSelector).toBeVisible({ timeout: 5000 });
+    const layoutSelector = page.locator('[data-testid="graph-layout-selector"]');
+    await expect(layoutSelector.first()).toBeVisible({ timeout: 5000 });
 
-    // Select force-directed layout
-    await layoutSelector.selectOption('force');
+    // Click Graph button
+    const graphButton = page.locator('[data-testid="graph-layout-selector"]').filter({ hasText: 'Graph' });
+    await graphButton.click();
 
     // Wait for graph to re-render
     await page.waitForLoadState('networkidle');
@@ -488,7 +490,7 @@ test.describe('Relationship Filtering', () => {
     await expect(lifecycleFilter).toBeVisible({ timeout: 5000 });
 
     // Select different lifecycle phases
-    await lifecycleFilter.selectOption('Production');
+    await lifecycleFilter.selectOption('Active');
     await page.waitForLoadState('networkidle');
 
     await expect(page.locator('[data-testid="relationship-item"], [data-testid="graph-node"]')).toBeVisible();
@@ -500,11 +502,12 @@ test.describe('Relationship Filtering', () => {
     const typeFilter = page.locator('[data-testid="relationship-type-filter"]');
     const cardTypeFilter = page.locator('[data-testid="card-type-filter"]');
 
-    await expect(typeFilter).toBeVisible({ timeout: 5000 });
+    await expect(typeFilter.first()).toBeVisible({ timeout: 5000 });
     await expect(cardTypeFilter).toBeVisible({ timeout: 5000 });
 
     // Apply multiple filters
-    await typeFilter.selectOption('depends_on');
+    const dependsOnFilter = page.locator('[data-testid="relationship-type-filter"]').filter({ hasText: 'Depends On' });
+    await dependsOnFilter.click();
     await cardTypeFilter.selectOption('Application');
     await page.waitForLoadState('networkidle');
 
@@ -522,10 +525,11 @@ test.describe('Relationship Filtering', () => {
     await page.goto('/relationships');
 
     const typeFilter = page.locator('[data-testid="relationship-type-filter"]');
-    await expect(typeFilter).toBeVisible({ timeout: 5000 });
+    await expect(typeFilter.first()).toBeVisible({ timeout: 5000 });
 
     // Apply a filter
-    await typeFilter.selectOption('depends_on');
+    const dependsOnFilter = page.locator('[data-testid="relationship-type-filter"]').filter({ hasText: 'Depends On' });
+    await dependsOnFilter.click();
     await page.waitForLoadState('networkidle');
 
     // Clear filter
@@ -533,8 +537,11 @@ test.describe('Relationship Filtering', () => {
     if (await clearBtn.isVisible()) {
       await clearBtn.click();
     } else {
-      // Alternatively, select "All" option
-      await typeFilter.selectOption('all');
+      // Alternatively, click "All" button
+      const allFilter = page.locator('[data-testid="relationship-type-filter"]').filter({ hasText: 'All' });
+      if (await allFilter.isVisible()) {
+        await allFilter.click();
+      }
     }
 
     await page.waitForLoadState('networkidle');
