@@ -3,6 +3,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import type { Card } from '@/types/api';
 import { cardApi } from '@/lib/cards';
 import { useImpactAnalysis } from '@/lib/relationship-hooks';
+import { relationshipApi } from '@/lib/relationships';
 
 const cardTypeColors: Record<string, string> = {
   BusinessCapability: 'bg-purple-100 text-purple-800',
@@ -40,6 +41,45 @@ export function CardDetail() {
 
   // Fetch impact analysis for this card
   const { data: impactAnalysis } = useImpactAnalysis(id || '');
+
+  // Relationship creation form state
+  const [showAddRelationship, setShowAddRelationship] = useState(false);
+  const [availableCards, setAvailableCards] = useState<Card[]>([]);
+  const [selectedCardId, setSelectedCardId] = useState('');
+  const [relationshipType, setRelationshipType] = useState<'depends_on' | 'implements' | 'similar_to' | 'conflicts_with'>('depends_on');
+  const [savingRelationship, setSavingRelationship] = useState(false);
+  const [relationshipError, setRelationshipError] = useState<string | null>(null);
+
+  // Fetch available cards when add relationship form is shown
+  useEffect(() => {
+    if (showAddRelationship && id) {
+      relationshipApi.getAvailableCards(id).then(setAvailableCards).catch(console.error);
+    }
+  }, [showAddRelationship, id]);
+
+  // Handle relationship creation
+  const handleCreateRelationship = async () => {
+    if (!id || !selectedCardId) return;
+
+    setSavingRelationship(true);
+    setRelationshipError(null);
+
+    try {
+      await relationshipApi.create({
+        fromCardId: id,
+        toCardId: selectedCardId,
+        relationshipType,
+      });
+
+      // Refresh the page data
+      window.location.reload();
+    } catch (err) {
+      setRelationshipError('Failed to create relationship');
+      console.error(err);
+    } finally {
+      setSavingRelationship(false);
+    }
+  };
 
   useEffect(() => {
     if (!id) return;
@@ -149,6 +189,13 @@ export function CardDetail() {
               >
                 Request ARB Review
               </button>
+              <button
+                data-testid="add-relationship-btn"
+                onClick={() => setShowAddRelationship(!showAddRelationship)}
+                className="px-3 py-1 bg-green-600 text-white text-sm rounded-md hover:bg-green-700"
+              >
+                {showAddRelationship ? 'Cancel' : 'Add Relationship'}
+              </button>
               <span className={`px-3 py-1 rounded-md text-sm font-medium ${typeColor}`} data-testid="card-type">
                 {card.type}
               </span>
@@ -227,9 +274,83 @@ export function CardDetail() {
         </div>
       </div>
 
+      {/* Relationship Creation Form */}
+      {showAddRelationship && (
+        <div className="mt-6 bg-white rounded-lg shadow-md p-6 border border-gray-200" data-testid="add-relationship-form">
+          <h2 className="text-lg font-semibold text-gray-900 mb-4">Add Relationship</h2>
+
+          {relationshipError && (
+            <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-md" data-testid="relationship-error">
+              <p className="text-sm text-red-600">{relationshipError}</p>
+            </div>
+          )}
+
+          <div className="space-y-4">
+            {/* Related Card Selection */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Related Card
+              </label>
+              <select
+                data-testid="related-card-select"
+                value={selectedCardId}
+                onChange={(e) => setSelectedCardId(e.target.value)}
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                disabled={savingRelationship}
+              >
+                <option value="">Select a card...</option>
+                {availableCards.map((c) => (
+                  <option key={c.id} value={c.id}>
+                    {c.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            {/* Relationship Type Selection */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Relationship Type
+              </label>
+              <select
+                data-testid="relationship-type-select"
+                value={relationshipType}
+                onChange={(e) => setRelationshipType(e.target.value as any)}
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                disabled={savingRelationship}
+              >
+                <option value="depends_on">Depends On</option>
+                <option value="implements">Implements</option>
+                <option value="similar_to">Similar To</option>
+                <option value="conflicts_with">Conflicts With</option>
+              </select>
+            </div>
+
+            {/* Action Buttons */}
+            <div className="flex gap-3">
+              <button
+                data-testid="save-relationship-btn"
+                onClick={handleCreateRelationship}
+                disabled={!selectedCardId || savingRelationship}
+                className="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 disabled:bg-gray-300 disabled:cursor-not-allowed"
+              >
+                {savingRelationship ? 'Saving...' : 'Save Relationship'}
+              </button>
+              <button
+                onClick={() => setShowAddRelationship(false)}
+                disabled={savingRelationship}
+                className="px-4 py-2 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300 disabled:bg-gray-100"
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Dependencies Section */}
       {(impactAnalysis?.upstream.length || impactAnalysis?.downstream.length) && (
-        <div className="mt-6 bg-white rounded-lg shadow-md p-6 border border-gray-200" data-testid="dependencies-section" data-testid="card-relationships">
+        <div className="mt-6 bg-white rounded-lg shadow-md p-6 border border-gray-200" data-testid="dependencies-section">
           <h2 className="text-lg font-semibold text-gray-900 mb-4">Dependencies</h2>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
