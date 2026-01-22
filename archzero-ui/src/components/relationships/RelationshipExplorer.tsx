@@ -27,6 +27,7 @@ type LifecycleState = 'current' | 'target';
 
 interface RelationshipExplorerProps {
   cardId: string;
+  lifecycleState?: 'current' | 'target';
 }
 
 // Custom node component for relationship graph
@@ -112,15 +113,15 @@ const nodeTypes = {
   relationshipNode: RelationshipNode,
 };
 
-export function RelationshipExplorer({ cardId }: RelationshipExplorerProps) {
+export function RelationshipExplorer({ cardId, lifecycleState: propLifecycleState }: RelationshipExplorerProps) {
   const [selectedType, setSelectedType] = useState<RelationshipType>('all');
   const [maxDepth, setMaxDepth] = useState(3);
   const [view, setView] = useState<'tree' | 'graph'>('graph');
   const [searchQuery, setSearchQuery] = useState('');
-  const [lifecycleState, setLifecycleState] = useState<LifecycleState>('current');
+  const [lifecycleState, setLifecycleState] = useState<LifecycleState>(propLifecycleState || 'current');
   const [showImpactAnalysis, setShowImpactAnalysis] = useState(false);
 
-  const { data: chain, isLoading, refetch } = useDependencyChains(cardId, maxDepth);
+  const { data: chain, isLoading, refetch } = useDependencyChains(cardId, maxDepth, lifecycleState);
 
   // Convert dependency chain to ReactFlow format
   const { initialNodes, initialEdges } = useMemo(() => {

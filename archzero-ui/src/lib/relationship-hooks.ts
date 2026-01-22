@@ -33,14 +33,31 @@ export interface MatrixCell {
   type: string;
 }
 
-export function useDependencyChains(cardId: string, depth: number = 3) {
+export function useDependencyChains(cardId: string, depth: number = 3, lifecycleState: 'current' | 'target' = 'current') {
   return useQuery<DependencyChain>({
-    queryKey: ['relationships', 'chains', cardId, depth],
+    queryKey: ['relationships', 'chains', cardId, depth, lifecycleState],
     queryFn: async () => {
       // Fetch relationships for the specified card
       const { data: relationships } = await api.get<any[]>(
         `/api/v1/relationships?card_id=${cardId}`
       );
+
+      // Filter relationships by lifecycle state based on valid_from dates
+      // Current state: relationships where valid_from is in the past
+      // Target state: relationships where valid_from is in the future
+      const now = new Date();
+      const filteredRelationships = relationships.filter((rel: any) => {
+        const validFromDate = new Date(rel.valid_from);
+        const validToDate = rel.valid_to ? new Date(rel.valid_to) : null;
+
+        if (lifecycleState === 'current') {
+          // Current state: valid now (valid_from <= now < valid_to)
+          return validFromDate <= now && (!validToDate || now < validToDate);
+        } else {
+          // Target state: valid in the future (valid_from > now)
+          return validFromDate > now;
+        }
+      });
 
       // Fetch all cards to build node data
       const { data: allCards } = await api.get<any[]>('/cards');
@@ -49,7 +66,7 @@ export function useDependencyChains(cardId: string, depth: number = 3) {
       const cardIds = new Set<string>();
       cardIds.add(cardId);
 
-      relationships.forEach((rel: any) => {
+      filteredRelationships.forEach((rel: any) => {
         cardIds.add(rel.from_card_id);
         cardIds.add(rel.to_card_id);
       });
@@ -70,7 +87,7 @@ export function useDependencyChains(cardId: string, depth: number = 3) {
       });
 
       // Convert relationships to links
-      const links: DependencyLink[] = relationships.map((rel: any) => ({
+      const links: DependencyLink[] = filteredRelationships.map((rel: any) => ({
         source: rel.from_card_id,
         target: rel.to_card_id,
         type: rel.relationship_type,
