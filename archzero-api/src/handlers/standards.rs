@@ -100,6 +100,12 @@ pub async fn list_standards(
                     _ => None,
                 })
                 .unwrap_or(TechnologyStatus::Assess),
+            quadrant: attributes.get("quadrant")
+                .and_then(|v| v.as_str())
+                .map(|s| s.to_string()),
+            ring: attributes.get("ring")
+                .and_then(|v| v.as_str())
+                .map(|s| s.to_string()),
             sunset_date: attributes.get("sunset_date")
                 .and_then(|v| v.as_str())
                 .map(|s| s.to_string()),
@@ -168,6 +174,12 @@ pub async fn get_standard(
                 _ => None,
             })
             .unwrap_or(TechnologyStatus::Assess),
+        quadrant: attributes.get("quadrant")
+            .and_then(|v| v.as_str())
+            .map(|s| s.to_string()),
+        ring: attributes.get("ring")
+            .and_then(|v| v.as_str())
+            .map(|s| s.to_string()),
         sunset_date: attributes.get("sunset_date")
             .and_then(|v| v.as_str())
             .map(|s| s.to_string()),
@@ -207,6 +219,8 @@ pub async fn create_standard(
     let attributes = json!({
         "category": req.category,
         "status": req.status.as_str(),
+        "quadrant": req.quadrant,
+        "ring": req.ring,
         "sunset_date": req.sunset_date,
         "replacement_id": req.replacement_id,
         "rationale": req.rationale,
@@ -231,6 +245,8 @@ pub async fn create_standard(
         card_type: "TechnologyStandard".to_string(),
         category: req.category,
         status: req.status,
+        quadrant: req.quadrant,
+        ring: req.ring,
         sunset_date: req.sunset_date,
         replacement_id: req.replacement_id,
         rationale: req.rationale,
@@ -275,6 +291,12 @@ pub async fn update_standard(
     if let Some(status) = &req.status {
         attributes["status"] = json!(status.as_str());
     }
+    if let Some(quadrant) = &req.quadrant {
+        attributes["quadrant"] = json!(quadrant);
+    }
+    if let Some(ring) = &req.ring {
+        attributes["ring"] = json!(ring);
+    }
     if let Some(sunset_date) = &req.sunset_date {
         attributes["sunset_date"] = json!(sunset_date);
     }
@@ -316,6 +338,12 @@ pub async fn update_standard(
                 _ => None,
             })
             .unwrap_or(TechnologyStatus::Assess),
+        quadrant: card.attributes.get("quadrant")
+            .and_then(|v| v.as_str())
+            .map(|s| s.to_string()),
+        ring: card.attributes.get("ring")
+            .and_then(|v| v.as_str())
+            .map(|s| s.to_string()),
         sunset_date: card.attributes.get("sunset_date")
             .and_then(|v| v.as_str())
             .map(|s| s.to_string()),
