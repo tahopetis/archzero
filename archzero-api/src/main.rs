@@ -15,7 +15,7 @@ use archzero_api::{
     state::AppState,
     handlers::{auth, cards, health, relationships, bia, migration, tco, policies, principles, standards, exceptions, initiatives, risks, compliance, arb, graph, import, bulk, csrf, cache, test_reset, users, export, reports},
     services::{CardService, AuthService, RelationshipService, Neo4jService, SagaOrchestrator, BIAService, TopologyService, MigrationService, TCOService, CsrfService, RateLimitService, CacheService, ArbTemplateService, ARBAuditService, ARBNotificationService, ExportService, ExportScheduler, ReportService},
-    middleware::{security_headers, security_logging, rate_limit_middleware, auth_middleware},
+    middleware::{security_headers, security_logging, rate_limit_middleware, auth_middleware, require_arb_role},
     models::card::{Card, CardType, LifecyclePhase, CreateCardRequest, UpdateCardRequest, CardSearchParams},
     models::relationship::{Relationship, RelationshipType, CreateRelationshipRequest, UpdateRelationshipRequest},
     models::principles::*,
@@ -619,7 +619,7 @@ async fn main() -> anyhow::Result<()> {
                 .route("/:id", get(compliance::get_compliance_audit).put(compliance::update_compliance_audit).delete(compliance::delete_compliance_audit))
                 // Removed Extension layer to fix type inference),
         )
-        // Phase 3: ARB Workflow endpoints (with authentication)
+        // Phase 3: ARB Workflow endpoints (with authentication + RBAC)
         .nest(
             "/api/v1/arb/meetings",
             Router::new()
@@ -629,7 +629,8 @@ async fn main() -> anyhow::Result<()> {
                 .layer(axum::middleware::from_fn_with_state(
                     app_state.clone(),
                     auth_middleware,
-                )),
+                ))
+                .layer(axum::middleware::from_fn(require_arb_role)),
         )
         .nest(
             "/api/v1/arb/submissions",
@@ -640,7 +641,8 @@ async fn main() -> anyhow::Result<()> {
                 .layer(axum::middleware::from_fn_with_state(
                     app_state.clone(),
                     auth_middleware,
-                )),
+                ))
+                .layer(axum::middleware::from_fn(require_arb_role)),
         )
         .nest(
             "/api/v1/arb/templates",
@@ -651,7 +653,8 @@ async fn main() -> anyhow::Result<()> {
                 .layer(axum::middleware::from_fn_with_state(
                     app_state.clone(),
                     auth_middleware,
-                )),
+                ))
+                .layer(axum::middleware::from_fn(require_arb_role)),
         )
         .nest(
             "/api/v1/arb/audit-logs",
@@ -662,7 +665,8 @@ async fn main() -> anyhow::Result<()> {
                 .layer(axum::middleware::from_fn_with_state(
                     app_state.clone(),
                     auth_middleware,
-                )),
+                ))
+                .layer(axum::middleware::from_fn(require_arb_role)),
         )
         .nest(
             "/api/v1/arb/notifications",
@@ -675,7 +679,8 @@ async fn main() -> anyhow::Result<()> {
                 .layer(axum::middleware::from_fn_with_state(
                     app_state.clone(),
                     auth_middleware,
-                )),
+                ))
+                .layer(axum::middleware::from_fn(require_arb_role)),
         )
         .nest(
             "/api/v1/arb",
@@ -685,7 +690,8 @@ async fn main() -> anyhow::Result<()> {
                 .layer(axum::middleware::from_fn_with_state(
                     app_state.clone(),
                     auth_middleware,
-                )),
+                ))
+                .layer(axum::middleware::from_fn(require_arb_role)),
         )
         // Phase 4: Graph Visualization endpoints
         .nest(

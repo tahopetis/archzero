@@ -3,8 +3,10 @@ use axum::{
     http::StatusCode,
     middleware::Next,
     response::Response,
+    Extension,
 };
 use crate::state::AppState;
+use crate::models::user::{Claims, UserRole};
 
 pub async fn auth_middleware(
     State(state): State<AppState>,
@@ -26,10 +28,22 @@ pub async fn auth_middleware(
         .map_err(|_| StatusCode::UNAUTHORIZED)?;
 
     // Add claims to request extensions
-    request.extensions_mut().insert(claims);
+    request.extensions_mut().insert(claims.clone());
 
     Ok(next.run(request).await)
 }
 
-// Note: require_role would be implemented as a separate middleware layer
-// For now, we'll handle role checks directly in handlers
+/// ARB Role-Based Access Control Middleware
+/// Only allows users with Admin, ArbChair, or ArbMember roles
+pub async fn require_arb_role(
+    Extension(claims): Extension<Claims>,
+    request: Request,
+    next: Next,
+) -> Result<Response, StatusCode> {
+    match claims.role {
+        UserRole::Admin | UserRole::ArbChair | UserRole::ArbMember => {
+            Ok(next.run(request).await)
+        }
+        _ => Err(StatusCode::FORBIDDEN),
+    }
+}

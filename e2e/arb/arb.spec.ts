@@ -655,22 +655,21 @@ test.describe('ARB Member Permissions', () => {
     expect(isEnabled).toBe(false);
   });
 
-  // TODO: Implement ARB access control for non-members
-  // Blocked by: Missing access control checks on ARB routes or viewer user not seeded
-  test.skip('should not allow non-members to access ARB', async ({ page }) => {
+  // ARB access control for non-members - backend returns 403 Forbidden
+  test('should not allow non-members to access ARB', async ({ page, request }) => {
     const loginPage = new LoginPage(page);
-    await loginPage.loginViaApi('viewer@archzero.local', 'changeme123');
+    const { token } = await loginPage.loginViaApi('viewer@archzero.local', 'changeme123');
 
-    await page.goto('/arb');
+    // Try to access ARB API directly - should get 403 Forbidden
+    const baseURL = process.env.API_URL || 'http://localhost:3000';
+    const arbResponse = await request.get(`${baseURL}/api/v1/arb/dashboard`, {
+      headers: {
+        'Authorization': `Bearer ${token}`,
+      },
+    });
 
-    // Should show access denied or redirect
-    const denied = page.locator('text=Permission denied, text=Unauthorized');
-    try {
-      await expect(denied.first()).toBeVisible({ timeout: 3000 });
-    } catch {
-      // If no denied message, should redirect
-      await expect(page).toHaveURL(/\/(dashboard|cards)/);
-    }
+    // Viewer role should receive 403 Forbidden
+    expect(arbResponse.status()).toBe(403);
   });
 });
 
@@ -810,9 +809,8 @@ test.describe('ARB Templates and Reuse', () => {
     }
   });
 
-  // TODO: Implement save-as-template functionality in ARB request detail view
-  // Blocked by: Missing save-as-template button and template creation modal
-  test.skip('should save request as template', async ({ page }) => {
+  // Save-as-template functionality in ARB request detail view
+  test('should save request as template', async ({ page }) => {
     await page.goto('/arb/requests');
 
     // Find a submission without a decision (draft status in UI) so save-as-template button is visible
@@ -876,9 +874,8 @@ test.describe('ARB Templates and Reuse', () => {
     }
   });
 
-  // TODO: Implement template management with delete functionality
-  // Blocked by: Template library exists but template cards don't have delete buttons or no templates in system
-  test.skip('should manage template library', async ({ page }) => {
+  // Template library management with delete functionality
+  test('should manage template library', async ({ page }) => {
     await page.goto('/arb/templates');
 
     // Wait for template library to load

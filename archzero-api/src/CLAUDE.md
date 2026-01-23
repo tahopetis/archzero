@@ -14,10 +14,6 @@
 | #3551 | 4:48 PM | 🟣 | Implemented ARB Audit Trail Backend System | ~130 |
 | #3547 | 4:45 PM | 🔵 | AppError enum defines database and Neo4j error variants | ~235 |
 | #3544 | 4:43 PM | 🟣 | ARB Audit Service Initialization Added | ~273 |
-| #3543 | " | 🔵 | AppState includes arb_template_service for ARB template management | ~298 |
-| #3541 | 4:40 PM | 🟣 | Added ARBAuditService Import to lib.rs | ~175 |
-| #3540 | " | 🔵 | Examined Backend Library Service Imports | ~175 |
-| #3539 | " | 🟣 | ARB Audit Trail service initialized and added to AppState | ~316 |
 
 ### Jan 18, 2026
 
@@ -85,6 +81,9 @@
 
 | ID | Time | T | Title | Read |
 |----|------|---|-------|------|
+| #6564 | 1:35 PM | ✅ | Applied require_arb_role Middleware to All ARB Routes | ~262 |
+| #6561 | 1:34 PM | ✅ | Imported require_arb_role Middleware in main.rs | ~155 |
+| #6378 | 5:09 AM | ✅ | Git merge conflicts resolved on feature branch | ~251 |
 | #6294 | 1:03 AM | 🟣 | Backend compliance dashboard API implemented | ~398 |
 | #6285 | 12:35 AM | 🔵 | Backend compliance handler contains 856 lines with full CRUD operations but no PDF/PowerPoint export endpoints | ~414 |
 </claude-mem-context>

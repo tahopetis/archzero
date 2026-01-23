@@ -306,14 +306,23 @@ impl AuthService {
             None => tracing::error!("❌ ERROR: arb-member user NOT FOUND in database after insertion!"),
         }
 
-        // Update viewer user to ensure role is correct, password matches, and account is unlocked
-        tracing::info!("🔄 Updating viewer user");
-        let viewer_result = sqlx::query("UPDATE users SET role = 'viewer', password_hash = $1, failed_login_attempts = 0, locked_until = NULL WHERE email = 'viewer@archzero.local'")
-            .bind(&password_hash)
-            .execute(&self.pool)
-            .await
-            .map_err(|e| AppError::Internal(anyhow::anyhow!("Database error: {}", e)))?;
-        tracing::info!("✅ viewer updated: {} row(s) affected", viewer_result.rows_affected());
+        // Insert viewer user (for access control testing)
+        tracing::info!("➕ Inserting viewer user with role='viewer'");
+        let viewer_id = Uuid::new_v4();
+        let viewer_result = sqlx::query(
+            "INSERT INTO users (id, email, full_name, role, password_hash, failed_login_attempts, locked_until, created_at, updated_at)
+             VALUES ($1, $2, $3, $4, $5, 0, NULL, NOW(), NOW())
+             ON CONFLICT (email) DO UPDATE SET role = 'viewer', password_hash = $5, failed_login_attempts = 0, locked_until = NULL"
+        )
+        .bind(viewer_id)
+        .bind("viewer@archzero.local")
+        .bind("Viewer User")
+        .bind("viewer")
+        .bind(&password_hash)
+        .execute(&self.pool)
+        .await
+        .map_err(|e| AppError::Internal(anyhow::anyhow!("Database error: {}", e)))?;
+        tracing::info!("✅ viewer inserted/updated: {} row(s) affected", viewer_result.rows_affected());
 
         // Verify viewer update
         let viewer_check: Option<UserRow> = sqlx::query_as(
@@ -329,6 +338,6 @@ impl AuthService {
         }
 
         tracing::info!("🎉 ARB user seeding completed successfully");
-        Ok(3) // Return count of affected users
+        Ok(4) // Return count of affected users (chair, member, viewer, admin)
     }
 }
