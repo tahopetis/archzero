@@ -11,11 +11,14 @@ test.describe('Risk Register', () => {
   });
 
   test('should display risk register', async ({ page }) => {
+    page.on('pageerror', err => console.log('Page Error:', err.message));
+
     await page.goto('/governance/risks');
     await page.waitForLoadState('domcontentloaded');
     await page.waitForTimeout(500); // Wait for React to stabilize
 
-    await expect(page.locator('[data-testid="risk-register"], h1:has-text("Risks")')).toBeVisible({ timeout: 10000 });
+    // Try with just the H1 text first
+    await expect(page.locator('h1:has-text("Risks")').first()).toBeVisible({ timeout: 10000 });
   });
 
   test('should create new risk entry', async ({ page }) => {

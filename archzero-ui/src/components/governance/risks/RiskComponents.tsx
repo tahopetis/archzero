@@ -304,7 +304,11 @@ export const RiskHeatMap = memo(function RiskHeatMap({ onSelectRisks }: { onSele
         <div>
           <h2 className="text-xl font-bold text-slate-900">Risk Heat Map</h2>
           <p className="text-sm text-slate-600">
-            {heatMapData ? `${heatMapData.totalRisks} risks • Avg score: ${heatMapData.avgRiskScore.toFixed(1)}` : 'Loading...'}
+            {heatMapData && heatMapData.avgRiskScore != null
+              ? `${heatMapData.totalRisks} risks • Avg score: ${heatMapData.avgRiskScore.toFixed(1)}`
+              : heatMapData
+              ? `${heatMapData.totalRisks} risks`
+              : 'Loading...'}
           </p>
         </div>
         <IconBadge icon={Flame} label="Heat Map" variant="danger" />
@@ -334,7 +338,7 @@ export const RiskHeatMap = memo(function RiskHeatMap({ onSelectRisks }: { onSele
 
                 for (let impact = 5; impact >= 1; impact--) {
                   for (let likelihood = 1; likelihood <= 5; likelihood++) {
-                    const cell = heatMapData.cells.find(
+                    const cell = heatMapData?.cells?.find(
                       c => c.likelihood === likelihood && c.impact === impact
                     );
 
@@ -405,7 +409,7 @@ export const TopRisks = memo(function TopRisks() {
     return <div className="animate-pulse bg-slate-100 h-64 rounded-xl" data-testid="top-risks" />;
   }
 
-  if (!topRisks || topRisks.risks.length === 0) {
+  if (!topRisks || !topRisks.risks || topRisks.risks.length === 0) {
     return (
       <Card className="p-6" data-testid="top-risks">
         <div className="text-center py-8">
