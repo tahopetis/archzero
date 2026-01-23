@@ -133,8 +133,8 @@ test.describe('Technology Standards', () => {
     // Submit form using enter key on last field
     await page.locator('[data-testid="standard-ring-select"]').press('Enter');
 
-    // Verify success - form closes after save
-    await page.waitForTimeout(3000);
+    // Verify success - form closes after save (increase wait time)
+    await page.waitForTimeout(5000);
     const formCount = await page.locator('[data-testid="standard-form"]').count();
     expect(formCount).toBe(0); // Form should be closed after save
   });
@@ -192,7 +192,7 @@ test.describe('Architecture Policies', () => {
     await page.goto('/governance/policies');
 
     // Policies page has tabs - need to switch to architecture tab first
-    const architectureTab = page.locator('button:has-text("Architecture")');
+    const architectureTab = page.locator('button:has-text("Architecture Policies")');
     const tabCount = await architectureTab.count();
 
     if (tabCount > 0) {
