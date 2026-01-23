@@ -59,5 +59,14 @@
 
 | ID | Time | T | Title | Read |
 |----|------|---|-------|------|
+| #6177 | 4:36 PM | 🔵 | Relationship specification defines comprehensive graph ontology with time-machine capabilities | ~339 |
+| #5840 | 12:46 AM | ✅ | Relationship hooks and documentation modified | ~160 |
 | #5830 | 12:43 AM | ✅ | Branch created for relationship graph test fixes | ~163 |
+
+### Jan 23, 2026
+
+| ID | Time | T | Title | Read |
+|----|------|---|-------|------|
+| #6302 | 1:09 AM | 🟣 | Phase 4.2 graph optimization work begins | ~176 |
+| #6298 | 1:05 AM | 🔵 | Comprehensive PRD defines Arc Zero as enterprise architecture platform | ~465 |
 </claude-mem-context>
