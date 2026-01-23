@@ -639,7 +639,8 @@ test.describe('Compliance Workflows', () => {
     await page.locator('[data-testid="training-framework"]').selectOption('GDPR');
     await page.locator('[data-testid="training-assignees"]').selectOption('all-users');
 
-    await page.locator('button:has-text("Assign")').click();
+    // Use type=submit to avoid strict mode violation with 2 Assign buttons
+    await page.locator('button[type="submit"]:has-text("Assign")').click();
 
     await expect(page.locator('text=Training assigned')).toBeVisible({ timeout: 5000 });
   });
