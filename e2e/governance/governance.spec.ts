@@ -24,24 +24,18 @@ test.describe('@regression Architecture Principles', () => {
     // Wait for form to be visible
     await expect(page.locator('[data-testid="principle-form"]')).toBeVisible({ timeout: 10000 });
 
-    // Fill principle form
+    // Fill principle form with all required fields
     await page.locator('[data-testid="principle-name-input"]').fill('Test Principle: Systems should be scalable');
     await page.locator('[data-testid="principle-statement-input"]').fill('Systems should be scalable');
+    await page.locator('[data-testid="principle-category-select"]').selectOption('Technical');
     await page.locator('[data-testid="principle-rationale-input"]').fill('Scalability ensures future growth');
     await page.locator('[data-testid="principle-implications-input"]').fill('Systems must handle increased load');
 
     // Save
     await page.locator('[data-testid="principle-save-button"]').click();
 
-    // Verify success - form closes after save, so check for success message before it closes
-    await page.waitForTimeout(1000);
-    const successMsg = page.locator('[data-testid="success-message"]');
-    const count = await successMsg.count();
-    if (count > 0) {
-      await expect(successMsg.first()).toBeVisible({ timeout: 3000 });
-    }
-    // If success message not visible, verify form closed (which indicates success)
-    await page.waitForTimeout(1000);
+    // Verify success - form closes after save
+    await page.waitForTimeout(2000);
     const formCount = await page.locator('[data-testid="principle-form"]').count();
     expect(formCount).toBe(0); // Form should be closed after save
   });
@@ -126,16 +120,17 @@ test.describe('Technology Standards', () => {
     // Wait for form to be visible
     await expect(page.locator('[data-testid="standard-form"]')).toBeVisible({ timeout: 10000 });
 
-    // Fill standard form
+    // Fill standard form with all required fields
     await page.locator('[data-testid="standard-name-input"]').fill('REST API Standard');
-    await page.locator('[data-testid="standard-rationale-input"]').fill('All APIs must follow REST principles');
     await page.locator('[data-testid="standard-category-input"]').fill('Technology');
+    await page.locator('[data-testid="standard-status-select"]').selectOption('Adopt');
+    await page.locator('[data-testid="standard-ring-select"]').selectOption('Adopt');
 
     // Save
     await page.locator('[data-testid="standard-save-button"]').click();
 
     // Verify success - form closes after save
-    await page.waitForTimeout(1000);
+    await page.waitForTimeout(2000);
     const formCount = await page.locator('[data-testid="standard-form"]').count();
     expect(formCount).toBe(0); // Form should be closed after save
   });
@@ -208,15 +203,17 @@ test.describe('Architecture Policies', () => {
     // Wait for form to be visible
     await expect(page.locator('[data-testid="policy-form"]')).toBeVisible({ timeout: 10000 });
 
-    // Fill policy form
+    // Fill policy form with all required fields
     await page.locator('[data-testid="policy-name-input"]').fill('Data Retention Policy');
     await page.locator('[data-testid="policy-description-input"]').fill('Data must be retained for minimum 7 years');
+    await page.locator('[data-testid="policy-severity-select"]').selectOption('Medium');
+    await page.locator('[data-testid="policy-enforcement-select"]').selectOption('Warning');
 
     // Save
     await page.locator('[data-testid="policy-save-button"]').click();
 
     // Verify success - form closes after save
-    await page.waitForTimeout(1000);
+    await page.waitForTimeout(2000);
     const formCount = await page.locator('[data-testid="policy-form"]').count();
     expect(formCount).toBe(0); // Form should be closed after save
   });
@@ -409,13 +406,17 @@ test.describe('Risk Register', () => {
   test('should create new risk entry', async ({ page }) => {
     await page.goto('/governance/risks');
 
-    // Wait for page to fully load
+    // Wait for page to fully load and stabilize
+    await page.waitForLoadState('domcontentloaded');
     await page.waitForLoadState('networkidle');
 
-    const addBtn = page.locator('button:has-text("Add Risk")');
+    // Wait a bit for any React re-renders to complete
+    await page.waitForTimeout(500);
+
+    // Use data-testid selector which is more stable
+    const addBtn = page.locator('[data-testid="add-risk-btn"]');
     await addBtn.waitFor({ state: 'visible', timeout: 10000 });
-    // Use force to handle potential overlapping elements
-    await addBtn.first().click({ force: true });
+    await addBtn.click();
 
     // Wait for form to be visible
     await expect(page.locator('[data-testid="risk-form"]')).toBeVisible({ timeout: 10000 });
@@ -432,11 +433,7 @@ test.describe('Risk Register', () => {
     // Verify success - form closes after save
     await page.waitForTimeout(2000);
     const formCount = await page.locator('[data-testid="risk-form"]').count();
-    // Form might still be visible if there was an error, but we expect success
-    if (formCount === 0) {
-      // Form closed successfully
-      expect(true).toBe(true);
-    }
+    expect(formCount).toBe(0); // Form should be closed after save
   });
 
   test('should show risk matrix view', async ({ page }) => {
