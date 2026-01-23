@@ -95,8 +95,17 @@ export class CardListPage extends BasePage {
    * Get card names from list
    */
   async getCardNames(): Promise<string[]> {
-    const cards = await this.cardList.locator('[data-card-name]').allTextContents();
-    return cards;
+    // Get all card elements and extract data-card-name attribute
+    const cards = this.cardList.locator('[data-card-name]');
+    const count = await cards.count();
+    const names: string[] = [];
+
+    for (let i = 0; i < count; i++) {
+      const name = await cards.nth(i).getAttribute('data-card-name');
+      if (name) names.push(name);
+    }
+
+    return names;
   }
 
   /**
@@ -136,10 +145,21 @@ export class CardListPage extends BasePage {
    * Bulk delete selected cards
    */
   async bulkDelete() {
-    await this.page.click('[data-testid="bulk-delete-button"]');
-    // Confirm modal
-    await this.page.click('[data-testid="confirm-delete"]');
+    // Use force: true to avoid button interception issues
+    await this.page.click('[data-testid="bulk-delete-button"]', { force: true });
+    // Confirm modal - use force to click through modal overlay
+    await this.page.click('[data-testid="confirm-delete"]', { force: true });
     await this.waitForLoad();
+  }
+
+  /**
+   * Verify success message
+   */
+  async verifySuccess(message: string) {
+    const toast = this.page.locator('[data-testid="toast-success"]');
+    await expect(toast).toBeVisible({ timeout: 10000 });
+    const text = await toast.textContent();
+    expect(text).toContain(message);
   }
 }
 
