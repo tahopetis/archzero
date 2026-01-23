@@ -1,25 +1,10 @@
 import { test, expect } from '@playwright/test';
-import { LoginPage } from '../pages/index';
-import { API_URL } from '../helpers/index';
 
-// Authenticate via API before all tests
-test.beforeAll(async ({ request }) => {
-  try {
-    await request.post(`${API_URL}/api/v1/auth/login`, {
-      data: { email: 'admin@archzero.local', password: 'changeme123' }
-    });
-  } catch (error) {
-    console.warn('Auth setup failed:', error);
-  }
-});
+// Note: Authentication is handled via global storageState (auth.setup.ts)
+// Tests are automatically authenticated when they start
 
 test.describe('@regression Architecture Principles', () => {
-  let loginPage: LoginPage;
 
-  test.beforeEach(async ({ page }) => {
-    loginPage = new LoginPage(page);
-    await loginPage.loginViaApi('admin@archzero.local', 'changeme123');
-  });
 
   test('should display principles list', async ({ page }) => {
     await page.goto('/governance/principles');
@@ -95,12 +80,7 @@ test.describe('@regression Architecture Principles', () => {
 });
 
 test.describe('Technology Standards', () => {
-  let loginPage: LoginPage;
 
-  test.beforeEach(async ({ page }) => {
-    loginPage = new LoginPage(page);
-    await loginPage.loginViaApi('admin@archzero.local', 'changeme123');
-  });
 
   test('should display standards list', async ({ page }) => {
     await page.goto('/governance/standards');
@@ -157,12 +137,7 @@ test.describe('Technology Standards', () => {
 });
 
 test.describe('Architecture Policies', () => {
-  let loginPage: LoginPage;
 
-  test.beforeEach(async ({ page }) => {
-    loginPage = new LoginPage(page);
-    await loginPage.loginViaApi('admin@archzero.local', 'changeme123');
-  });
 
   test('should display policies list', async ({ page }) => {
     await page.goto('/governance/policies');
@@ -202,12 +177,7 @@ test.describe('Architecture Policies', () => {
 });
 
 test.describe('Exceptions Management', () => {
-  let loginPage: LoginPage;
 
-  test.beforeEach(async ({ page }) => {
-    loginPage = new LoginPage(page);
-    await loginPage.loginViaApi('admin@archzero.local', 'changeme123');
-  });
 
   test('should display exceptions list', async ({ page }) => {
     await page.goto('/governance/exceptions');
@@ -256,12 +226,7 @@ test.describe('Exceptions Management', () => {
 });
 
 test.describe('Strategic Initiatives', () => {
-  let loginPage: LoginPage;
 
-  test.beforeEach(async ({ page }) => {
-    loginPage = new LoginPage(page);
-    await loginPage.loginViaApi('admin@archzero.local', 'changeme123');
-  });
 
   test('should display initiatives list', async ({ page }) => {
     await page.goto('/governance/initiatives');
@@ -326,12 +291,7 @@ test.describe('Strategic Initiatives', () => {
 });
 
 test.describe('Risk Register', () => {
-  let loginPage: LoginPage;
 
-  test.beforeEach(async ({ page }) => {
-    loginPage = new LoginPage(page);
-    await loginPage.loginViaApi('admin@archzero.local', 'changeme123');
-  });
 
   test('should display risk register', async ({ page }) => {
     await page.goto('/governance/risks');
@@ -372,12 +332,7 @@ test.describe('Risk Register', () => {
 });
 
 test.describe('Compliance Dashboard', () => {
-  let loginPage: LoginPage;
 
-  test.beforeEach(async ({ page }) => {
-    loginPage = new LoginPage(page);
-    await loginPage.loginViaApi('admin@archzero.local', 'changeme123');
-  });
 
   test('should display compliance dashboard', async ({ page }) => {
     await page.goto('/governance/compliance');
@@ -411,12 +366,7 @@ test.describe('Compliance Dashboard', () => {
 });
 
 test.describe('Governance Cross-Features', () => {
-  let loginPage: LoginPage;
 
-  test.beforeEach(async ({ page }) => {
-    loginPage = new LoginPage(page);
-    await loginPage.loginViaApi('admin@archzero.local', 'changeme123');
-  });
 
   test('should link principle to standard', async ({ page }) => {
     await page.goto('/governance/principles');
