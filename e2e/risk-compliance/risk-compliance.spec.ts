@@ -31,17 +31,19 @@ test.describe('Risk Register', () => {
     await addRiskBtn.scrollIntoViewIfNeeded();
     await addRiskBtn.click();
 
-    // Fill risk details
-    await page.locator('[data-testid="risk-title"]').fill('Data Breach Risk');
+    // Fill risk details with unique name to avoid conflicts with seeded data
+    const uniqueRiskName = `E2E Test Risk ${Date.now()}`;
+    await page.locator('[data-testid="risk-title"]').fill(uniqueRiskName);
     await page.locator('[data-testid="risk-description"]').fill('Unauthorized access to sensitive customer data');
     await page.locator('[data-testid="risk-category"]').selectOption('Security');
-    await page.locator('[data-testid="risk-probability"]').selectOption('Medium');
-    await page.locator('[data-testid="risk-impact"]').selectOption('High');
+    await page.locator('[data-testid="risk-probability"]').selectOption('3'); // Medium = 3
+    await page.locator('[data-testid="risk-impact"]').selectOption('4'); // High = 4
 
     // Save
     await page.locator('button:has-text("Save"), [data-testid="save-risk-btn"]').click();
 
-    await expect(page.locator('text=Risk created, text=Success')).toBeVisible({ timeout: 5000 });
+    // Verify risk was created by checking it appears in the list
+    await expect(page.locator(`text=${uniqueRiskName}`)).toBeVisible({ timeout: 5000 });
   });
 
   test('should calculate risk score (Likelihood × Impact)', async ({ page }) => {
@@ -56,8 +58,8 @@ test.describe('Risk Register', () => {
 
     // Set probability (Likelihood) to High (4) and Impact to High (5)
     await page.locator('[data-testid="risk-title"]').fill('Test Risk Score');
-    await page.locator('[data-testid="risk-probability"]').selectOption('High');
-    await page.locator('[data-testid="risk-impact"]').selectOption('High');
+    await page.locator('[data-testid="risk-probability"]').selectOption('4'); // High
+    await page.locator('[data-testid="risk-impact"]').selectOption('5'); // High
 
     // Risk score should be displayed (4 × 5 = 20)
     const riskScore = page.locator('[data-testid="risk-score"], .risk-score-display');
