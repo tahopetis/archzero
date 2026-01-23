@@ -30,6 +30,7 @@ export class TestDataSeeder {
       await this.seedInitiatives();
       const meetingIds = await this.seedARBMeetings();
       await this.seedARBSubmissions(meetingIds);
+      await this.seedARBTemplates();
       await this.seedRisksAndCompliance();
       await this.seedAudits();
 
@@ -343,6 +344,64 @@ export class TestDataSeeder {
     }
 
     console.log(`✅ Created ${createdCount} ARB submissions, ${skippedCount} already existed`);
+  }
+
+  /**
+   * Seed ARB templates
+   */
+  async seedARBTemplates() {
+    console.log('📝 Seeding ARB templates...');
+
+    try {
+      // First, get a draft submission to use as template base
+      const submissionsResponse = await this.request.get(`${this.baseURL}/api/v1/arb/submissions`, {
+        headers: {
+          'Authorization': `Bearer ${this.authToken}`,
+        },
+      });
+
+      if (!submissionsResponse.ok()) {
+        console.warn('⚠️  Failed to fetch submissions for template creation');
+        return;
+      }
+
+      const responseData = await submissionsResponse.json();
+      const submissions = responseData.data || [];
+      const draftSubmission = submissions.find((s: any) => s.status === 'Draft');
+
+      const templates = TestDataFactory.createTestARBTemplates(draftSubmission?.id);
+      let createdCount = 0;
+      let skippedCount = 0;
+
+      for (const template of templates) {
+        try {
+          const response = await this.request.post(`${this.baseURL}/api/v1/arb/templates`, {
+            headers: {
+              'Authorization': `Bearer ${this.authToken}`,
+            },
+            data: template,
+          });
+
+          if (response.ok()) {
+            createdCount++;
+            console.log(`  ✅ Created template: ${template.title}`);
+          } else if (response.status() === 409) {
+            skippedCount++;
+            console.log(`  ⏭️  Skipped existing template: ${template.title}`);
+          } else {
+            const errorText = await response.text();
+            console.warn(`⚠️  Failed to create template ${template.title}: ${response.status()} - ${errorText}`);
+          }
+        } catch (error) {
+          console.warn(`⚠️  Error creating template ${template.title}:`, error);
+        }
+      }
+
+      console.log(`✅ Created ${createdCount} ARB templates, ${skippedCount} already existed`);
+    } catch (error) {
+      console.error('❌ Failed to seed ARB templates:', error);
+      throw error;
+    }
   }
 
   /**
@@ -1104,6 +1163,32 @@ class TestDataFactory {
         rationale: 'Temporary exception to security protocols for emergency fix deployment',
         priority: 'Critical',
         meetingId: 'ASSIGN_TO_SECOND_MEETING',
+      },
+    ];
+  }
+
+  /**
+   * Create test ARB templates for template library tests
+   */
+  static createTestARBTemplates(submissionId?: string) {
+    // Use a default submission ID if none provided (for testing)
+    const defaultId = submissionId || '00000000-0000-0000-0000-000000000000';
+
+    return [
+      {
+        title: 'New Application Template',
+        description: 'Standard template for new architecture review applications',
+        submission_id: defaultId,
+      },
+      {
+        title: 'Major Change Template',
+        description: 'Template for major system change requests',
+        submission_id: defaultId,
+      },
+      {
+        title: 'Exception Request Template',
+        description: 'Template for policy exception requests',
+        submission_id: defaultId,
       },
     ];
   }

@@ -15,11 +15,6 @@
 | #3169 | 7:19 AM | 🔵 | ARB role-based users not found in E2E test helpers | ~280 |
 | #3168 | " | 🔵 | User seeding functions not found in test data seeder | ~206 |
 | #3166 | 7:18 AM | 🔵 | E2E test constants define users, selectors, timeouts, and API endpoints | ~374 |
-| #3115 | 6:17 AM | 🔴 | ARB Notifications timeout and success message fixes | ~271 |
-| #3103 | 6:11 AM | 🔵 | Test data seeder file check returned empty | ~179 |
-| #3084 | 5:56 AM | 🔵 | Test Data Seeder Submission Processing Logic | ~253 |
-| #3083 | " | 🔵 | createTestARBSubmissions defined in TestDataFactory class | ~200 |
-| #3048 | 5:28 AM | 🔵 | Test data seeder resolves meeting ID markers for ARB submissions | ~316 |
 
 ### Jan 18, 2026
 
@@ -70,6 +65,16 @@
 
 | ID | Time | T | Title | Read |
 |----|------|---|-------|------|
+| #6183 | 4:44 PM | 🟣 | Test data relationships expanded from 4 to 16 to fix conditional rendering test failures | ~449 |
+| #5840 | 12:46 AM | ✅ | Relationship hooks and documentation modified | ~160 |
 | #5830 | 12:43 AM | ✅ | Branch created for relationship graph test fixes | ~163 |
 | #5804 | 12:33 AM | 🔵 | Test data seeder relationship seeding examined | ~183 |
+
+### Jan 23, 2026
+
+| ID | Time | T | Title | Read |
+|----|------|---|-------|------|
+| #6688 | 3:29 PM | 🔴 | Template Seeding Data Structure Fix | ~275 |
+| #6683 | 3:27 PM | ✅ | Added Template Seeding to Test Data Seeder | ~104 |
+| #6414 | 6:14 AM | 🔵 | TestDataSeeder class provides API-based test data seeding | ~298 |
 </claude-mem-context>
